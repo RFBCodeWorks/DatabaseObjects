@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+      <LangVersion>9.0</LangVersion>
+      <!-- This cannot run as AnyCPU due to requiring the OLEDB driver, Must select either x86 or x64 -->
+      <Platforms>x86;x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.OleDb" Version="6.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\RFBCodeWorks\ExtensionMethods\System.Extensions\System.Extensions.csproj" />
+    <ProjectReference Include="..\..\RFBCodeWorks\ExtensionMethods\System.IO.Extensions\System.IO.Extensions.csproj" />
+    <ProjectReference Include="..\..\SqlKata\QueryBuilder\QueryBuilder.csproj" />
+  </ItemGroup>
+
+</Project>
