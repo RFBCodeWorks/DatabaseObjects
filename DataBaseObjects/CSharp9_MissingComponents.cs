@@ -5,16 +5,16 @@ using System.ComponentModel;
 
 namespace ClassLibrary
 {
-
-    public record Class(string Str)
-    {
-        internal int Int { get; init; }
-    }
+    //Not used by this library
+    //public record Class(string Str)
+    //{
+    //    internal int Int { get; init; }
+    //}
 }
 
 namespace System.Runtime.CompilerServices
 {
-    
+
     /// <summary>
     /// Reserved to be used by the compiler for tracking metadata.
     /// This class should not be used by developers in source code.

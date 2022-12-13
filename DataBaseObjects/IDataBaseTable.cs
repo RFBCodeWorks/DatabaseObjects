@@ -5,7 +5,7 @@ using System.Data;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBaseObjects
+namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
     /// Represents the functions a database table should provide
@@ -26,11 +26,11 @@ namespace DataBaseObjects
 
         /// <summary>Generate a 'Select * From [TableName]' query</summary>
         /// <inheritdoc cref="Query.Select(string[])"/>
-        public Query Select();
+        Query Select();
 
         /// <summary>Generate a 'Select <paramref name="columns"/> From [TableName]' query</summary>
         /// <param name="columns">the array of columns to select from the table</param>
-        public Query Select(params string[] columns);
+        Query Select(params string[] columns);
 
         /// <summary>
         /// Generate a 'SELECT <paramref name="columns"/> FROM [TableName] WHERE <paramref name="searchColumn"/> == <paramref name="searchValue"/>' query
@@ -40,15 +40,15 @@ namespace DataBaseObjects
         /// <inheritdoc cref="Select(string[])"/>
         /// <inheritdoc cref="BaseQuery{Q}.Where(string, object)"/>
         /// <param name="columns"/>
-        public Query SelectWhere(string[] columns, string searchColumn, object searchValue);
+        Query SelectWhere(string[] columns, string searchColumn, object searchValue);
 
         /// <inheritdoc cref="SelectWhere(string, object, string[])"/>
         /// <inheritdoc cref="BaseQuery{Q}.Where(string, string, Func{Q, Q})"/>
-        public Query SelectWhere(string[] columns, string searchColumn, string op, object searchValue);
+        Query SelectWhere(string[] columns, string searchColumn, string op, object searchValue);
 
         /// <inheritdoc cref="SelectWhere(string, object, string[])"/>
         /// <inheritdoc cref="BaseQuery{Q}.Where(IEnumerable{KeyValuePair{string, object}})"/>
-        public Query SelectWhere(string[] columns, params KeyValuePair<string, object>[] values);
+        Query SelectWhere(string[] columns, params KeyValuePair<string, object>[] values);
 
         #endregion
 

@@ -4,14 +4,13 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Text;
 
-namespace DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
 {
+    /// <summary>
+    /// A database object representing a <see cref="SqlConnection"/>
+    /// </summary>
     public class SqlServerDataBase : AbstractDataBase<SqlConnection>
     {
-        /// <summary>
-        /// Generate a new <see cref="SqlServerDataBase"/>
-        /// </summary>
-        public SqlServerDataBase() : base() { }
 
         /// <summary>
         /// Generate a new <see cref="SqlServerDataBase"/>

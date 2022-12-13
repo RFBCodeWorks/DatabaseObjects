@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBaseObjects
+namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
     /// Abstract base class for a Table within a database
@@ -22,7 +22,7 @@ namespace DataBaseObjects
         public DataBaseTable(IDatabase parent, string tableName)
         {
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
-            if (tableName.IsNullOrEmpty()) throw new ArgumentException("tableName parameter is null or empty!");
+            if (string.IsNullOrWhiteSpace(tableName)) throw new ArgumentException("tableName parameter is null or empty!");
             TableName = tableName;
         }
         
@@ -35,7 +35,6 @@ namespace DataBaseObjects
         /// <summary>
         /// Gets the connection string from the <see cref="Parent"/>
         /// </summary>
-        /// <returns><typeparamref name="O"/></returns>
         protected virtual IDbConnection GetDatabaseConnection() => Parent.GetDatabaseConnection();
 
         #region < Generate SQL Statements >
@@ -150,7 +149,7 @@ namespace DataBaseObjects
                     if (InsertOnly && !isnull) return 0; //Exit if value is not null and insertOnly = true
 
                     Query query = isnull ?
-                        new Query(TableName).AsInsert(UpdatePairs.Concat(new KeyValuePair<string, object>[] { new(SearchCol, SearchValue)})) :    // Produce INSERT query
+                        new Query(TableName).AsInsert(UpdatePairs.Concat(new KeyValuePair<string, object>[] { new KeyValuePair<string, object>(SearchCol, SearchValue)})) :    // Produce INSERT query
                         new Query(TableName).AsUpdate(UpdatePairs).Where(SearchCol, SearchValue);     // Produce UPDATE query
 
                     cmd.CommandText = Parent.Compiler.Compile(query).ToString();

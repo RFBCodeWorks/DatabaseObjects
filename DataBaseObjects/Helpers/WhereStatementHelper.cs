@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataBaseObjects.Helpers
+namespace RFBCodeWorks.DataBaseObjects.Helpers
 {
     
 
     /// <summary>
-    /// Force conditions to AND & OR values
+    /// Force conditions to AND &amp; OR values
     /// </summary>
     public enum AndOr
     {
+        /// <summary> AND operator </summary>
         AND,
+        /// <summary> OR operator </summary>
         OR
     }
+
 
     public static partial class Extensions
     {
@@ -101,9 +104,25 @@ namespace DataBaseObjects.Helpers
         /// </summary>
         public object Value { get; set; }
 
-        public bool IsValueInt32 => Value is int;
+        /// <summary>
+        /// Check if the <see cref="Value"/> is a <see cref="int"/>
+        /// </summary>
+        public bool IsValueInt => Value is int;
+
+        /// <summary>
+        /// Check if the <see cref="Value"/> is a <see cref="string"/> object
+        /// </summary>
         public bool IsValueString => Value is string;
+
+        /// <summary>
+        /// Check if the <see cref="Value"/> is a <see cref="bool"/> object
+        /// </summary>
         public bool IsValueBool => Value is bool;
+
+        /// <summary>
+        /// Check if the <see cref="Value"/> is a <see cref="double"/>
+        /// </summary>
+        public bool IsValueDouble => Value is double;
 
         /// <summary>
         /// Apply this condition to the specified <paramref name="query"/>

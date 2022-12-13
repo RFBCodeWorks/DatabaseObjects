@@ -4,7 +4,7 @@ using System.Data;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBaseObjects
+namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
     /// <inheritdoc cref="ISimpleKeyDataBaseTable"/>
@@ -19,7 +19,7 @@ namespace DataBaseObjects
         /// <param name="parent"/><param name="tableName"/>
         public SimpleKeyDatabaseTable(IDatabase parent, string tableName, string primaryKey) : base(parent, tableName)
         {
-            if (primaryKey.IsNullOrEmpty()) throw new ArgumentException("primaryKey parameter is null or empty!");
+            if (string.IsNullOrWhiteSpace(primaryKey)) throw new ArgumentException("primaryKey parameter is null or empty!");
             PrimaryKey = primaryKey;
         }
          
@@ -89,7 +89,7 @@ namespace DataBaseObjects
                 while (Rdr.Read())
                 {
                     string val;
-                    int key = ObjectExtensions.ConvertToInt(Rdr.GetValue(0));
+                    int key = Extensions.ConvertToInt(Rdr.GetValue(0));
                     if (Rdr.IsDBNull(1)) { val = string.Empty; } else { val = Rdr.GetValue(1).ConvertToString(); }
                     Dict.Add(key, val);
                 }

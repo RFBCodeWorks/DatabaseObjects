@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataBaseObjects.Helpers
+namespace RFBCodeWorks.DataBaseObjects.Helpers
 {
     /// <summary>
     /// abstract Class that frames the required functionality for SQL Operator class enum types
@@ -15,6 +15,7 @@ namespace DataBaseObjects.Helpers
         /// Instantiate the class value
         /// </summary>
         /// <param name="op">string representation of the SQL operator to pass into SQL factory</param>
+        /// <param name="enumValue"></param>
         protected AbstractSqlOperator(string op, int enumValue)
         {
             Operator = op;
@@ -48,6 +49,7 @@ namespace DataBaseObjects.Helpers
         /// <returns><paramref name="query"/></returns>
         public abstract Q ApplyCondition<Q>(Q query, string column, object value, bool IsAndCondition = true) where Q : SqlKata.BaseQuery<Q>;
 
+        /// <inheritdoc/>
         public int CompareTo(object obj)
         {
             if (this.GetType() == obj.GetType())
@@ -79,7 +81,14 @@ namespace DataBaseObjects.Helpers
     {
         private BoolOperators(string op, int val) : base(op, val) { }
 
+        /// <summary>
+        /// "= <see langword="true"/>"
+        /// </summary>
         public static BoolOperators IsTrue { get; } = new BoolOperators("= true", 0);
+
+        /// <summary>
+        /// "= <see langword="false"/>"
+        /// </summary>
         public static BoolOperators IsFalse { get; } = new BoolOperators("= false", 1);
 
         /// <param name="value">this is ignored since the operator is based on the selected <see cref="BoolOperators"/></param>
@@ -131,7 +140,8 @@ namespace DataBaseObjects.Helpers
         public static NumericOperators LessThanEqualTo { get; } = new NumericOperators("<=",4);
         /// <summary> != </summary>
         public static NumericOperators NotEqualTo { get; } = new NumericOperators("!=",5);
-        /// <summary> &lt;=> </summary>
+        
+        ///// <summary> &lt;=> </summary>
         //public static NumericOperators Between { get; } = new NumericOperators("<=>"); //Not currently supported
 
         ///<inheritdoc/>
@@ -189,7 +199,8 @@ namespace DataBaseObjects.Helpers
         public static StringOperators MatchRegex { get; } = new StringOperators("regexpr",7);
         /// <summary> Column value does not match the regex string used to evaluate it </summary>
         public static StringOperators DoesNotMatchRegex { get; } = new StringOperators("not regexpr",8);
-        /// <summary> </summary>
+        
+        ///// <summary> </summary>
         //public static StringOperators DoesNotContain { get; } = new StringOperators("not contains",9);
 
 

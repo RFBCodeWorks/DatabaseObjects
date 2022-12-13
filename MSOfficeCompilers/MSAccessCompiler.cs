@@ -10,6 +10,20 @@ namespace SqlKata.Compilers
     /// </summary>
     public class MSAccessCompiler : SqlKata.Compilers.Compiler
     {
+
+        /// <summary>
+        /// A singleton compiler for MS Access
+        /// </summary>
+        public static SqlKata.Compilers.MSAccessCompiler AccessCompiler
+        {
+            get
+            {
+                if (MSAccessCompilerField is null) MSAccessCompilerField = new MSAccessCompiler();
+                return MSAccessCompilerField;
+            }
+        }
+        private static SqlKata.Compilers.MSAccessCompiler MSAccessCompilerField;
+
         public MSAccessCompiler()
         {
             this.userOperators.Add("alike");
@@ -21,15 +35,17 @@ namespace SqlKata.Compilers
         /// <inheritdoc/>
         public override string EngineCode => "MSAccess";
 
+        private static Regex CompileJoinOnRegex = new Regex(@".+?\sON\s(?<CLAUSE>.*)", RegexOptions.ExplicitCapture | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
         public override string CompileJoin(SqlResult ctx, Join join, bool isNested = false)
         {
             var val = base.CompileJoin(ctx, join, isNested);
             if (val is null) return null;
-            
-            Regex OnClause = new(@".+?\sON\s(?<CLAUSE>.*)", RegexOptions.ExplicitCapture | RegexOptions.CultureInvariant | RegexOptions.Compiled);
-            if (OnClause.IsMatch(val, out var Match))
+
+            var match = CompileJoinOnRegex.Match(val);
+            if (match.Success)
             {
-                string clause = Match.Groups["CLAUSE"].Value;
+                string clause = match.Groups["CLAUSE"].Value;
                 return val.Replace(clause, "(" + clause + ")");
             }
             else
@@ -91,7 +107,8 @@ namespace SqlKata.Compilers
         /// <inheritdoc/>
         public override string WrapValue(string value)
         {
-            if (ColumnRegex.IsMatch(value)) return value;
+            if (value.StartsWith(OpeningIdentifier) && value.EndsWith(ClosingIdentifier)) return value;
+            //if (ColumnRegex.IsMatch(value)) return value;
             return base.WrapValue(value);
         }
 
@@ -150,14 +167,21 @@ namespace SqlKata.Compilers
                 NamedBindings = base.NamedBindings;
             }
 
-            private const string stringwrapper = "\"";
-            //language=Regex
-            static Regex ValueRegex { get; } = new Regex(@"^" + stringwrapper + @".+?" + stringwrapper, RegexOptions.Compiled);
+            //private const char sw = '"';
+            //private const string stringwrapper = "\"";
+            ////language=Regex
+            //static Regex ValueRegex { get; } = new Regex(@"^" + stringwrapper + @".+?" + stringwrapper, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
             protected override string WrapStringValue(string value)
             {
-                if (ValueRegex.IsMatch(value)) return value;
-                return stringwrapper + value + stringwrapper;
+                //base = "'" + value.ToString().Replace("'", "''") + "'";
+
+                return '"' + value.Replace("\"", "\"\"") + '"';
+                //return base.WrapStringValue(value);
+                
+                //if (value[0] == sw && value.Last() == sw) return value;
+                ////if (ValueRegex.IsMatch(value)) return value;
+                //return stringwrapper + value + stringwrapper;
             }
 
         }

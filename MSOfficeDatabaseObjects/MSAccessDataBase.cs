@@ -5,7 +5,7 @@ using System.Data.Common;
 using System.Data.OleDb;
 using System.Text;
 
-namespace DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
 {
     public class MSAccessDataBase : AbstractDataBase<OleDbConnection>
     {
@@ -23,7 +23,7 @@ namespace DataBaseObjects.DataBaseTypes
         public MSAccessDataBase(string path, string password) : base(GenerateACEConnectionString(path, password)) { }
 
         /// <inheritdoc/>
-        public override Compiler Compiler => CompilerSingletons.MSAccessCompiler;
+        public override Compiler Compiler => SqlKata.Compilers.MSAccessCompiler.AccessCompiler;
 
         /// <inheritdoc/>
         public override OleDbConnection GetDatabaseConnection()

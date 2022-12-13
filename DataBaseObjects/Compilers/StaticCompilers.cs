@@ -7,34 +7,15 @@ namespace SqlKata.Compilers
     /// <summary>
     /// Static class that contains the compiler singletons
     /// </summary>
-    public static class CompilerSingletons
+    internal static class CompilerSingletons
     {
-        private static SqlKata.Compilers.MSAccessCompiler MSAccessCompilerField;
         private static SqlKata.Compilers.FirebirdCompiler FirebirdCompilerField;
         private static SqlKata.Compilers.MySqlCompiler MySqlCompilerField;
         private static SqlKata.Compilers.OracleCompiler OracleCompilerField;
         private static SqlKata.Compilers.PostgresCompiler PostGresCompilerField;
         private static SqlKata.Compilers.SqliteCompiler SqlLiteCompilerField;
         private static SqlKata.Compilers.SqlServerCompiler SqlServerCompilerField;
-        private static SqlKata.Compilers.ExcelWorkbookCompiler ExcelWorkbookCompilerField;
-
-        public static SqlKata.Compilers.ExcelWorkbookCompiler ExcelWorkbookCompiler
-        {
-            get
-            {
-                if (ExcelWorkbookCompilerField is null) ExcelWorkbookCompilerField = new ExcelWorkbookCompiler();
-                return ExcelWorkbookCompilerField;
-            }
-        }
-
-        public static SqlKata.Compilers.MSAccessCompiler MSAccessCompiler
-        {
-            get {
-                if (MSAccessCompilerField is null) MSAccessCompilerField = new MSAccessCompiler();
-                return MSAccessCompilerField; 
-            }
-        }
-
+        
         public static SqlKata.Compilers.FirebirdCompiler FirebirdCompiler
         {
             get

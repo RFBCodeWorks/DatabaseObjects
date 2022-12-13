@@ -1,11 +1,11 @@
-﻿using DataBaseObjects.Exceptions;
+﻿using RFBCodeWorks.DataBaseObjects.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.Text;
 
-namespace DataBaseObjects
+namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
     /// Functions specific to Excel Workbooks

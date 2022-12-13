@@ -9,7 +9,7 @@ namespace SqlKata.Compilers.Tests
     [TestClass()]
     public class ExcelWorkbookCompilerTests
     {
-        static ExcelWorkbookCompiler Compiler => SqlKata.Compilers.CompilerSingletons.ExcelWorkbookCompiler;
+        static ExcelWorkbookCompiler Compiler => SqlKata.Compilers.ExcelWorkbookCompiler.ExcelCompiler;
 
         [TestMethod()]
         public void CompileTableExpressionTest()

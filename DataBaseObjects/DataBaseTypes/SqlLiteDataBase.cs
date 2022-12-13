@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Text;
 
-namespace DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
 {
     public class SqlLiteDataBase : AbstractDataBase<SqlConnection>
     {

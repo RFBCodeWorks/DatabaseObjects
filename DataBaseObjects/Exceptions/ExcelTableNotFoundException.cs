@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataBaseObjects.Exceptions
+namespace RFBCodeWorks.DataBaseObjects.Exceptions
 {
     [Serializable]
     public class ExcelTableNotFoundException : Exception

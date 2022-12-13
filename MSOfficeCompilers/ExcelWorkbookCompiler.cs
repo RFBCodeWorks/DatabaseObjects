@@ -20,6 +20,18 @@ namespace SqlKata.Compilers
          * 
          */
 
+        /// <summary>
+        /// A singleton compiler for MS Excel
+        /// </summary>
+        public static SqlKata.Compilers.ExcelWorkbookCompiler ExcelCompiler
+        {
+            get
+            {
+                if (ExcelWorkbookCompilerField is null) ExcelWorkbookCompilerField = new ExcelWorkbookCompiler();
+                return ExcelWorkbookCompilerField;
+            }
+        }
+        private static SqlKata.Compilers.ExcelWorkbookCompiler ExcelWorkbookCompilerField;
 
         public ExcelWorkbookCompiler()
         {

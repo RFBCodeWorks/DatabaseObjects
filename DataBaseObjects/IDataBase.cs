@@ -5,7 +5,7 @@ using System.Data;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBaseObjects
+namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
     /// Basic requirements for a database object

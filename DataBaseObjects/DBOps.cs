@@ -4,11 +4,12 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Data.OleDb;
 using System.Collections.Generic;
-using DataBaseObjects.Exceptions;
+using RFBCodeWorks.DataBaseObjects.Exceptions;
 using System.Threading.Tasks;
 using SqlKata;
+using System.Runtime.CompilerServices;
 
-namespace DataBaseObjects
+namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
     /// Methods for interacting with databases
@@ -17,16 +18,7 @@ namespace DataBaseObjects
     {
         #region < Helper Methods  >
 
-        /// <inheritdoc cref="ObjectExtensions.ConvertToString{T}(T, IFormatProvider?)"/>
-        private static string CStr(object obj) => obj.ConvertToString();
-        
-        /// <inheritdoc cref="ObjectExtensions.ConvertToInt{T}(T)"/>
-        private static int ConvertToInt(object obj) => obj?.ConvertToInt() ?? 0;
-        
-        /// <inheritdoc cref="ObjectExtensions.ConvertToBool(object?)"/>
-        private static bool CBool(object obj) => obj?.ConvertToBool() ?? false;
-
-        /// <summary>
+                /// <summary>
         /// Check the <see cref="IDbConnection.State"/> and report if the connection is closed
         /// </summary>
         /// <param name="connection"></param>
@@ -46,32 +38,6 @@ namespace DataBaseObjects
         public static void CloseAndReOpen(this IDbConnection connection) { 
             if (!connection.IsClosed()) connection.Close();
             connection.OpenIfClosed();
-        }
-
-        /// <summary>
-        /// Evaluate the connection string and get the compiler to use for that type of connection
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns>
-        /// If <see cref="OleDbConnection"/> : returns <see cref="SqlKata.Compilers.CompilerSingletons.MSAccessCompiler"/>  or <see cref="SqlKata.Compilers.CompilerSingletons.ExcelWorkbookCompiler"/> <br/>
-        /// If <see cref="SqlConnection"/>  : returns <see cref="SqlKata.Compilers.CompilerSingletons.SqlServerCompiler"/> or <see cref="SqlKata.Compilers.CompilerSingletons.SqliteCompiler"/>
-        /// </returns>
-        public static SqlKata.Compilers.Compiler GetCompilerForConnection(IDbConnection connection)
-        {
-            if (connection is OleDbConnection ole)
-            {
-                if (ole.DataSource.Contains(".xls")) return SqlKata.Compilers.CompilerSingletons.ExcelWorkbookCompiler; // Check if database has '.xls' in it to determine its an excel file
-                return SqlKata.Compilers.CompilerSingletons.MSAccessCompiler;   // Assume Access Database
-            }
-
-            if (connection is SqlConnection sql)
-            {
-                if (connection.ConnectionString.StartsWith("Data Source") && sql.DataSource.EndsWith(".db"))
-                    return SqlKata.Compilers.CompilerSingletons.SqliteCompiler;
-
-                return SqlKata.Compilers.CompilerSingletons.SqlServerCompiler; // default functionality
-            }
-            throw new NotImplementedException($"{connection.GetType()} currently not supported by this method");
         }
 
         #endregion
@@ -107,7 +73,7 @@ namespace DataBaseObjects
         /// <inheritdoc cref="TestConnection(IDbConnection)"/>
         public static Task<bool> TestConnectionAsync(this IDbConnection Conn)
         {
-            Func<bool> func = new(() => TestConnection(Conn));
+            Func<bool> func = new Func<bool>(() => TestConnection(Conn));
             return Task<bool>.Run<bool>(func);
         }
 
@@ -264,52 +230,55 @@ namespace DataBaseObjects
 
         /// <returns>True/False</returns>
         /// <inheritdoc cref="GetValue(IDbConnection, Query, SqlKata.Compilers.Compiler)"/>
+        [System.Diagnostics.DebuggerHidden]
         public static bool GetValueAsBool(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
-            CBool(DBOps.GetValue(DB, query, compiler));
+            Extensions.ConvertToBool(DBOps.GetValue(DB, query, compiler));
 
 
         /// <returns> string </returns>
         /// <inheritdoc cref="GetValue(IDbConnection, Query, SqlKata.Compilers.Compiler)"/>
         [System.Diagnostics.DebuggerHidden]
         public static string GetValueAsString(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
-            CStr(DBOps.GetValue(DB, query, compiler));
+            Extensions.ConvertToString(DBOps.GetValue(DB, query, compiler));
 
         /// <returns> int </returns>
         /// <inheritdoc cref="GetValue(IDbConnection, Query, SqlKata.Compilers.Compiler)"/>
         [System.Diagnostics.DebuggerHidden]
         public static int GetValueAsInt(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
-            ConvertToInt(DBOps.GetValue(DB, query, compiler));
+            Extensions.ConvertToInt(DBOps.GetValue(DB, query, compiler));
 
         /// <summary>Return a single value from a DB Table</summary>
         /// <param name="DB">Some DB Connection</param>
-        /// <param name="TableName">Table to query</param>
-        /// <param name="LookupColName">Column to to find a value in</param>
-        /// <param name="LookupVal">Value to find in supplied column</param>
-        /// <param name="ReturnColName">Return the value from this column</param>
+        /// <param name="tableName">Table to query</param>
+        /// <param name="lookupColName">Column to to find a value in</param>
+        /// <param name="lookupVal">Value to find in supplied column</param>
+        /// <param name="returnColName">Return the value from this column</param>
+        /// <param name="compiler">The SqlKata Compiler to use to compile the query</param>
         /// <returns><see cref="IDataReader"/>.GetValue() object. -- sanitizes <see cref="DBNull"/> to null. </returns>
-        public static object GetValue(IDbConnection DB, string TableName, string LookupColName, object LookupVal, string ReturnColName, SqlKata.Compilers.Compiler QueryCompiler = null)
+        public static object GetValue(IDbConnection DB, string tableName, string lookupColName, object lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler)
         {
-            SqlKata.Query qry = new SqlKata.Query().Select(ReturnColName).From(TableName).Where(LookupColName, LookupVal);
-            return GetValue(DB, qry, QueryCompiler ?? GetCompilerForConnection(DB));
+            SqlKata.Query qry = new SqlKata.Query().Select(returnColName).From(tableName).Where(lookupColName, lookupVal);
+            return GetValue(DB, qry, compiler ?? throw new ArgumentNullException(nameof(compiler)));
         }
 
         /// <returns>True/False</returns>
         /// <inheritdoc cref="GetValue(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
-        public static bool GetValueAsBool(IDbConnection DB, string TableName, string LookupColName, string LookupVal, string ReturnColName, SqlKata.Compilers.Compiler compiler = null) =>
-            CBool(DBOps.GetValue(DB, TableName, LookupColName, LookupVal, ReturnColName, compiler));
+        [System.Diagnostics.DebuggerHidden]
+        public static bool GetValueAsBool(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
+            Extensions.ConvertToBool(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
 
 
         /// <returns> string </returns>
         /// <inheritdoc cref="GetValue(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
         [System.Diagnostics.DebuggerHidden]
-        public static string GetValueAsString(IDbConnection DB, string TableName, string LookupColName, string LookupVal, string ReturnColName, SqlKata.Compilers.Compiler compiler = null) =>
-            CStr(DBOps.GetValue(DB, TableName, LookupColName, LookupVal, ReturnColName, compiler));
+        public static string GetValueAsString(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
+            Extensions.ConvertToString(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
 
         /// <returns> int </returns>
         /// <inheritdoc cref="GetValue(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
         [System.Diagnostics.DebuggerHidden]
-        public static int GetValueAsInt(IDbConnection DB, string TableName, string LookupColName, string LookupVal, string ReturnColName, SqlKata.Compilers.Compiler compiler = null) =>
-            ConvertToInt(DBOps.GetValue(DB, TableName, LookupColName, LookupVal, ReturnColName, compiler));
+        public static int GetValueAsInt(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
+            Extensions.ConvertToInt(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
 
 
         #endregion < Get return from DataTables / DB Connections >

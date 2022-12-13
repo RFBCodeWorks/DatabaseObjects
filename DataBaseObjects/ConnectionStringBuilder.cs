@@ -4,7 +4,7 @@ using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Text;
 
-namespace DataBaseObjects
+namespace RFBCodeWorks.DataBaseObjects
 {
     public static class ConnectionStringBuilders
     {
@@ -20,7 +20,7 @@ namespace DataBaseObjects
             /// <exception cref="System.IO.FileNotFoundException"/>
             private static void ValidateWorkbookPath(string workbookPath)
             {
-                if (workbookPath.IsNullOrEmpty()) throw new ArgumentException("WorkBookPath has no value");
+                if (string.IsNullOrWhiteSpace(workbookPath)) throw new ArgumentException("WorkBookPath has no value");
                 if (!System.IO.Path.IsPathRooted(workbookPath)) throw new ArgumentException("WorkBookPath is not rooted!");
                 if (!System.IO.Path.HasExtension(workbookPath)) throw new ArgumentException("WorkBookPath does not have an extension!");
                 if (!System.IO.File.Exists(workbookPath)) throw new System.IO.FileNotFoundException($"Workbook does not exist at specified location! - Path: \n {workbookPath}");
@@ -77,12 +77,12 @@ namespace DataBaseObjects
             /// <exception cref="ArgumentException"/>
             public static string GenerateJetConnectionString(string path, string dbPassword = default)
             {
-                if (path.IsNullOrEmpty()) throw new ArgumentException("Path has no value");
+                if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path has no value");
                 if (!System.IO.Path.IsPathRooted(path)) throw new ArgumentException("Path is not rooted!");
                 if (!System.IO.Path.HasExtension(path)) throw new ArgumentException("Path does not have an extension!");
 
                 string Conn = $"Provider=Microsoft.Jet.OLEDB.4.0;Data Source= {path} ; Persist Security Info = false ;";
-                if (dbPassword.IsNotEmpty()) Conn += $" Jet OLEDB:Database Password={dbPassword};";
+                if (!string.IsNullOrWhiteSpace(dbPassword)) Conn += $" Jet OLEDB:Database Password={dbPassword};";
                 return  Conn;
             }
 
@@ -95,12 +95,12 @@ namespace DataBaseObjects
             /// <exception cref="ArgumentException"/>
             public static string GenerateACEConnectionString(string path, string dbPassword = default)
             {
-                if (path.IsNullOrEmpty()) throw new ArgumentException("Path has no value");
+                if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path has no value");
                 if (!System.IO.Path.IsPathRooted(path)) throw new ArgumentException("Path is not rooted!");
                 if (!System.IO.Path.HasExtension(path)) throw new ArgumentException("Path does not have an extension!");
 
                 string Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source= {path} ; Persist Security Info = false ;";
-                if (dbPassword.IsNotEmpty()) Conn += $" Jet OLEDB:Database Password={dbPassword};";
+                if (!string.IsNullOrWhiteSpace(dbPassword)) Conn += $" Jet OLEDB:Database Password={dbPassword};";
                 return Conn;
             }
 

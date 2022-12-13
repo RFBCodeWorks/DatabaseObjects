@@ -7,7 +7,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
 {
     /// <summary>
     /// Represents a data connection to an excel workbook
@@ -15,10 +15,11 @@ namespace DataBaseObjects.DataBaseTypes
     public partial class ExcelWorkBook : AbstractDataBase<OleDbConnection>
     {
         
-        public ExcelWorkBook(string path, bool hasHeaders = true) : base()
+        public ExcelWorkBook(string path, bool hasHeaders = true) : base(ExcelOps.GetConnection(path, hasHeaders).ConnectionString)
         {
-            HasHeaders = hasHeaders;
-            WorkbookPath = path;
+            this.hasHeaders = hasHeaders;
+            workbookPath = path;
+            //base.ConnectionString = GetDatabaseConnection().ConnectionString;
         }
         
         private string workbookPath;
@@ -27,10 +28,10 @@ namespace DataBaseObjects.DataBaseTypes
         /// <remarks> Updates the ConnectionString automatically when this value is modified.</remarks>
         public string WorkbookPath { 
             get => workbookPath; 
-            init {
-                workbookPath = value;
-                base.ConnectionString = GetDatabaseConnection().ConnectionString;
-            } 
+            //init {
+            //    workbookPath = value;
+            //    base.ConnectionString = GetDatabaseConnection().ConnectionString;
+            //} 
         }
 
         /// <summary>
@@ -38,10 +39,10 @@ namespace DataBaseObjects.DataBaseTypes
         /// </summary>
         public bool HasHeaders { 
             get => hasHeaders; 
-            init {
-                hasHeaders = value;
-                if (workbookPath.IsNotEmpty()) base.ConnectionString = GetDatabaseConnection().ConnectionString;
-            }
+            //init {
+            //    hasHeaders = value;
+            //    if (workbookPath.IsNotEmpty()) base.ConnectionString = GetDatabaseConnection().ConnectionString;
+            //}
         }
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace DataBaseObjects.DataBaseTypes
         public bool FileExists => File.Exists(WorkbookPath);
 
         /// <inheritdoc/>
-        public override Compiler Compiler => CompilerSingletons.ExcelWorkbookCompiler;
+        public override Compiler Compiler => SqlKata.Compilers.ExcelWorkbookCompiler.ExcelCompiler;
 
         /// <inheritdoc/>
         public override OleDbConnection GetDatabaseConnection()

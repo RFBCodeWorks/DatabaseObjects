@@ -4,7 +4,7 @@ using System.Data;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
 {
     public partial class ExcelWorkBook
     {
@@ -12,7 +12,7 @@ namespace DataBaseObjects.DataBaseTypes
         /// <summary>
         /// Represents an Excel Worksheet that does not specify a primary key
         /// </summary>
-        public class WorkSheet : DataBaseObjects.DataBaseTable
+        public class WorkSheet : RFBCodeWorks.DataBaseObjects.DataBaseTable
         {
 
             public WorkSheet(ExcelWorkBook workbook, string sheetName, bool hasHeaders = true) : base(workbook, sheetName)

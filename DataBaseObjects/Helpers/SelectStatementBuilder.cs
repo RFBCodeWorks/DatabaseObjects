@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataBaseObjects.Helpers
+namespace RFBCodeWorks.DataBaseObjects.Helpers
 {
     
     public class StatementBuilderFactory
@@ -35,29 +35,37 @@ namespace DataBaseObjects.Helpers
         /// <param name="builder"></param>
         public static implicit operator Func<SqlKata.Query,SqlKata.Query>(SelectStatementBuilder builder) => (o) => builder.GenerateQuery();
 
-        public List<string> ReturnColumns { get; } = new();
-        public object From { 
-            get =>fromValue; 
+        public List<string> ReturnColumns { get; } = new List<string>();
+        public object From {
+            get => fromValue; 
             set
             {
                 if (value is SqlKata.Query | value is string | value is SelectStatementBuilder)
                     fromValue = value;
                 else
-                    throw new ArgumentException("Invalid Object Type for 'FROM' value");
+                    throw new ArgumentException("Invalid Object Type for 'FROM' value - Expected a SqlKata.Query, a string, or a SelectStatementBuilder");
             }
         }
 
         private object fromValue;
-        public List<WhereStatementHelper> WhereStatements { get; } = new();
+        
+        /// <summary>
+        /// The collection of 'Where' statements
+        /// </summary>
+        public List<WhereStatementHelper> WhereStatements { get; } = new List<WhereStatementHelper>();
 
         /// <summary>
         /// Specify the Alias for this query result to be referenced from other queries
         /// </summary>
         public string Alias { get; set; }
 
+        /// <summary>
+        /// Compile the parameters from this object into a new Query object
+        /// </summary>
+        /// <returns>a new <see cref="SqlKata.Query"/> object representing this object</returns>
         public SqlKata.Query GenerateQuery()
         {
-            SqlKata.Query qry = new();
+            SqlKata.Query qry = new SqlKata.Query();
             qry.Select(ReturnColumns.Count > 0 ? ReturnColumns.ToArray() : new string[] { "*" });
 
             if (From is string) qry.From((string)From);
@@ -72,7 +80,7 @@ namespace DataBaseObjects.Helpers
                 firstStatement = false;
             }
 
-            if (Alias.IsNotEmpty()) qry.As(Alias);
+            if (!string.IsNullOrWhiteSpace(Alias)) qry.As(Alias);
             return qry;
         }
 
@@ -101,9 +109,11 @@ namespace DataBaseObjects.Helpers
         /// <param name="columnID"></param>
         /// <param name="columnValue"></param>
         /// <param name="op"></param>
+        /// <param name="andOr"></param>
+        /// <param name="isCaseSensitive"></param>
         public void AddWhereStatement(string columnID, string columnValue, StringOperators op, AndOr andOr = AndOr.AND, bool isCaseSensitive = false)
         {
-            this.WhereStatements.Add(new(
+            this.WhereStatements.Add(new WhereStatementHelper(
                 columnName: columnID,
                 columnValue: columnValue,
                 op: op,
@@ -113,6 +123,12 @@ namespace DataBaseObjects.Helpers
             );
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="columnID"></param>
+        /// <param name="expectedValue"></param>
+        /// <param name="andor"></param>
         public void AddWhereTrueStatement(string columnID, bool expectedValue, AndOr andor = AndOr.AND)
         {
             this.WhereStatements.Add(new WhereStatementHelper(columnID, expectedValue, andor));
@@ -124,9 +140,10 @@ namespace DataBaseObjects.Helpers
         /// <param name="columnID"></param>
         /// <param name="columnValue"></param>
         /// <param name="op"></param>
+        /// <param name="andOr"></param>
         public void AddWhereStatement(string columnID, int columnValue, NumericOperators op, AndOr andOr = AndOr.AND)
         {
-            this.WhereStatements.Add(new(
+            this.WhereStatements.Add(new WhereStatementHelper(
                 columnName: columnID,
                 columnValue: columnValue,
                 op: op,

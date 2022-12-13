@@ -7,7 +7,7 @@ using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBaseObjects
+namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
     /// Abstract base class for database structures
@@ -20,12 +20,23 @@ namespace DataBaseObjects
         ///// </summary>
         //protected object dbLock = new object();
 
-        protected AbstractDataBase() { }
+        //protected AbstractDataBase() { }
+
+        /// <summary>
+        /// Create a new Database object with the supplied connection string or database name
+        /// </summary>
+        /// <param name="connectionString">The connection string to the database</param>
         protected AbstractDataBase(string connectionString) { ConnectionString = connectionString; }
 
+        /// <summary>
+        /// Specify the compiler to use with this database object
+        /// </summary>
         public abstract Compiler Compiler { get; }
 
-        public virtual string ConnectionString { get; init; }
+        /// <summary>
+        /// The database connection string
+        /// </summary>
+        public virtual string ConnectionString { get; }
 
         /// <summary>
         /// Create a new <see cref="DbConnection"/>
