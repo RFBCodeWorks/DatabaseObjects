@@ -31,11 +31,59 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
             return new OleDbConnection(ConnectionString);
         }
 
-        /// <inheritdoc cref="ConnectionStringBuilders.AccessDB.GenerateJetConnectionString(string, string)"/>
-        public static string GenerateJetConnectionString(string path, string password = "") => ConnectionStringBuilders.AccessDB.GenerateJetConnectionString(path, password);
-        
-        /// <inheritdoc cref="ConnectionStringBuilders.AccessDB.GenerateACEConnectionString(string, string)"/>
-        public static string GenerateACEConnectionString(string path, string password = "") => ConnectionStringBuilders.AccessDB.GenerateACEConnectionString(path, password);
+        /// <summary>
+        /// Generate a new OLEDB.JET database connection string
+        /// </summary>
+        /// <param name="path">path to the database</param>
+        /// <param name="dbPassword">Password to the database</param>
+        /// <returns>new <see cref="OleDbConnection"/></returns>
+        /// <exception cref="ArgumentException"/>
+        public static string GenerateJetConnectionString(string path, string dbPassword = default)
+        {
+            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path has no value");
+            if (!System.IO.Path.IsPathRooted(path)) throw new ArgumentException("Path is not rooted!");
+            if (!System.IO.Path.HasExtension(path)) throw new ArgumentException("Path does not have an extension!");
+
+            string Conn = $"Provider=Microsoft.Jet.OLEDB.4.0;Data Source= {path} ; Persist Security Info = false ;";
+            if (!string.IsNullOrWhiteSpace(dbPassword)) Conn += $" Jet OLEDB:Database Password={dbPassword};";
+            return Conn;
+        }
+
+        /// <summary>
+        /// Generate a new OLEDB.ACE database connection string
+        /// </summary>
+        /// <param name="path">path to the database</param>
+        /// <param name="dbPassword">Password to the database</param>
+        /// <returns>new <see cref="OleDbConnection"/></returns>
+        /// <exception cref="ArgumentException"/>
+        public static string GenerateACEConnectionString(string path, string dbPassword = default)
+        {
+            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path has no value");
+            if (!System.IO.Path.IsPathRooted(path)) throw new ArgumentException("Path is not rooted!");
+            if (!System.IO.Path.HasExtension(path)) throw new ArgumentException("Path does not have an extension!");
+
+            string Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source= {path} ; Persist Security Info = false ;";
+            if (!string.IsNullOrWhiteSpace(dbPassword)) Conn += $" Jet OLEDB:Database Password={dbPassword};";
+            return Conn;
+        }
+
+        /// <summary>
+        /// Generate a new OLEDB.ACE database connection
+        /// </summary>
+        /// <inheritdoc cref="GenerateACEConnectionString"/>
+        public static OleDbConnection GetACEConnection(string path, string dbPassword = default)
+        {
+            return new OleDbConnection(GenerateACEConnectionString(path, dbPassword));
+        }
+
+        /// <summary>
+        /// Generate a new OLEDB.ACE database connection
+        /// </summary>
+        /// <inheritdoc cref="GenerateJetConnectionString"/>
+        public static OleDbConnection GetJetConnection(string path, string dbPassword = default)
+        {
+            return new OleDbConnection(GenerateJetConnectionString(path, dbPassword));
+        }
 
     }
 }

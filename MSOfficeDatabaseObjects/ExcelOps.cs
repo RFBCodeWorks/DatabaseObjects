@@ -26,7 +26,7 @@ namespace RFBCodeWorks.DataBaseObjects
 
         /// <inheritdoc cref="ConnectionStringBuilders.ExcelWorkbooks.GetConnection(string, bool?)"/>
         public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = null) 
-            => ConnectionStringBuilders.ExcelWorkbooks.GetConnection(workbookPath, hasHeaders);
+            => RFBCodeWorks.DataBaseObjects.DataBaseTypes.ExcelWorkBook.GetConnection(workbookPath, hasHeaders);
 
         /// <summary>
         /// Opens an <see cref="OleDbCommand"/> to the specified workbook and retrieves a <see cref="DataTable"/> representation of the <paramref name="SheetName"/>

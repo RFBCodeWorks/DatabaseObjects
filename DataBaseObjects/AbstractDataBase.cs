@@ -15,12 +15,13 @@ namespace RFBCodeWorks.DataBaseObjects
     /// <typeparam name="T"></typeparam>
     public abstract class AbstractDataBase<T> : IDatabase where T : DbConnection
     {
-        ///// <summary>
-        ///// Object that can be used to ensure thread safety by limiting the number of connections to the database to one
-        ///// </summary>
-        //protected object dbLock = new object();
-
-        //protected AbstractDataBase() { }
+        /// <summary>
+        /// Create a new abstract database
+        /// </summary>
+        /// <remarks>
+        /// <see cref="ConnectionString"/> must be set by derived class!
+        /// </remarks>
+        protected AbstractDataBase() { }
 
         /// <summary>
         /// Create a new Database object with the supplied connection string or database name
@@ -36,7 +37,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <summary>
         /// The database connection string
         /// </summary>
-        public virtual string ConnectionString { get; }
+        public string ConnectionString { get; protected set; }
 
         /// <summary>
         /// Create a new <see cref="DbConnection"/>
@@ -75,12 +76,12 @@ namespace RFBCodeWorks.DataBaseObjects
         public Task<bool> TestDatabaseConnectionAsync() => Task.Run(TestDatabaseConnection);
 
         /// <inheritdoc/>
-        /// <exception cref="Exception"/>
+        /// <exception cref="InvalidExpressionException"/>
         public virtual DataRow GetDataRow(Query query)
         {
             var DT = GetDataTable(query);
             if (DT is null) return null;
-            if (DT.Rows.Count > 1) throw new Exception("Multiple Matches Found when expected only a single match!");
+            if (DT.Rows.Count > 1) throw new InvalidExpressionException("Multiple Matches Found when expected only a single match!");
             if (DT.Rows.Count == 1) return DT.Rows[0];
             return null;
         }
@@ -105,9 +106,9 @@ namespace RFBCodeWorks.DataBaseObjects
         }
 
         /// <inheritdoc/>
-        public virtual object GetValue(string TableName, string LookupColName, object LookupVal, string ReturnColName)
+        public virtual object GetValue(string table, string lookupColName, object lookupVal, string returnColName)
         {
-            return GetValue(new Query(TableName).Select(ReturnColName).Where(LookupColName, LookupVal));
+            return GetValue(new Query(table).Select(returnColName).Where(lookupColName, lookupVal));
         }
 
         /// <inheritdoc/>
@@ -159,9 +160,9 @@ namespace RFBCodeWorks.DataBaseObjects
         }
 
         /// <inheritdoc/>
-        public Task<object> GetValueAsync(string TableName, string LookupColName, object LookupVal, string ReturnColName)
+        public Task<object> GetValueAsync(string tableName, string lookupColName, object lookupVal, string returnColName)
         {
-            return Task.Run(() => GetValue(TableName, LookupColName, LookupVal, ReturnColName));
+            return Task.Run(() => GetValue(tableName, lookupColName, lookupVal, returnColName));
         }
 
     }

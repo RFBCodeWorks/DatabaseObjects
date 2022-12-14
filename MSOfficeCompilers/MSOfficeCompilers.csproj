@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <!-- This cannot run as AnyCPU due to requiring the OLEDB driver, Must select either x86 or x64 -->
-    
+    <TargetFramework>netstandard2.0</TargetFramework>    
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
+      <!--
     <ProjectReference Include="..\SqlKata\QueryBuilder\QueryBuilder.csproj" />
+    -->
   </ItemGroup>
 
 </Project>

@@ -6,28 +6,40 @@ using System.Text;
 namespace RFBCodeWorks.DataBaseObjects.Helpers
 {
     
-    public class StatementBuilderFactory
-    {
-        /// <summary>
-        /// Generate a new <see cref="SelectStatementBuilder"/> object 
-        /// </summary>
-        /// <returns></returns>
-        public SelectStatementBuilder GetSelectStatementBuilder() => new SelectStatementBuilder();
-
-        /// <inheritdoc cref="GetSelectStatementBuilder()"/>
-        public SelectStatementBuilder GetSelectStatementBuilder(string tableName) => new SelectStatementBuilder() { From = tableName };
-
-        /// <inheritdoc cref="GetSelectStatementBuilder()"/>
-        public SelectStatementBuilder GetSelectStatementBuilder(SqlKata.Query query) => new SelectStatementBuilder() { From = query };
-    }
-
     /// <summary>
     /// Class used to help consumers build select statements
     /// </summary>
     public class SelectStatementBuilder
     {
 
-        public SelectStatementBuilder() { }
+        private SelectStatementBuilder() { }
+
+        /// <summary>
+        /// Create a new SelectStatementBuilder whose 'FROM' statement is the <paramref name="tableName"/>
+        /// </summary>
+        /// <param name="tableName">The name of the table to select from</param>
+        public SelectStatementBuilder(string tableName) : this()
+        {
+            From = tableName;
+        }
+
+        /// <summary>
+        /// Create a new SelectStatementBuilder whose 'FROM' statement is the <paramref name="query"/>
+        /// </summary>
+        /// <param name="query">The SqlKata Query that provides the inner query to select from</param>
+        public SelectStatementBuilder(SqlKata.Query query)  : this()
+        {
+            From = query;
+        }
+
+        /// <summary>
+        /// Create a new SelectStatementBuilder whose 'FROM' statement is the <paramref name="builder"/>
+        /// </summary>
+        /// <param name="builder">The builder that provides the inner query to select from</param>
+        public SelectStatementBuilder(SelectStatementBuilder builder) : this()
+        {
+            From = builder;
+        }
 
         /// <summary>
         /// Treat the <see cref="SelectStatementBuilder"/> as a function to get a query
@@ -35,18 +47,33 @@ namespace RFBCodeWorks.DataBaseObjects.Helpers
         /// <param name="builder"></param>
         public static implicit operator Func<SqlKata.Query,SqlKata.Query>(SelectStatementBuilder builder) => (o) => builder.GenerateQuery();
 
+        /// <summary>
+        /// The list of column names to return as a result of the query
+        /// </summary>
         public List<string> ReturnColumns { get; } = new List<string>();
+
+        /// <summary>
+        /// Where to select data from. 
+        /// <br/> One of the following: 
+        /// <br/> - <see cref="string"/> (table name)
+        /// <br/> - <see cref="SqlKata.Query"/>
+        /// <br/> - <see cref="SelectStatementBuilder"/>
+        /// </summary>
         public object From {
             get => fromValue; 
             set
             {
-                if (value is SqlKata.Query | value is string | value is SelectStatementBuilder)
+                if (value is SqlKata.Query | value is SelectStatementBuilder)
                     fromValue = value;
+                else if (value is string str)
+                {
+                    if (string.IsNullOrWhiteSpace(str)) throw new ArgumentException("string value for 'From' property cannot be null! A string value representing the name of a table was expected.");
+                    fromValue = str;
+                }
                 else
                     throw new ArgumentException("Invalid Object Type for 'FROM' value - Expected a SqlKata.Query, a string, or a SelectStatementBuilder");
             }
         }
-
         private object fromValue;
         
         /// <summary>

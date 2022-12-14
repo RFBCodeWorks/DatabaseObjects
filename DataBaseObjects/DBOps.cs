@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Configuration;
 using System.Data;
-using System.Data.SqlClient;
-using System.Data.OleDb;
 using System.Collections.Generic;
-using RFBCodeWorks.DataBaseObjects.Exceptions;
 using System.Threading.Tasks;
 using SqlKata;
-using System.Runtime.CompilerServices;
+using RFBCodeWorks.SystemExtensions;
 
 namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
-    /// Methods for interacting with databases
+    /// Extension Methods for interacting with databases
     /// </summary>
     public static partial class DBOps
     {
@@ -88,9 +84,10 @@ namespace RFBCodeWorks.DataBaseObjects
         /// </summary>
         /// <param name="Conn">DataBase Connection String</param>
         /// <param name="Query">Pre-Built SQL Query to run against the database</param>
+        /// <param name="bindings"><inheritdoc cref="SqlKata.SqlResult.Bindings"/></param>
         /// <param name="disposeConnection">If TRUE, wraps the connection in a 'using' statement to automatically dispose of it after completing the command</param>
         /// <returns></returns>
-        public static DataTable GetDataTable(IDbConnection Conn, string Query, bool disposeConnection = true)
+        public static DataTable GetDataTable(IDbConnection Conn, string Query, bool disposeConnection = true, params object[] bindings)
         {
             try
             {
@@ -100,6 +97,19 @@ namespace RFBCodeWorks.DataBaseObjects
                     using (var Cmd = Conn.CreateCommand())
                     {
                         Cmd.CommandText = Query;
+                        Cmd.CommandType = CommandType.Text;
+                        foreach (object bind in bindings)
+                        {
+                            var param = Cmd.CreateParameter();
+                            if (bind is KeyValuePair<string, object> kvp)
+                            {
+                                param.ParameterName = kvp.Key;
+                                param.Value = kvp.Value;
+                            }
+                            else if (bind is )
+                            Cmd.Parameters.Add(param);
+                        }
+                        Cmd.Parameters. = bindings;
                         using (var DR = Cmd.ExecuteReader())
                         {
                             DataTable DT = new DataTable();
@@ -123,9 +133,16 @@ namespace RFBCodeWorks.DataBaseObjects
             }
         }
 
+        /// <summary>
+        /// Get the DataTable from the <paramref name="database"/> by running the <paramref name="query"/>
+        /// </summary>
+        /// <param name="database">The database to interact with</param>
+        /// <param name="query">The query to execute</param>
+        /// <returns>A new <see cref="DataTable"/></returns>
         public static DataTable GetDataTable(IDatabase database, SqlKata.Query query)
         {
-            return GetDataTable(database.GetDatabaseConnection(), database.Compiler.Compile(query).ToString());
+            var result = database.Compiler.Compile(query);
+            return GetDataTable(database.GetDatabaseConnection(), result.Sql, true, result.Bindings);
         }
 
         #endregion
@@ -228,24 +245,24 @@ namespace RFBCodeWorks.DataBaseObjects
             return null;
         }
 
-        /// <returns>True/False</returns>
+        /// <returns> The result of the query as an <see cref="bool"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
         /// <inheritdoc cref="GetValue(IDbConnection, Query, SqlKata.Compilers.Compiler)"/>
         [System.Diagnostics.DebuggerHidden]
-        public static bool GetValueAsBool(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.ConvertToBool(DBOps.GetValue(DB, query, compiler));
+        public static bool? GetValueAsBool(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
+            Extensions.SanitizeToBool(DBOps.GetValue(DB, query, compiler));
 
 
-        /// <returns> string </returns>
+        /// <returns> The result of the query as a <see cref="string"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
         /// <inheritdoc cref="GetValue(IDbConnection, Query, SqlKata.Compilers.Compiler)"/>
         [System.Diagnostics.DebuggerHidden]
         public static string GetValueAsString(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.ConvertToString(DBOps.GetValue(DB, query, compiler));
+            Extensions.SanitizeToString(DBOps.GetValue(DB, query, compiler));
 
-        /// <returns> int </returns>
+        /// <returns> The result of the query as an <see cref="int"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
         /// <inheritdoc cref="GetValue(IDbConnection, Query, SqlKata.Compilers.Compiler)"/>
         [System.Diagnostics.DebuggerHidden]
-        public static int GetValueAsInt(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.ConvertToInt(DBOps.GetValue(DB, query, compiler));
+        public static int? GetValueAsInt(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
+            Extensions.SanitizeToInt(DBOps.GetValue(DB, query, compiler));
 
         /// <summary>Return a single value from a DB Table</summary>
         /// <param name="DB">Some DB Connection</param>
@@ -261,24 +278,24 @@ namespace RFBCodeWorks.DataBaseObjects
             return GetValue(DB, qry, compiler ?? throw new ArgumentNullException(nameof(compiler)));
         }
 
-        /// <returns>True/False</returns>
+        /// <returns> The result of the query as an <see cref="bool"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
         /// <inheritdoc cref="GetValue(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
         [System.Diagnostics.DebuggerHidden]
-        public static bool GetValueAsBool(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.ConvertToBool(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
+        public static bool? GetValueAsBool(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
+            Extensions.SanitizeToBool(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
 
 
-        /// <returns> string </returns>
+        /// <returns> The result of the query as an <see cref="string"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
         /// <inheritdoc cref="GetValue(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
         [System.Diagnostics.DebuggerHidden]
         public static string GetValueAsString(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.ConvertToString(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
+            Extensions.SanitizeToString(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
 
-        /// <returns> int </returns>
+        /// <returns> The result of the query as an <see cref="int"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
         /// <inheritdoc cref="GetValue(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
         [System.Diagnostics.DebuggerHidden]
-        public static int GetValueAsInt(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.ConvertToInt(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
+        public static int? GetValueAsInt(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
+            Extensions.SanitizeToInt(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
 
 
         #endregion < Get return from DataTables / DB Connections >
@@ -295,8 +312,9 @@ namespace RFBCodeWorks.DataBaseObjects
         [System.Diagnostics.DebuggerHidden]
         public static void BuildDictionary(out Dictionary<string, string> Dict, IDbConnection Conn, string Query) => DBOps.GetDataTable(Conn, Query).BuildDictionary(out Dict);
 
-        /// <summary>Create Dictionary of all from the excel table. First Col in table is the Key, all other Cols are added to an array. </summary>
+        ///// <summary>Create Dictionary of all from the excel table. First Col in table is the Key, all other Cols are added to an array. </summary>
         //public static void BuildDictionary(out Dictionary<string, string[]> Dict, string ExcelWorkBookPath, string TableName) => BuildDictionary(out Dict, ExcelOps.GetDataTable(ExcelWorkBookPath, TableName));
+        
         /// <summary>Create Dictionary of all from the query results. First Col in table is the Key, all other Cols are added to an array. </summary>
         public static void BuildDictionary(out Dictionary<string, string[]> Dict, IDbConnection Conn, string Query) => DBOps.GetDataTable(Conn, Query).BuildDictionary(out Dict);
 

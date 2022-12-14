@@ -74,36 +74,36 @@ namespace RFBCodeWorks.DataBaseObjects
         /// </summary>
         /// <inheritdoc cref="BuildDictionary{K, V}(DataTable, Func{object, K}, Func{object, V}, int, int)"/>
         public static Dictionary<int, object> ToObjectDictionary(this DataTable table, int valueColumn = 1, int keyColumn = 0)
-            => BuildDictionary<int, object>(table, Extensions.ConvertToInt, (o) => o, valueColumn, keyColumn);
+            => BuildDictionary<int, object>(table, Extensions.SanitizeToInt, (o) => o, valueColumn, keyColumn);
 
         /// <summary>
         /// Convert a DataTable to a dictionary of strings
         /// </summary>
         /// <inheritdoc cref="BuildDictionary{K, V}(DataTable, Func{object, K}, Func{object, V}, int, int)"/>
         public static Dictionary<int, string> ToStringDictionary(this DataTable table, int valueColumn = 1, int keyColumn = 0)
-            => BuildDictionary(table, Extensions.ConvertToInt<object>, Extensions.ConvertToString, valueColumn, keyColumn);
+            => BuildDictionary(table, Extensions.SanitizeToInt<object>, Extensions.ConvertToString, valueColumn, keyColumn);
 
         /// <summary>
         /// Convert a DataTable to a dictionary of integers
         /// </summary>
         /// <inheritdoc cref="BuildDictionary{K, V}(DataTable, Func{object, K}, Func{object, V}, int, int)"/>
         public static Dictionary<int, int> ToIntDictionary(this DataTable table, int valueColumn = 1, int keyColumn = 0)
-            => BuildDictionary(table, Extensions.ConvertToInt<object>, Extensions.ConvertToInt<object>, valueColumn, keyColumn);
+            => BuildDictionary(table, Extensions.SanitizeToInt<object>, Extensions.SanitizeToInt<object>, valueColumn, keyColumn);
 
         /// <summary>
         /// Convert a DataTable to a dictionary of booleans
         /// </summary>
         /// <inheritdoc cref="BuildDictionary{K, V}(DataTable, Func{object, K}, Func{object, V}, int, int)"/>
         public static Dictionary<int, bool> ToBoolDictionary(this DataTable table, int valueColumn = 1, int keyColumn = 0)
-            => BuildDictionary(table, Extensions.ConvertToInt<object>, Extensions.ConvertToBool, valueColumn, keyColumn);
+            => BuildDictionary(table, Extensions.SanitizeToInt<object>, Extensions.ConvertToBool, valueColumn, keyColumn);
         
         /// <inheritdoc cref="BuildArrayDictionary{K, V}(DataTable, Func{object, K}, Func{object, V})"/>
         public static Dictionary<int, object[]> ToObjectArrayDictionary(this DataTable table)
-            => BuildArrayDictionary<int, object>(table, Extensions.ConvertToInt, (o) => o);
+            => BuildArrayDictionary<int, object>(table, Extensions.SanitizeToInt, (o) => o);
 
         /// <inheritdoc cref="BuildArrayDictionary{K, V}(DataTable, Func{object, K}, Func{object, V})"/>
         public static Dictionary<int, string[]> ToStringArrayDictionary(this DataTable table)
-            => BuildArrayDictionary(table, Extensions.ConvertToInt<object>, Extensions.ConvertToString);
+            => BuildArrayDictionary(table, Extensions.SanitizeToInt<object>, Extensions.ConvertToString);
 
 
        

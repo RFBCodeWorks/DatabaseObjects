@@ -103,7 +103,7 @@ namespace RFBCodeWorks.DataBaseObjects
             return Task.Run(() => GetDataTable(columns, WhereString));
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc cref="GetDataTable(string[], string, object[])"/>
         public virtual Task<DataTable> GetDataTableAsync(string[] columns, string WhereString, params object[] bindings)
         {
             return Task.Run(() => GetDataTable(columns, WhereString, bindings));
@@ -172,7 +172,6 @@ namespace RFBCodeWorks.DataBaseObjects
 
         #endregion
 
-
         #region < Delete Data >
 
         /// <summary>
@@ -181,7 +180,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <param name="searchCol">The column name to search</param>
         /// <param name="searchValue">The value of the column to search for exactly</param>
         /// <returns>The number of rows deleted</returns>
-        public int DeleteRows(string searchCol, object searchValue)
+        public virtual int DeleteRows(string searchCol, object searchValue)
         {
             using (var conn = GetDatabaseConnection())
             {

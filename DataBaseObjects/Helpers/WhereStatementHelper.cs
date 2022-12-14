@@ -17,7 +17,9 @@ namespace RFBCodeWorks.DataBaseObjects.Helpers
         OR
     }
 
-
+    /// <summary>
+    /// 
+    /// </summary>
     public static partial class Extensions
     {
         /// <inheritdoc cref="WhereStatementHelper.ApplyStatement(SqlKata.Query, bool)"/>

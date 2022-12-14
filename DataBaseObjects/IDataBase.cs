@@ -32,10 +32,10 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <returns>
         /// If a single match is found, return it as a <see cref="DataRow"/>. <br/>
         /// If no matches are found, return null. <br/>
-        /// If multiple matches are found, throw <see cref="Exception"/>
+        /// If multiple matches are found, throw <see cref="InvalidExpressionException"/>
         /// </returns>
         /// <inheritdoc cref="GetDataTable(Query)"/>
-        /// <exception cref="Exception"/>
+        /// <exception cref="InvalidExpressionException"/>
         DataRow GetDataRow(Query query);
 
         ///<inheritdoc cref="GetDataRow(Query)"/>
@@ -84,8 +84,8 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <summary>
         /// Generate a <see cref="Query"/> that will return a single value from the <paramref name="table"/>
         /// </summary>
-        /// <inheritdoc cref="DBOps.DataReturn(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
-        object GetValue(string table, string LookupColName, object LookupVal, string ReturnColName);
+        /// <inheritdoc cref="DBOps.GetValue(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
+        object GetValue(string table, string lookupColName, object lookupVal, string returnColName);
 
         ///// <param name="query"></param>
         ///// <param name="bindings"></param>
@@ -96,7 +96,7 @@ namespace RFBCodeWorks.DataBaseObjects
         Task<object> GetValueAsync(Query query);
 
         /// <inheritdoc cref="GetValue(string, string, object, string)"/>
-        Task<object> GetValueAsync(string TableName, string LookupColName, object LookupVal, string ReturnColName);
+        Task<object> GetValueAsync(string table, string lookupColName, object lookupVal, string returnColName);
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -36,18 +36,27 @@ namespace RFBCodeWorks.DataBaseObjects
         /// Generate a 'SELECT <paramref name="columns"/> FROM [TableName] WHERE <paramref name="searchColumn"/> == <paramref name="searchValue"/>' query
         /// </summary>
         /// <param name="searchColumn">Column Name to search for the value</param>
-        /// <param name="searchValue">Value to search for</param>
+        /// <param name="searchValue">Value to search for within the <paramref name="searchColumn"/></param>
         /// <inheritdoc cref="Select(string[])"/>
         /// <inheritdoc cref="BaseQuery{Q}.Where(string, object)"/>
         /// <param name="columns"/>
         Query SelectWhere(string[] columns, string searchColumn, object searchValue);
 
-        /// <inheritdoc cref="SelectWhere(string, object, string[])"/>
+        /// <inheritdoc cref="SelectWhere(string[], string, object)"/>
+        /// <param name="op">The operator to compare the value of the <paramref name="searchColumn"/> and <paramref name="searchValue"/></param>
         /// <inheritdoc cref="BaseQuery{Q}.Where(string, string, Func{Q, Q})"/>
+        /// <param name="columns"/>
+        /// <param name="searchColumn"/>
+        /// <param name="searchValue"/>
         Query SelectWhere(string[] columns, string searchColumn, string op, object searchValue);
 
-        /// <inheritdoc cref="SelectWhere(string, object, string[])"/>
+        /// <inheritdoc cref="SelectWhere(string[], string, object)"/>
+        /// <param name="values">
+        /// Column/Value pairs to constrain the query. 
+        /// <br/>Ex: ("State", "WI") will select all results where the 'State' column has a value of 'WI'
+        /// </param>
         /// <inheritdoc cref="BaseQuery{Q}.Where(IEnumerable{KeyValuePair{string, object}})"/>
+        /// <param name="columns"/>
         Query SelectWhere(string[] columns, params KeyValuePair<string, object>[] values);
 
         #endregion
@@ -57,7 +66,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <summary>
         /// Request the columns from the table.
         /// </summary>
-        /// <param name="columns">An empty array ( or "*" ) returns the entire column list.</param>
+        /// <param name="columns">The columns retrieve. <br/> <see langword="null"/>, an empty array, or "*" will return the entire column list.</param>
         /// <returns>a new DataTable with the results of the query</returns>
         DataTable GetDataTable(params string[] columns);
 
@@ -67,7 +76,10 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <param name="WhereString">the raw 'WHERE' statement</param>
         DataTable GetDataTable(string[] columns, string WhereString);
 
+        /// <param name="bindings">The bindings to apply to the DBCommand</param>
         /// <inheritdoc cref="GetDataTable(string[], string)"/>
+        /// <param name="WhereString"/>
+        /// <param name="columns"/>
         DataTable GetDataTable(string[] columns, string WhereString, params object[] bindings);
 
         /// <inheritdoc cref="GetDataTable(string[])"/>
@@ -121,48 +133,54 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <summary>
         /// Search the table for the value, then return the result
         /// </summary>
-        /// <param name="PrimaryKeyValue">Search the primary key column for this value</param>
-        /// <param name="ReturnColName">Name of the column to return</param>
+        /// <param name="primaryKeyValue">Search the primary key column for this value</param>
+        /// <param name="returnColName">Name of the column to return</param>
         /// <returns>If successful, return the object. Otherwise return null.</returns>
-        object GetValue(object PrimaryKeyValue, string ReturnColName);
+        object GetValue(object primaryKeyValue, string returnColName);
 
+        /// <returns>If successful, return the <see langword="bool"/> value. <see cref="DBNull"/> converts to <see langword="null"/>.</returns>
         /// <inheritdoc cref="GetValue"/>
-        bool GetValueAsBool(object PrimaryKeyValue, string ReturnColName);
+        bool? GetValueAsBool(object primaryKeyValue, string returnColName);
 
+        /// <returns>If successful, return the <see cref="string"/> value. <see cref="DBNull"/> converts to <see langword="null"/>.</returns>
         /// <inheritdoc cref="GetValue"/>
-        string GetValueAsString(object PrimaryKeyValue, string ReturnColName);
+        string GetValueAsString(object primaryKeyValue, string returnColName);
 
+        /// <returns>If successful, return the <see cref="int"/> value. <see cref="DBNull"/> converts to <see langword="null"/>.</returns>
         /// <inheritdoc cref="GetValue"/>
-        int GetValueAsInt(object PrimaryKeyValue, string ReturnColName);
+        int? GetValueAsInt(object primaryKeyValue, string returnColName);
 
-        /// <returns>A task that <inheritdoc cref="DataReturn"/></returns>
+        /// <returns>A task that <inheritdoc cref="GetValue(object, string)"/></returns>
         /// <inheritdoc cref="GetValue"/>
-        Task<object> GetValueAsync(object PrimaryKeyValue, string ReturnColName);
+        Task<object> GetValueAsync(object primaryKeyValue, string returnColName);
 
+        /// <returns>A task that <inheritdoc cref="GetValueAsBool(object, string)"/></returns>
         /// <inheritdoc cref="GetValueAsync"/>
-        Task<bool> GetValueAsBoolAsync(object PrimaryKeyValue, string ReturnColName);
+        Task<bool?> GetValueAsBoolAsync(object primaryKeyValue, string returnColName);
 
+        /// <returns>A task that <inheritdoc cref="GetValueAsString(object, string)"/></returns>
         /// <inheritdoc cref="GetValueAsync"/>
-        Task<string> GetValueAsStringAsync(object PrimaryKeyValue, string ReturnColName);
+        Task<string> GetValueAsStringAsync(object primaryKeyValue, string returnColName);
 
+        /// <returns>A task that <inheritdoc cref="GetValueAsInt(object, string)"/></returns>
         /// <inheritdoc cref="GetValueAsync"/>
-        Task<int> GetValueAsIntAsync(object PrimaryKeyValue, string ReturnColName);
+        Task<int?> GetValueAsIntAsync(object primaryKeyValue, string returnColName);
 
         #endregion
 
         #region < GetDataTable >
 
         /// <summary>
-        /// Search the table's primary key column for the <paramref name="PrimaryKeyValue"/>, then return the entire row.
+        /// Search the table's primary key column for the <paramref name="primaryKeyValue"/>, then return the entire row.
         /// </summary>
         /// <returns>
         /// If a matching primary key is found, return the corresponding <see cref="DataRow"/>. Otherwise return null.
         /// </returns>
-        /// <inheritdoc cref="DataReturn(object, string)"/>
-        DataRow GetDataRow(object PrimaryKeyValue);
+        /// <inheritdoc cref="GetValue(object, string)"/>
+        DataRow GetDataRow(object primaryKeyValue);
 
         /// <inheritdoc cref="GetDataRow(object)"/>
-        Task<DataRow> GetDataRowAsync(object PrimaryKeyValue);
+        Task<DataRow> GetDataRowAsync(object primaryKeyValue);
 
         #endregion
 
@@ -178,12 +196,13 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <summary>
         /// Get the DataTable from the database, then pass it to the <paramref name="dictionaryBuilder"/> functionary to build a dictionary of some type.
         /// </summary>
-        /// <typeparam name="T">Output Dictionary Type</typeparam>
         /// <typeparam name="X">Dictionary Key Type</typeparam>
         /// <typeparam name="Y">Dictionary Value Type</typeparam>
-        /// <param name="dictionaryBuilder">Function that loops through some DataTable and produces a <typeparamref name="T"/>. Accepts parameters of type DataTable and string[] of column names for the value columns</param>
-        /// <param name="valueColumns">Value Columns</param>
-        /// <returns></returns>
+        /// <param name="dictionaryBuilder">Function that loops through a DataTable and produces a new Dictionary. </param>
+        /// <param name="valueColumns">
+        /// <inheritdoc cref="IDataBaseTable.GetDataTable(string[])" path="/param[@name='columns']" />
+        /// </param>
+        /// <returns>The result of <paramref name="dictionaryBuilder"/></returns>
         Dictionary<X, Y> GetDictionary<X, Y>(Func<DataTable, Dictionary<X, Y>> dictionaryBuilder, params string[] valueColumns);
 
         #endregion

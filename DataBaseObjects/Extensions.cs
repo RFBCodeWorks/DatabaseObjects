@@ -4,6 +4,7 @@ using System.Text;
 using System.Linq;
 using RFBCodeWorks.DataBaseObjects;
 using SqlKata;
+using RFBCodeWorks.SystemExtensions;
 
 namespace RFBCodeWorks.DataBaseObjects
 {
@@ -22,7 +23,8 @@ namespace RFBCodeWorks.DataBaseObjects
         }
 
         /// <summary>
-        /// Generate a new KeyValuePair array that consists of a single pair
+        /// Generate a new KeyValuePair array contains all the keys and values.
+        /// <br/> <paramref name="keys"/> and <paramref name="values"/> count are expected to match.
         /// </summary>
         public static KeyValuePair<T, O>[] ConvertToKeyValuePairArray<T, O>(IEnumerable<T> keys, IEnumerable<O> values)
         {
@@ -40,114 +42,125 @@ namespace RFBCodeWorks.DataBaseObjects
         }
 
         /// <summary>
-        /// Sanitizes an object and does basic checking to return either TRUE or FALSE. Use this for reading from a DataTable.
+        /// Sanitizes an object and does basic checking to return either TRUE or FALSE.
         /// </summary>
         /// <param name="value">Object to attempt to convert</param>
         /// <returns>
-        /// If (<paramref name="value"/> is null | <see cref="DBNull"/>) return FALSE <br/>
+        /// If (<paramref name="value"/> is <see langword="null"/> | <see cref="DBNull"/>) return null <br/>
+        /// If (<paramref name="value"/> is <see cref="bool"/> b) return b <br/>
         /// If (<paramref name="value"/>.ToString() == "false"| "0" ) return FALSE <br/>
-        /// Else return TRUE.
+        /// Else attempt to case into a bool? object.
         /// </returns>
-        public static bool ConvertToBool(this object value)
+        /// <exception cref="InvalidCastException"/>
+        public static bool? SanitizeToBool(this object value)
         {
-            if (value is null | value is DBNull) return false;
-            if (value is bool v) return v;
-            string val = value?.ToString()?.ToLower();
-            switch (true)
+            if (value is null | value is DBNull | (value is string str && string.IsNullOrEmpty(str))) return null;
+            if (value is bool b) return b;
+            if (value is IConvertible ic) return ic.ToBoolean(default);
+
+            string val = value?.ToString()?.ToLower().Trim();
+            switch (val)
             {
-                case true when val == "false":
-                case true when val == "0":
-                case true when string.IsNullOrWhiteSpace(val):
+                case "0":
+                case "false":
+                case "":
                     return false;
-                default:
+                case "1":
+                case "true":
                     return true;
             }
+            try
+            {
+                return (bool?)value;
+            }
+            catch(Exception e) 
+            {
+                e.AddVariableData("Info", "Attempt to cast object to boolean failed");
+                e.AddVariableData("Object Type", value.GetType().ToString());
+                e.AddVariableData("Object.ToString", value.ToString());
+                throw;
+            }
+            
         }
+
+        /// <returns>
+        /// If <paramref name="value"/> is null | <see cref="DBNull"/> | String.IsNullOrEmpty() == true : return 0 <br/>
+        /// Otherwise, attempt to convert the object directly using <see cref="Convert.ToInt32(object)"/>.
+        /// </returns>
+        /// <inheritdoc cref="SanitizeToInt(object)"/>
+        public static bool SanitizeOrDefaultBool(this object value) => SanitizeToBool(value) ?? false;
 
         /// <summary>
         /// Attemps to convert the object into an Int32. <br/>
         /// Mainly for sanitizing data out of a datatable.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="value">Object to attempt to convert</param>
         /// <returns>
-        /// If <paramref name="value"/> is null | <see cref="DBNull"/> | String.IsNullOrEmpty() == true : return 0  <br/>
+        /// If <paramref name="value"/> is null | <see cref="DBNull"/> | String.IsNullOrEmpty() == true : return null  <br/>
         /// If the value is already an int type, (this includes stored as long), use <see cref="Convert.ToInt32(object)"/> <br/>
-        /// Otherwise, convert the object to a string and attempt to convert it to an int.
+        /// Otherwise, attempt to convert the object directly using <see cref="Convert.ToInt32(object)"/>.
         /// </returns>
         /// <inheritdoc cref="Convert.ToInt32(object)"/>
-        public static int ConvertToInt<T>(this T value)
-            where T : class
+        public static int? SanitizeToInt(this object value)
         {
-            if (value is null || value is DBNull) return 0;
-            if (value is string str)
+            try
             {
-                if (string.IsNullOrWhiteSpace(str))
-                    return 0;
+                if (value is null | value is DBNull | (value is string str && string.IsNullOrEmpty(str)))
+                    return null;
+                else if (value is IConvertible v)
+                    return Convert.ToInt32(value);
                 else
-                    return (int)Math.Round(Convert.ToDouble(str));
+                    return (int?)value;
             }
-            //Integer/Long
-            else if (
-                typeof(T) == typeof(Int16) | typeof(T) == typeof(Int32) | typeof(T) == typeof(Int64) |
-                typeof(T) == typeof(UInt16) | typeof(T) == typeof(UInt32) | typeof(T) == typeof(UInt64) |
-                typeof(T) == typeof(long) | typeof(T) == typeof(ulong) | typeof(T) == typeof(int)
-                )
+            catch (Exception e)
             {
-                return Convert.ToInt32(value);
+                e.AddVariableData("Info", "Attempt to convert object to Int32 failed");
+                e.AddVariableData("Object Type", value.GetType().ToString());
+                e.AddVariableData("Object.ToString", value.ToString());
+                throw;
             }
-            else
-                return (int)Math.Round(Convert.ToDouble(value.ToString()));
         }
+
+        /// <returns>
+        /// If <paramref name="value"/> is null | <see cref="DBNull"/> | String.IsNullOrEmpty() == true : return 0 <br/>
+        /// Otherwise, attempt to convert the object directly using <see cref="Convert.ToInt32(object)"/>.
+        /// </returns>
+        /// <inheritdoc cref="SanitizeToInt(object)"/>
+        public static int SanitizeOrDefaultInt(this object value) => SanitizeToInt(value) ?? 0;
 
         /// <summary>
         /// Convert this object to its string representation. <br/>
-        /// Sanitizes null, <see cref="DBNull"/>, <see cref="Enum"/>, and string types. <br/>
+        /// Sanitizes <see langword="null"/>, <see cref="DBNull"/>, <see cref="Enum"/>, and string types. <br/>
         /// </summary>
-        /// <typeparam name="T">Enums, Strings, and Numerics are expected</typeparam>
         /// <returns>
         /// The string representation of the <paramref name="value"/>. <br/> 
         /// If the type is an Enum, returns <see cref="Enum.GetName(Type, object)"/> <br/>
-        /// If the <paramref name="value"/> is null or <see cref="DBNull"/> : return <see cref="String.Empty"/> <br/>
+        /// If the <paramref name="value"/> is <see langword="null"/> or <see cref="DBNull"/> : return <see langword="null"/> <br/>
         /// Otherwise, return the result of the <see cref="Convert.ToString(object, IFormatProvider)"/> method.
         /// </returns>
-        /// <inheritdoc cref="Convert.ToString(object?, IFormatProvider?)"/>
-        public static string ConvertToString<T>(this T value, IFormatProvider provider = null)
-            where T : class
+        /// <inheritdoc cref="Convert.ToString(object, IFormatProvider)"/>
+        public static string SanitizeToString(this object value, IFormatProvider provider = null)
         {
             switch (true)
             {
-                case true when value is string val: return val;
-                case true when value is null: return string.Empty;
-                case true when value is DBNull: return string.Empty;
-                case true when (typeof(T).IsEnum): return Enum.GetName(typeof(T), value) ?? string.Empty;
-                default: return (provider is null ? Convert.ToString(value) : Convert.ToString(value, provider)) ?? string.Empty;
+                case true when value is null:
+                case true when value is DBNull:
+                    return null;
+                case true when value is string val:
+                    return val;
+                case true when value is Enum en:
+                    return Enum.GetName(en.GetType(), en);
+                default: 
+                    return (provider is null ? Convert.ToString(value) : Convert.ToString(value, provider));
             }
         }
 
-        ///<inheritdoc cref="ConvertToString{T}(T, IFormatProvider?)"/>
-        public static string ConvertToString(this object value, IFormatProvider provider = null) => ConvertToString(value, provider);
-        ///<inheritdoc cref="ConvertToInt{T}(T)"/>
-        public static int ConvertToInt(this object value) => ConvertToInt(value);
-
-        /// <summary>
-        /// Extension Method to easily add the Variable Data from a method to the <see cref="Exception.Data"/> for logging purposes.
-        /// </summary>
-        /// <param name="E">Exception to add data to </param>
-        /// <param name="nameofVariable">Name of the variable - for ease use : <c>nameof(Variable)</c></param>
-        /// <param name="VariableValue">Put the variable or string property here</param>
-        internal static void AddVariableData(this Exception E, string nameofVariable, string VariableValue) => E.Data.Add(nameofVariable, VariableValue);
-
-        /// <summary>
-        /// Extension Method to easily add the Variable Data from a method to the <see cref="Exception.Data"/> for logging purposes.
-        /// </summary>
-        /// <param name="E">Exception to add data to </param>
-        /// <param name="VariableDict">Dictionary of Variables</param>
-        internal static void AddVariableData(this Exception E, System.Collections.Generic.IDictionary<string, string> VariableDict)
-        {
-            foreach (System.Collections.DictionaryEntry entry in (System.Collections.IDictionary)VariableDict)
-                E.Data.Add(entry.Key.ToString(), entry.Value.ToString());
-        }
+        /// <returns>
+        /// If <paramref name="value"/> is null | <see cref="DBNull"/> | String.IsNullOrEmpty() == true : return 0 <br/>
+        /// Otherwise, attempt to convert the object directly using <see cref="Convert.ToInt32(object)"/>.
+        /// </returns>
+        /// <inheritdoc cref="SanitizeToInt(object)"/>
+        public static string SanitizeOrDefaultString(this object value) => SanitizeToString(value) ?? string.Empty;
     }
 
 }

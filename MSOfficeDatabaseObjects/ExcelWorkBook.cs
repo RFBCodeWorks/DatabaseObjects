@@ -14,35 +14,39 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
     /// </summary>
     public partial class ExcelWorkBook : AbstractDataBase<OleDbConnection>
     {
-        
-        public ExcelWorkBook(string path, bool hasHeaders = true) : base(ExcelOps.GetConnection(path, hasHeaders).ConnectionString)
+       public ExcelWorkBook(string path, bool hasHeaders = true) : base(GetConnection(path, hasHeaders).ConnectionString)
         {
             this.hasHeaders = hasHeaders;
             workbookPath = path;
-            //base.ConnectionString = GetDatabaseConnection().ConnectionString;
         }
         
         private string workbookPath;
-        private bool hasHeaders;
+        private bool? hasHeaders;
 
         /// <remarks> Updates the ConnectionString automatically when this value is modified.</remarks>
         public string WorkbookPath { 
-            get => workbookPath; 
-            //init {
-            //    workbookPath = value;
-            //    base.ConnectionString = GetDatabaseConnection().ConnectionString;
-            //} 
+            get => workbookPath;
+            init
+            {
+                workbookPath = value;
+                base.ConnectionString = GetDatabaseConnection().ConnectionString;
+            }
         }
 
         /// <summary>
-        /// Treat the first row of each worksheet as if it were the headers (column names) of a table
+        /// Treat the first row of each worksheet as if it were the headers (column names) of a table <br/>
         /// </summary>
-        public bool HasHeaders { 
+        /// <remarks>
+        /// If <see langword="true"/> - Include ';HDR=Yes' in the generated connection string <br/>
+        /// If <see langword="false"/> - Include ';HDR=No' in the generated connection string <br/>
+        /// If <see langword="null"/> - the argument is not provided in the generated connection string
+        /// </remarks>
+        public bool? HasHeaders { 
             get => hasHeaders; 
-            //init {
-            //    hasHeaders = value;
-            //    if (workbookPath.IsNotEmpty()) base.ConnectionString = GetDatabaseConnection().ConnectionString;
-            //}
+            set {
+                hasHeaders = value;
+                if (!string.IsNullOrWhiteSpace(workbookPath)) base.ConnectionString = GetDatabaseConnection().ConnectionString;
+            }
         }
 
         /// <summary>
@@ -64,7 +68,50 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// <inheritdoc cref="GetDatabaseConnection()"/>
         public OleDbConnection GetDatabaseConnection(bool hasHeaders)
         {
-            return ExcelOps.GetConnection(WorkbookPath, hasHeaders);
+            return GetConnection(WorkbookPath, hasHeaders);
+        }
+
+
+        /// <exception cref="ArgumentException"/>
+        ///// <exception cref="System.IO.FileNotFoundException"/>
+        private static void ValidateWorkbookPath(string workbookPath)
+        {
+            if (string.IsNullOrWhiteSpace(workbookPath)) throw new ArgumentException("WorkBookPath has no value");
+            if (!System.IO.Path.IsPathRooted(workbookPath)) throw new ArgumentException("WorkBookPath is not rooted!");
+            if (!System.IO.Path.HasExtension(workbookPath)) throw new ArgumentException("WorkBookPath does not have an extension!");
+            //if (!System.IO.File.Exists(workbookPath)) throw new System.IO.FileNotFoundException($"Workbook does not exist at specified location! - Path: \n {workbookPath}");
+        }
+
+        /// <summary>
+        /// Generate the <see cref="OleDbConnection"/> to the specified <paramref name="workbookPath"/>
+        /// </summary>
+        /// <param name="workbookPath">Path to the workbook</param>
+        /// <param name="hasHeaders"><inheritdoc cref="HasHeaders" path="*"/></param>
+        /// <returns></returns>
+        /// <inheritdoc cref="ValidateWorkbookPath(string)"/>
+        public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = null)
+        {
+            ValidateWorkbookPath(workbookPath);
+            if (System.IO.Path.GetExtension(workbookPath) == ".xlsx" || System.IO.Path.GetExtension(workbookPath) == ".xlsm")
+                return GetACEConnection(workbookPath, hasHeaders);
+            else
+                return GetJETConnection(workbookPath, hasHeaders);
+        }
+
+        /// <inheritdoc cref="GetConnection" />
+        public static OleDbConnection GetACEConnection(string workbookPath, bool? hasHeaders = null)
+        {
+            ValidateWorkbookPath(workbookPath);
+            string HDR = hasHeaders is null ? string.Empty : (bool)hasHeaders ? ";HDR=Yes" : ";HDR=No";
+            return new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + workbookPath + ";Extended Properties=\"Excel 12.0" + HDR + ";IMEX=0\"");
+        }
+
+        /// <inheritdoc cref="GetConnection" />
+        public static OleDbConnection GetJETConnection(string workbookPath, bool? hasHeaders = null)
+        {
+            ValidateWorkbookPath(workbookPath);
+            string HDR = hasHeaders is null ? string.Empty : (bool)hasHeaders ? ";HDR=Yes" : ";HDR=No";
+            return new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + workbookPath + ";Extended Properties=\"Excel 8.0" + HDR + ";IMEX=0\"");
         }
 
     }
