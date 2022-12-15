@@ -2,8 +2,9 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using SqlKata.Compilers;
+using SqlKata;
 
-namespace SqlKata.Compilers
+namespace RFBCodeWorks.SqlKataCompilers
 {
     /// <summary>
     /// Compiler to use when working with an Excel Workbook
@@ -23,7 +24,7 @@ namespace SqlKata.Compilers
         /// <summary>
         /// A singleton compiler for MS Excel
         /// </summary>
-        public static SqlKata.Compilers.ExcelWorkbookCompiler ExcelCompiler
+        public static ExcelWorkbookCompiler ExcelCompiler
         {
             get
             {
@@ -31,9 +32,12 @@ namespace SqlKata.Compilers
                 return ExcelWorkbookCompilerField;
             }
         }
-        private static SqlKata.Compilers.ExcelWorkbookCompiler ExcelWorkbookCompilerField;
+        private static ExcelWorkbookCompiler ExcelWorkbookCompilerField;
 
-        public ExcelWorkbookCompiler()
+        /// <summary>
+        /// Create the SqlKata Compiler for an Excel Workbook
+        /// </summary>
+        public ExcelWorkbookCompiler() : base()
         {
             this.userOperators.Add("alike");
             this.userOperators.Add("not alike");
@@ -65,7 +69,7 @@ namespace SqlKata.Compilers
         /// <inheritdoc/>
         public override string WrapValue(string value) => base.WrapValue(value);
 
-        public string SanitizeConditionValue(object conditionValue) => "'" + conditionValue.ToString() + "'";
+        private string SanitizeConditionValue(object conditionValue) => "'" + conditionValue.ToString() + "'";
 
         /// <inheritdoc/>
         protected override string CompileBasicCondition(SqlResult ctx, BasicCondition x)
@@ -73,12 +77,6 @@ namespace SqlKata.Compilers
             x.Value = SanitizeConditionValue(x.Value);
             return base.CompileBasicCondition(ctx, x);
         }
-
-        /// <inheritdoc/>
-        //public override string CompileTrue() => SanitizeConditionValue(base.CompileTrue());
-
-        /// <inheritdoc/>
-        //public override string CompileFalse() => SanitizeConditionValue(base.CompileFalse());
 
         /// <inheritdoc/>
         protected override string CompileBasicStringCondition(SqlResult ctx, BasicStringCondition x)
@@ -94,12 +92,21 @@ namespace SqlKata.Compilers
             return base.CompileBasicStringCondition(ctx, x);
         }
 
+        /// <summary>
+        /// This operation is not supported by Microsoft Excel, the "TOP" keyword must be used instead.<br/>
+        /// This translation is already handled by this compiler.
+        /// </summary>
+        /// <returns><see langword="null"/></returns>
         public override string CompileLimit(SqlResult ctx)
         {
             // ACCESS does not support the 'Limit X' command, use 'TOP' instead -> See the ColumnCompiler override
             return null;
         }
 
+        /// <summary>
+        /// Compiles the columns and adds in the 'TOP' command if 'Limit' was specified
+        /// </summary>
+        /// <inheritdoc/>
         protected override string CompileColumns(SqlResult ctx)
         {
             // Add in the 'TOP' command, similar to legacy mode sql server: https://github.com/sqlkata/querybuilder/blob/044c7ae48591ed956ab0ffb33c556b9e59ea9d6d/QueryBuilder/Compilers/SqlServerCompiler.cs#L73
@@ -131,9 +138,9 @@ namespace SqlKata.Compilers
             return compiled;
         }
 
-        public override SqlResult GetNewSqlResult()
-        {
-            return new MSAccessCompiler.MsAccessSqlResult();
-        }
+        //public override SqlResult GetNewSqlResult()
+        //{
+        //    return new MSAccessCompiler.MsAccessSqlResult();
+        //}
     }
 }

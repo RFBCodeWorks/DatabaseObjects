@@ -23,7 +23,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         public MSAccessDataBase(string path, string password) : base(GenerateACEConnectionString(path, password)) { }
 
         /// <inheritdoc/>
-        public override Compiler Compiler => SqlKata.Compilers.MSAccessCompiler.AccessCompiler;
+        public override Compiler Compiler => RFBCodeWorks.SqlKataCompilers.MSAccessCompiler.AccessCompiler;
 
         /// <inheritdoc/>
         public override OleDbConnection GetDatabaseConnection()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,10 +18,10 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
 
             public SimpleKeyWorkSheet(ExcelWorkBook workbook, string sheetName, string primaryKey, bool hasHeaders = true) : base(workbook, sheetName, hasHeaders)
             {
-                PrimaryKey = primaryKey.IsNotEmpty() ? primaryKey : throw new ArgumentException("Invalid Primary Key");
+                PrimaryKey = !string.IsNullOrWhiteSpace(primaryKey) ? primaryKey : throw new ArgumentException("Invalid Primary Key");
             }
 
-            public string PrimaryKey { get; init; }
+            public string PrimaryKey { get; set; }
 
             public object GetValue(object PrimaryKeyValue, string ReturnColName) => Parent.GetValue(TableName, PrimaryKey, PrimaryKeyValue, ReturnColName);
 
@@ -45,7 +46,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
                 throw new InvalidOperationException("Unable to convert ");
             }
 
-            public string GetValueAsString(object PrimaryKeyValue, string ReturnColName) => GetValue(PrimaryKeyValue, ReturnColName).ConvertToString();
+            public string GetValueAsString(object PrimaryKeyValue, string ReturnColName) => GetValue(PrimaryKeyValue, ReturnColName).SanitizeToString();
 
             public int? GetValueAsInt(object PrimaryKeyValue, string ReturnColName) => GetValue(PrimaryKeyValue, ReturnColName).SanitizeToInt();
 
@@ -75,9 +76,9 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
                     while (Rdr.Read())
                     {
                         string val;
-                        if (Rdr.GetValue(0).ConvertToString().IsNullOrEmpty()) continue;
-                        int key = ObjectExtensions.ConvertToInt(Rdr.GetValue(0));
-                        if (Rdr.IsDBNull(1)) { val = string.Empty; } else { val = Rdr.GetValue(1).ConvertToString(); }
+                        if (string.IsNullOrWhiteSpace(Rdr.GetValue(0).SanitizeToString())) continue;
+                        int key = Rdr.GetValue(0).SanitizeToInt() ?? throw new InvalidOperationException("Null value was found in the DataTable when expected an integer");
+                        if (Rdr.IsDBNull(1)) { val = string.Empty; } else { val = Rdr.GetValue(1).SanitizeToString(); }
                         Dict.Add(key, val);
                     }
                 }
@@ -102,9 +103,9 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
                     while (Rdr.Read())
                     {
                         string val;
-                        string key = ObjectExtensions.ConvertToString(Rdr.GetValue(0));
-                        if (Rdr.IsDBNull(1)) { val = string.Empty; } else { val = Rdr.GetValue(1).ConvertToString(); }
-                        if (key.IsNotEmpty()) Dict.Add(key, val);
+                        string key = Extensions.SanitizeToString(Rdr.GetValue(0));
+                        if (Rdr.IsDBNull(1)) { val = string.Empty; } else { val = Rdr.GetValue(1).SanitizeToString(); }
+                        if (!string.IsNullOrWhiteSpace(key)) Dict.Add(key, val);
                     }
                 }
                 return Dict;
@@ -113,7 +114,17 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
             /// <inheritdoc/>
             public virtual Dictionary<X, Y> GetDictionary<X, Y>(Func<DataTable, Dictionary<X, Y>> dictionaryBuilder, params string[] valueColumns)
             {
-                return dictionaryBuilder(GetDataTable(new string[] { PrimaryKey }.AddRange(valueColumns)));
+                if (valueColumns is null || valueColumns.Length == 0) 
+                    valueColumns = new string[] { };
+                else
+                {
+                    var list = valueColumns.ToList();
+                    list.Remove(PrimaryKey);
+                    list.Insert(0, PrimaryKey);
+                    valueColumns = list.ToArray();
+                }
+
+                return dictionaryBuilder(GetDataTable(valueColumns));
             }
 
         }

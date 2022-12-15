@@ -26,7 +26,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// <remarks> Updates the ConnectionString automatically when this value is modified.</remarks>
         public string WorkbookPath { 
             get => workbookPath;
-            init
+            protected set
             {
                 workbookPath = value;
                 base.ConnectionString = GetDatabaseConnection().ConnectionString;
@@ -56,7 +56,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         public bool FileExists => File.Exists(WorkbookPath);
 
         /// <inheritdoc/>
-        public override Compiler Compiler => SqlKata.Compilers.ExcelWorkbookCompiler.ExcelCompiler;
+        public override Compiler Compiler => RFBCodeWorks.SqlKataCompilers.ExcelWorkbookCompiler.ExcelCompiler;
 
         /// <inheritdoc/>
         public override OleDbConnection GetDatabaseConnection()

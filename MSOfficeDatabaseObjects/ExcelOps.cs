@@ -1,4 +1,5 @@
 ﻿using RFBCodeWorks.DataBaseObjects.Exceptions;
+using RFBCodeWorks.SystemExtensions;
 using System;
 using System.Collections.Generic;
 using System.Data;

@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>.netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+
+    <Platforms>x86;x64</Platforms>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.0.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.0.0" />
+    <PackageReference Include="coverlet.collector" Version="3.0.2" />
+    <PackageReference Include="SQLite" Version="3.13.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
+    <ProjectReference Include="..\DBO_SqlLite\DBO_SqlLite.csproj" />
+  </ItemGroup>
+
+</Project>

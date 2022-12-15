@@ -101,15 +101,9 @@ namespace RFBCodeWorks.DataBaseObjects
                         foreach (object bind in bindings)
                         {
                             var param = Cmd.CreateParameter();
-                            if (bind is KeyValuePair<string, object> kvp)
-                            {
-                                param.ParameterName = kvp.Key;
-                                param.Value = kvp.Value;
-                            }
-                            else if (bind is )
+                            param.Value = bind;
                             Cmd.Parameters.Add(param);
                         }
-                        Cmd.Parameters. = bindings;
                         using (var DR = Cmd.ExecuteReader())
                         {
                             DataTable DT = new DataTable();

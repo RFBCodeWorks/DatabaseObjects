@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ExtensionMethods\System.Extensions\System.Extensions.csproj" />
     <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
     <ProjectReference Include="..\MSOfficeCompilers\MSOfficeCompilers.csproj" />
   </ItemGroup>

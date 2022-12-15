@@ -3,13 +3,14 @@ using SqlKata.Compilers;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using RFBCodeWorks.SqlKataCompilers;
 
 namespace SqlKata.Compilers.Tests
 {
     [TestClass()]
     public class ExcelWorkbookCompilerTests
     {
-        static ExcelWorkbookCompiler Compiler => SqlKata.Compilers.ExcelWorkbookCompiler.ExcelCompiler;
+        static ExcelWorkbookCompiler Compiler => RFBCodeWorks.SqlKataCompilers.ExcelWorkbookCompiler.ExcelCompiler;
 
         [TestMethod()]
         public void CompileTableExpressionTest()

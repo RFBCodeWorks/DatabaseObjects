@@ -20,7 +20,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
                 HasHeaders = hasHeaders;
             }
 
-            public bool HasHeaders { get; init; }
+            public bool HasHeaders { get; set; }
 
             public ExcelWorkBook ParentWorkBook => (ExcelWorkBook)base.Parent;
 

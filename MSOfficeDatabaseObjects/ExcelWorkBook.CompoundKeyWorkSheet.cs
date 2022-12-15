@@ -21,7 +21,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
                 if (compoundKeyColumns.Length == 0) throw new ArgumentException("No column names have been specified!", nameof(compoundKeyColumns));
                 foreach (string s in compoundKeyColumns)
                 {
-                    if (s.IsNullOrEmpty())
+                    if (string.IsNullOrWhiteSpace(s))
                         throw new ArgumentException("atleast one of the column names in the compoundKeyColumns parameter was null or empty!");
                 }
                 CompoundKeyColumns = compoundKeyColumns;

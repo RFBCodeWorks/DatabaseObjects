@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace RFBCodeWorks.DataBaseObjects.Helpers
+namespace RFBCodeWorks.DataBaseObjects
 {
     
     /// <summary>
-    /// Class used to help consumers build select statements
+    /// Helper Class used to help consumers build select statements
     /// </summary>
     public class SelectStatementBuilder
     {

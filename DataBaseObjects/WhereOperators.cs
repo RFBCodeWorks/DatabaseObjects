@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace RFBCodeWorks.DataBaseObjects.Helpers
+namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
     /// abstract Class that frames the required functionality for SQL Operator class enum types
@@ -90,6 +90,11 @@ namespace RFBCodeWorks.DataBaseObjects.Helpers
         /// "= <see langword="false"/>"
         /// </summary>
         public static BoolOperators IsFalse { get; } = new BoolOperators("= false", 1);
+
+        /// <summary>
+        /// The boolean value of this <see cref="BoolOperators"/>
+        /// </summary>
+        public bool Value => this.EnumValue == 1;
 
         /// <param name="value">this is ignored since the operator is based on the selected <see cref="BoolOperators"/></param>
         /// <inheritdoc/>
