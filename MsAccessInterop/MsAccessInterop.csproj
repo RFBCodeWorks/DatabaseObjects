@@ -4,4 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Office.Interop.Access.Dao" Version="15.0.4420.1018" />
+  </ItemGroup>
+
 </Project>

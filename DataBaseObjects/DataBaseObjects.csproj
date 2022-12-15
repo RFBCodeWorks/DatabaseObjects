@@ -34,7 +34,7 @@ The 'DataBaseTable.GetDataTable(params string[] columns)' will use the method de
     <PackageReference Include="SqlKata" Version="2.4.0" />
   </ItemGroup>
 <!--
-  <ItemGroup>
+  <ItemGroup>ddd
     <ProjectReference Include="..\SqlKata\QueryBuilder\QueryBuilder.csproj" />
   </ItemGroup>
 -->
