@@ -21,6 +21,8 @@
   <ItemGroup>
     <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
     <ProjectReference Include="..\DBO_SqlLite\DBO_SqlLite.csproj" />
+    <ProjectReference Include="..\MSOfficeCompilers\MSOfficeCompilers.csproj" />
+    <ProjectReference Include="..\MSOfficeDatabaseObjects\MSOfficeDatabaseObjects.csproj" />
   </ItemGroup>
 
 </Project>

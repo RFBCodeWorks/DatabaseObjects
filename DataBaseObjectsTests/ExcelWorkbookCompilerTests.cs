@@ -26,5 +26,20 @@ namespace SqlKata.Compilers.Tests
             Assert.AreEqual(exp, Compiler.Compile(new Query("[SheetName$]")).ToString());
             Assert.AreEqual(exp, Compiler.Compile(new Query("[SheetName]")).ToString());
         }
+
+        [TestMethod()]
+        public void CompileWhereStatementTest()
+        {
+            string exp = "SELECT * FROM [SheetName$]";
+            Query qry = new Query("SheetName").Select();
+            Assert.AreEqual(exp, Compiler.Compile(qry).ToString());
+
+            qry = new Query("SheetName$").Select();
+            Assert.AreEqual(exp, Compiler.Compile(qry).ToString());
+
+            exp = "SELECT * FROM [[SheetName$]]]";
+            Assert.AreEqual(exp, Compiler.Compile(new Query("[SheetName$]")).ToString());
+            Assert.AreEqual(exp, Compiler.Compile(new Query("[SheetName]")).ToString());
+        }
     }
 }
