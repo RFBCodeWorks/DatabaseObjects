@@ -5,6 +5,28 @@
     <LangVersion>9.0</LangVersion>
     <!-- This cannot as AnyCPU due to requiring the OLEDB driver, Must select either x86 or x64 -->
     <Platforms>x86;x64</Platforms>
+
+      <!-- Nuget Stuff -->
+      <PackageId>RFBCodeWorks.DatabaseObjects.MSOffice</PackageId>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <Authors>Robert Brenckman</Authors>
+      <Company />
+      <Product>RFBCodeWorks.DatabaseObjects.MSOffice</Product>
+      <Description>
+          Extends RFBCodeWorks.DatabaseObjects to provides objects that represent an MSAccess database, as well as an MS EXcel workbook.
+          
+          Using SQL to query an excel workbook also requires some special syntax, so the ExcelWorkSheet object is also provided to ease that translation.
+          The OLEDBConnection string will also be generated depending on the file extension (.xls vs .xslx/.xlsm), since each file format requires a different connection adapater.
+          
+          The AccessDatabase object is a concrete class to use the MSAccess Compiler provided by RFBCodeWorks.SqlKata.MSOfficeCompilers (required nuget pkg)
+          
+          Note: Due to requiring the OLEDB driver, this package is compiled for x86/x64 only.
+      </Description>
+      <PackageLicenseExpression></PackageLicenseExpression>
+      <PackageLicenseFile>LICENSE</PackageLicenseFile>
+      <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+      <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+      <PackageTags>SqlKata, DataBase</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
