@@ -136,6 +136,14 @@ namespace RFBCodeWorks.DataBaseObjects
         }
 
         /// <inheritdoc/>
+        public virtual Task<int> RunAction(IDbCommand query)
+        {
+            var db = this.GetDatabaseConnection();
+            query.Connection = db;
+            return Task.Run(() => query.ExecuteNonQuery());
+        }
+
+        /// <inheritdoc/>
         public virtual Task<int> RunAction(Query query)
         {
             return DBOps.RunAction(this, query);

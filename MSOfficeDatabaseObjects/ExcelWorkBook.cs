@@ -114,6 +114,31 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
             return new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + workbookPath + ";Extended Properties=\"Excel 8.0" + HDR + ";IMEX=0\"");
         }
 
+        /// <summary>
+        /// Provide a Connection String for a MS Access DB linked table from an excel file 
+        /// </summary>
+        /// <param name="FilePath"></param>
+        /// <param name="Headers"></param>
+        /// <returns></returns>
+        private static string ConnStr_excel(string FilePath, bool Headers = true)
+        {
+            string Conn = "";
+            string Hdr = (Headers) ? "YES" : "NO";
+            switch (true)
+            {
+                case true when Path.GetExtension(FilePath) == ".xlsm":
+                    Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={FilePath};Excel 12.0 Macro;HDR={Hdr};IMEX=1;";
+                    break;
+                case true when Path.GetExtension(FilePath) == ".xlsx":
+                    Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={FilePath};Excel 12.0 Xml;HDR={Hdr};IMEX=1;";
+                    break;
+                case true when Path.GetExtension(FilePath) == ".xls":
+                    Conn = $"Provider=Microsoft.Jet.OLEDB.4.0;Data Source={FilePath};Excel 8.0;HDR={Hdr};IMEX=1;";
+                    break;
+            }
+            return Conn;
+        }
+
     }
     
 }
