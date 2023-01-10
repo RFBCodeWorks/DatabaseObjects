@@ -1,52 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Platforms>AnyCPU</Platforms>
-    <DocumentationFile>bin\(Configuration)\$(Framework)\DataBaseObjects.xml</DocumentationFile>
-    
-    <!-- Nuget Stuff -->
-    <PackageId>RFBCodeWorks.DatabaseObjects</PackageId>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Robert Brenckman</Authors>
-    <Company />
-    <Product>RFBCodeWorks.DataBaseObjects</Product>
-    <Description>A library that is meant to extend the SqlKata Query Builder with objects that represent DataBase and DataBase Tables. This allows a 'Database' object with its own tables to be constructed, then queried more easily via methods that help build (or run) the query.
+    <!-- License File housed in top-level of repo -->
 
-This differs from Dapper and SqlKata.Execution (which uses Dapper) in that it models the concept of the database, but it also returns raw values and DataTables. SqlKata is just being used behind the scenes to generate the SQL commands. 
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <Platforms>AnyCPU</Platforms>
+        <AssemblyName>RFBCodeWorks.DataBaseObjects</AssemblyName>
 
-Example:
-The 'DataBaseTable.Select(params string[] columns)' method will return a query that requests the specified columns from the DataBaseTable object. The TableName is descibed as a property of the DataBaseTable object.
+        <!-- Nuget Stuff -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>$(AssemblyName)</PackageId>
+        <Product>$(AssemblyName)</Product>
+        <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageLicenseExpression></PackageLicenseExpression>
+        <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
+        <Authors>Robert Brenckman</Authors>
+        <Company />
+        <Copyright>Copyright 2023</Copyright>
+        <Version>1.0.0.0</Version>
+        <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
 
-The 'DataBaseTable.GetDataTable(params string[] columns)' will use the method described above to create the query, then will run the query against the parent DataBase object, and finally return a System.Data.DataTable.</Description>
-    <PackageLicenseExpression></PackageLicenseExpression>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
-    <PackageTags>SqlKata, DataBase</PackageTags>
-  </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Framework)'=='Debug'">
-    
-  </PropertyGroup>
+        <Description>
+            A library that is meant to extend the SqlKata Query Builder with objects that represent DataBase and DataBase Tables. This allows a 'Database' object with its own tables to be constructed, then queried more easily via methods that help build (or run) the query.
 
-  <ItemGroup>
-    <PackageReference Include="SqlKata" Version="2.4.0" />
-  </ItemGroup>
-<!--
-  <ItemGroup>ddd
-    <ProjectReference Include="..\SqlKata\QueryBuilder\QueryBuilder.csproj" />
-  </ItemGroup>
--->
+            This differs from Dapper and SqlKata.Execution (which uses Dapper) in that it models the concept of the database, but it also returns raw values and DataTables. SqlKata is just being used behind the scenes to generate the SQL commands.
+
+            Example:
+            The 'DataBaseTable.Select(params string[] columns)' method will return a query that requests the specified columns from the DataBaseTable object. The TableName is descibed as a property of the DataBaseTable object.
+
+            The 'DataBaseTable.GetDataTable(params string[] columns)' will use the method described above to create the query, then will run the query against the parent DataBase object, and finally return a System.Data.DataTable.
+        </Description>
+        <PackageTags>SqlKata, DataBase</PackageTags>
+    </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\LICENSE">
-            <Pack>True</Pack>
-            <PackagePath></PackagePath>
-        </None>
+        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\ExtensionMethods\System.Extensions\System.Extensions.csproj" />
+        <ProjectReference Include="..\SqlKata.Extensions\SqlKata.Extensions.csproj" />
     </ItemGroup>
 </Project>

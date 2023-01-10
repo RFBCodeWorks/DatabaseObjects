@@ -3,7 +3,10 @@ using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SqlKata;
-using RFBCodeWorks.SystemExtensions;
+using SqlKata.Compilers;
+using System.Data.Common;
+using System.Threading;
+using System.Linq;
 
 namespace RFBCodeWorks.DataBaseObjects
 {
@@ -14,7 +17,52 @@ namespace RFBCodeWorks.DataBaseObjects
     {
         #region < Helper Methods  >
 
-                /// <summary>
+        /// <summary>
+        /// Generate a new <see cref="KeyValuePair{TKey, TValue}"/> array that consists of a single pair
+        /// </summary>
+        public static KeyValuePair<T, O>[] CreateKeyValuePair<T, O>(T key, O value)
+        {
+            return new KeyValuePair<T, O>[] { new KeyValuePair<T, O>(key, value) };
+        }
+
+        /// <summary>
+        /// Generate a new KeyValuePair array contains all the keys and values.
+        /// <br/>The number of <paramref name="keys"/> and <paramref name="values"/> are expected to match.
+        /// <br/>The first parameter will be the <paramref name="keys"/>. When used as an extension method, this will be the calling collection.
+        /// </summary>
+        /// <exception cref="ArgumentException"/>
+        /// <param name="keys">The keys that will be used when generating the new collection</param>
+        /// <param name="values">The values that will be used</param>
+        /// <param name="token">Optional token that can be used if this method is called within a Task. Not required.</param>
+        public static KeyValuePair<T, O>[] CreateKeyValuePairs<T, O>(this IEnumerable<T> keys, IEnumerable<O> values, CancellationToken token = default)
+        {
+            token.ThrowIfCancellationRequested();
+            var keyList = keys.ToArray();
+            var valueList = values.ToArray();
+            if (keyList.Length != valueList.Length) throw new ArgumentException("Cannot convert to KeyValuePair array - Number of keys does not match number of values");
+            
+            int count = keyList.Length;
+            Dictionary<T, O> dic = new Dictionary<T, O>();
+            if (token.CanBeCanceled)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    token.ThrowIfCancellationRequested();
+                    dic.Add(keyList[i], valueList[i]);
+                }
+                return dic.ToArray();
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    dic.Add(keyList[i], valueList[i]);
+                }
+                return dic.ToArray();
+            }
+        }
+
+        /// <summary>
         /// Check the <see cref="IDbConnection.State"/> and report if the connection is closed
         /// </summary>
         /// <param name="connection"></param>
@@ -22,55 +70,152 @@ namespace RFBCodeWorks.DataBaseObjects
         public static bool IsClosed(this IDbConnection connection) => connection.State == ConnectionState.Closed;
 
         /// <summary>
-        /// Checks the <see cref="IDbConnection.State"/> for <see cref="ConnectionState.Closed"/>, and if true opens the connection
+        /// Evaluates the <see cref="IDbConnection.State"/> and determines what to do when requesting to open the connection.
         /// </summary>
-        /// <param name="connection"></param>
-        public static void OpenIfClosed(this IDbConnection connection) { if (connection.IsClosed()) connection.Open(); }
+        /// <remarks>
+        /// <see cref="ConnectionState.Connecting"/> is unexpected, and will return <see langword="false"/>.
+        /// </remarks>
+        /// <param name="connection">The connection to open</param>
+        /// <returns>
+        /// When this methods returns successfully, the database should be open for communication. Return values are for if this method opened the connection.
+        /// <br/>- If this method opened the connection: return <see langword="true"/>
+        /// <br/>- If the connection was already open: return <see langword="false"/>
+        /// </returns>
+        public static bool OpenSafely(this IDbConnection connection) 
+        {
+            switch (true)
+            {
+                //Broken - Must Re-Open
+                case true when connection.State.HasFlag(ConnectionState.Broken):
+                    if (connection.State != ConnectionState.Closed) connection.Close();
+                    connection.Open();
+                    return true;
+                
+                //Already Open Cases
+                case true when connection.State.HasFlag(ConnectionState.Open):
+                case true when connection.State.HasFlag(ConnectionState.Executing):
+                case true when connection.State.HasFlag(ConnectionState.Fetching):
+                    return false;
 
-        /// <summary>
-        /// Closes the connection, then opens it back up.
-        /// </summary>
-        /// <param name="connection"></param>
-        public static void CloseAndReOpen(this IDbConnection connection) { 
-            if (!connection.IsClosed()) connection.Close();
-            connection.OpenIfClosed();
+                case true when connection.State.HasFlag(ConnectionState.Connecting):
+                    return false;
+
+                // This is the expected default case - Open the connection and return
+                default:
+                case true when connection.State.HasFlag(ConnectionState.Closed):
+                    connection.Open();
+                    return true;
+            }
+        }
+
+        /// <inheritdoc cref="OpenSafely(IDbConnection)"/>
+        /// <inheritdoc cref="DbConnection.OpenAsync(CancellationToken)"/>
+        public static async Task<bool> OpenSafelyAsync(this DbConnection connection, CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken.IsCancellationRequested)
+                cancellationToken.ThrowIfCancellationRequested();
+            switch (true)
+            {
+                //Broken - Must Re-Open
+                case true when connection.State.HasFlag(ConnectionState.Broken):
+                    if (connection.State != ConnectionState.Closed) connection.Close();
+                    await connection.OpenAsync(cancellationToken);
+                    return true;
+
+                //Already Open Cases
+                case true when connection.State.HasFlag(ConnectionState.Open):
+                case true when connection.State.HasFlag(ConnectionState.Executing):
+                case true when connection.State.HasFlag(ConnectionState.Fetching):
+                    return false;
+
+                //Wait until open - this case is unexpected
+                case true when connection.State.HasFlag(ConnectionState.Connecting):
+                    while (connection.State.HasFlag(ConnectionState.Connecting))
+                    {
+                        await Task.Delay(10, cancellationToken);
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                    if (connection.State == ConnectionState.Broken)
+                        return await OpenSafelyAsync(connection, cancellationToken);  // This allows reopening a broken connection
+                    else
+                        return false;
+
+                // This is the expected default case - Open the connection and return
+                default:
+                case true when connection.State.HasFlag(ConnectionState.Closed):
+                    await connection.OpenAsync(cancellationToken);
+                    return true;
+            }
         }
 
         #endregion
 
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         #region < TestConnection >
 
         /// <summary>
-        /// Test an <see cref="IDbConnection"/> connection by opening then closing the connection
+        /// Test an <see cref="IDbConnection"/> connection by briefly opening then closing the connection
         /// </summary>
-        /// <param name="Conn"></param>
+        /// <param name="connection">The connection to test. Will be disposed of at the end of the test.</param>
+        /// <param name="e">If the connection failed and exception was thrown, it will be returned here. If successful, this value will be null.</param>
         /// <returns>TRUE if connection was successfully opened then closed, otherwise false.</returns>
-        public static bool TestConnection(this IDbConnection Conn)
+        public static bool TestConnection(this IDbConnection connection, out Exception e)
         {
             bool result = false;
+            e = null;
             try
             {
-                using (Conn)
+                using (connection)
                 {
-                    Conn.Open();
-                    if (Conn.State == System.Data.ConnectionState.Open) result = true;
-                    Conn.Close();
+                    connection.OpenSafely();
+                    if (connection.State.HasFlag(System.Data.ConnectionState.Open)) result = true;
+                    connection.Close();
                 }
             }
-            catch
+            catch(Exception err)
             {
-
+                e = err;
+                result = false;
             }
             return result;
         }
 
+        /// <inheritdoc cref="TestConnection(IDbConnection, out Exception)"/>
+        public static bool TestConnection(this IDbConnection connection) => TestConnection(connection, out _);
+
+        /// <param name="cancellationToken">Token to monitor while waiting for the connection. If not specified, uses <see cref="CancellationToken.None"/></param>
+        /// <returns>
+        /// If the test was successfull, return (<see langword="true"/>, <see langword="null"/>)
+        /// <br/>If the test errored out, return (<see langword="false"/>, [The Exception that was thrown] )
+        /// <br/>If the test cancelled, throw <see cref="OperationCanceledException"/>
+        /// </returns>
         /// <inheritdoc cref="TestConnection(IDbConnection)"/>
-        public static Task<bool> TestConnectionAsync(this IDbConnection Conn)
+        /// <param name="connection"/>
+        /// <exception cref="OperationCanceledException"/>
+        public static async Task<(bool ConnectionSuccess, Exception ConnectionError)> TestConnectionAsync(this DbConnection connection, CancellationToken cancellationToken= default)
         {
-            Func<bool> func = new Func<bool>(() => TestConnection(Conn));
-            return Task<bool>.Run<bool>(func);
+            bool result = false;
+            Exception error = null;
+            try
+            {
+                using (connection)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    await connection.OpenSafelyAsync(cancellationToken);
+                    if (connection.State.HasFlag(System.Data.ConnectionState.Open)) result = true;
+                    connection.Close();
+                }
+            }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception err)
+            {
+                error = err;
+                result = false;
+            }
+            return (result, error);
         }
 
         #endregion
@@ -82,61 +227,86 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <summary>
         /// Fill up a datatable with the results of a database Call
         /// </summary>
-        /// <param name="Conn">DataBase Connection String</param>
-        /// <param name="Query">Pre-Built SQL Query to run against the database</param>
-        /// <param name="bindings"><inheritdoc cref="SqlKata.SqlResult.Bindings"/></param>
-        /// <param name="disposeConnection">If TRUE, wraps the connection in a 'using' statement to automatically dispose of it after completing the command</param>
+        /// <param name="connection">DataBase Connection object</param>
+        /// <param name="command">The command that will return the <see cref="DataTable"/></param>
         /// <returns></returns>
-        public static DataTable GetDataTable(IDbConnection Conn, string Query, bool disposeConnection = true, params object[] bindings)
+        public static DataTable GetDataTable(DbConnection connection, DbCommand command)
         {
-            try
+            using (command)
             {
-                Func<DataTable> getDT = () =>
+                var shouldClose = connection.OpenSafely();
+                try
                 {
-                    Conn.OpenIfClosed();
-                    using (var Cmd = Conn.CreateCommand())
+                    using (var dr = command.ExecuteReader())
                     {
-                        Cmd.CommandText = Query;
-                        Cmd.CommandType = CommandType.Text;
-                        foreach (object bind in bindings)
-                        {
-                            var param = Cmd.CreateParameter();
-                            param.Value = bind;
-                            Cmd.Parameters.Add(param);
-                        }
-                        using (var DR = Cmd.ExecuteReader())
-                        {
-                            DataTable DT = new DataTable();
-                            DT.Load(DR);
-                            return DT;
-                        }
+                        DataTable DT = new DataTable();
+                        DT.Load(dr);
+                        return DT;
                     }
-                };
-
-                if (disposeConnection)
-                    using (Conn)
-                        return getDT();
-                else
-                    return getDT();
-            }
-            catch (Exception E)
-            {
-                //E.AddVariableData(nameof(Conn), Conn.ConnectionString);
-                E.AddVariableData(nameof(Query), Query);
-                throw E;
+                }
+                catch (Exception e)
+                {
+                    e.AddVariableData("Query Text: ", command.CommandText);
+                    foreach (IDbDataParameter p in command.Parameters)
+                        e.AddVariableData($"Parameter ' {p.ParameterName} ': ", p.Value?.ToString() ?? "NULL VALUE");
+                    throw;
+                }
+                finally
+                {
+                    if (shouldClose && connection.State != ConnectionState.Closed) connection.Close();
+                }
             }
         }
 
-        /// <summary>
-        /// Get the DataTable from the <paramref name="database"/> by running the <paramref name="query"/>
-        /// </summary>
-        /// <param name="database">The database to interact with</param>
-        /// <param name="query">The query to execute</param>
-        /// <returns>A new <see cref="DataTable"/></returns>
-        public static DataTable GetDataTable(IDatabase database, SqlKata.Query query)
+        /// <inheritdoc cref="GetDataTable(DbConnection, DbCommand)"/>
+        /// <inheritdoc cref="DBCommands.CreateCommand(DbConnection, string, KeyValuePair{string, object}[])"/>
+        public static DataTable GetDataTable(DbConnection connection, string query, params KeyValuePair<string, object>[] parameters)
         {
-            var result = database.Compiler.Compile(query);
-            return GetDataTable(database.GetDatabaseConnection(), result.Sql, true, result.Bindings);
+            return GetDataTable(connection, connection.CreateCommand(query, parameters));
+        }
+
+        /// <summary>
+        /// Fill up a datatable with the results of a database Call
+        /// </summary>
+        /// <param name="connection">DataBase Connection object</param>
+        /// <param name="command">The command that will return the <see cref="DataTable"/></param>
+        /// <param name="cancellationToken">The cancellationToken to use. If not specified, uses <see cref="CancellationToken.None"/></param>
+        /// <returns></returns>
+        /// <inheritdoc cref="GetDataTable(DbConnection, DbCommand)"/>
+        public static async Task<DataTable> GetDataTableAsync(DbConnection connection, DbCommand command, CancellationToken cancellationToken = default)
+        {
+            using (command)
+            {
+                var shouldClose = connection.OpenSafely();
+                try
+                {
+                    using (var dr = await command.ExecuteReaderAsync(cancellationToken))
+                    {
+                        DataTable DT = new DataTable();
+                        DT.Load(dr);
+                        return DT;
+                    }
+                }
+                catch (OperationCanceledException) { throw; } //No logging required
+                catch (Exception e)
+                {
+                    e.AddVariableData("Query Text: ", command.CommandText);
+                    foreach (IDbDataParameter p in command.Parameters)
+                        e.AddVariableData($"Parameter ' {p.ParameterName} ': ", p.Value?.ToString() ?? "NULL VALUE");
+                    throw;
+                }
+                finally
+                {
+                    if (shouldClose && connection.State != ConnectionState.Closed) connection.Close();
+                }
+            }
+        }
+
+        /// <inheritdoc cref="GetDataTableAsync(DbConnection, DbCommand,CancellationToken)"/>
+        /// <inheritdoc cref="DBCommands.CreateCommand(DbConnection, string, KeyValuePair{string, object}[])"/>
+        public static Task<DataTable> GetDataTableAsync(DbConnection connection, string query, CancellationToken cancellationToken = default, params KeyValuePair<string, object>[] parameters)
+        {
+            return GetDataTableAsync(connection, connection.CreateCommand(query, parameters), cancellationToken);
         }
 
         #endregion
@@ -145,66 +315,100 @@ namespace RFBCodeWorks.DataBaseObjects
 
         #region < RunAction >
 
+        /// <summary>
+        /// Assign the <see cref="IDbCommand.Connection"/> to the <paramref name="connection"/>, then execute the command.
+        /// </summary>
+        /// <param name="connection">
+        /// The database connection
+        /// <br/> - This will open the <paramref name="connection"/> if it is closed, but will not close the connection. As such, the caller should be wrapping the <paramref name="connection"/> inside a <see langword="using"/> statment.
+        /// </param>
+        /// <param name="command">
+        /// The <see cref="IDbCommand"/> to execute. 
+        /// <br/> - The <paramref name="command"/> will be disposed of after it has run (this is wrapped inside a using statement).
+        /// </param>
         /// <inheritdoc cref="IDbCommand.ExecuteNonQuery" />
-        /// <param name="query">The query to run</param>
-        /// <param name="Conn">The <see cref="IDbConnection"/> to run the query against</param>
-        public static Task<int> RunAction(IDbConnection Conn, string query)
+        public static int RunAction(DbConnection connection, DbCommand command)
         {
-            return Task.Run(() =>
-           {
-               try
-               {
-                   using (Conn)
-                   {
-                       Conn.OpenIfClosed();
-                       using (var Cmd = Conn.CreateCommand())
-                       {
-                           Cmd.CommandText = query;
-                           return Cmd.ExecuteNonQuery();
-                       }
-                   }
-               }
-               catch (Exception E)
-               {
-                   //E.AddVariableData(nameof(Conn), Conn.ConnectionString);
-                   E.AddVariableData(nameof(query), query);
-                   throw E;
-               }
-           });
-        }
+            if (command is null) throw new ArgumentNullException(nameof(command));
+            command.Connection = connection ?? throw new ArgumentNullException(nameof(connection));
 
-        /// <inheritdoc cref="IDbCommand.ExecuteNonQuery" />
-        /// <param name="query">The query to run</param>
-        /// <param name="database">The <see cref="IDatabase"/> to run the query against</param>
-        public static Task<int> RunAction(IDatabase database, SqlKata.Query query)
-            => RunAction(database.GetDatabaseConnection(), database.Compiler.Compile(query).ToString());
-
-        /// <inheritdoc cref="IDbCommand.ExecuteNonQuery" />
-        public static Task<int> RunAction(IDbConnection Conn, string Query, params object[] parameters)
-        {
-            return Task.Run(() =>
+            var shouldClose = connection.OpenSafely();
+            using (command)
             {
                 try
                 {
-                    using (Conn)
-                    {
-                        Conn.OpenIfClosed();
-                        using (var Cmd = Conn.CreateCommand())
-                        {
-                            Cmd.CommandText = Query;
-                            foreach(object o in parameters)
-                                Cmd.Parameters.Add(o);
-                            return Cmd.ExecuteNonQuery();
-                        }
-                    }
-                }
-                catch (Exception E)
+                    return command.ExecuteNonQuery();
+                } 
+                catch (Exception e)
                 {
-                    //E.AddVariableData(nameof(Conn), Conn.ConnectionString);
-                    E.AddVariableData(nameof(Query), Query);
-                    throw E;
+                    e.AddVariableData("Query Text: ", command.CommandText);
+                    foreach (IDbDataParameter p in command.Parameters)
+                        e.AddVariableData($"Parameter ' {p.ParameterName} ': ", p.Value?.ToString() ?? "NULL VALUE");
+                    throw;
                 }
-            });
+                finally
+                {
+                    if (shouldClose && connection.State != ConnectionState.Closed) connection.Close();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Create a new <see cref="DbCommand"/> from the provided <paramref name="query"/> and <paramref name="parameters"/>, then run it via <see cref="RunAction(DbConnection, DbCommand)"/>
+        /// </summary>
+        /// <param name="query">The query string</param>
+        /// <inheritdoc cref="RunAction(DbConnection, DbCommand)" />
+        /// <inheritdoc cref="DBCommands.CreateCommand(DbConnection, string, KeyValuePair{string, object}[])"/>
+        /// <param name="connection"/><param name="parameters"/>
+        public static int RunAction(DbConnection connection, string query, params KeyValuePair<string, object>[] parameters)
+        {
+            DbCommand cmd = null;
+            try{
+
+                cmd = connection.CreateCommand(query, parameters);
+                return RunAction(connection, cmd);
+            }
+            finally
+            {
+                cmd?.Dispose();
+            }
+        }
+
+        /// <inheritdoc cref="RunAction(DbConnection, DbCommand)"/>
+        /// <param name="command"/>
+        /// <param name="connection"/>
+        /// <param name="cancellationToken">An optional cancellation token. If not provided, uses <see cref="CancellationToken.None"/></param>
+        public static async Task<int> RunActionAsync(DbConnection connection, DbCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command is null) throw new ArgumentNullException(nameof(command));
+            command.Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+
+            await connection.OpenSafelyAsync();
+            using (command)
+            {
+                try
+                {
+                    return await command.ExecuteNonQueryAsync(cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw; // Operation was cancelled, no reason to log variable data
+                }
+                catch (Exception e)
+                {
+                    e.AddVariableData("Query Text: ", command.CommandText);
+                    foreach (IDbDataParameter p in command.Parameters)
+                        e.AddVariableData($"Parameter ' {p.ParameterName} ': ", p.Value?.ToString() ?? "NULL VALUE");
+                    throw;
+                }
+            }
+        }
+
+        /// <inheritdoc cref="RunAction(DbConnection, string, KeyValuePair{string, object}[])"/>
+        /// <inheritdoc cref="RunActionAsync(DbConnection, DbCommand, CancellationToken)"/>
+        public static Task<int> RunActionAsync(DbConnection connection, string query, CancellationToken cancellationToken = default, params KeyValuePair<string, object>[] parameters) 
+        {
+            return RunActionAsync(connection, connection.CreateCommand(query, parameters), cancellationToken);
         }
 
         #endregion
@@ -212,120 +416,142 @@ namespace RFBCodeWorks.DataBaseObjects
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         #region < Get return from DataTables / DB Connections >
-        
+
         /// <summary>
-        /// Compile the <paramref name="query"/> and run it against the <paramref name="DB"/>
+        /// Compile the <paramref name="query"/> and run it against the <paramref name="connection"/>
         /// </summary>
-        /// <param name="DB">database connection</param>
+        /// <param name="connection">database connection</param>
         /// <param name="query">query designed to return a single value from the database</param>
         /// <param name="compiler">compiler used to compile the query into the SQL statement</param>
-        /// <returns></returns>
-        public static object GetValue(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler)
+        /// <returns>
+        /// The first value read from the database. This was written when the goal of the query returning a single cell. 
+        /// <br/>Note: <see cref="DBNull"/> will be sanitized to <see langword="null"/>
+        /// </returns>
+        public static object GetValue(DbConnection connection, Query query, Compiler compiler)
         {
-            using (DB)
+            using (var cmd = connection.CreateCommand(query, compiler))
             {
-                if (DB.State == ConnectionState.Closed) DB.Open();
-                var C = DB.CreateCommand();
-                C.CommandText = compiler.Compile(query).ToString();
-                using (var R = C.ExecuteReader())
+                var shouldClose = connection.OpenSafely();
+                try
                 {
-                    while (R.Read())
-                    {
-                        if (R.IsDBNull(0)) return null;
-                        return R.GetValue(0);
-                    }
+                    return cmd.ExecuteScalar();
+                }
+                finally
+                {
+                    if (shouldClose && connection.State != ConnectionState.Closed) connection.Close();
                 }
             }
-            return null;
         }
 
-        /// <returns> The result of the query as an <see cref="bool"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
-        /// <inheritdoc cref="GetValue(IDbConnection, Query, SqlKata.Compilers.Compiler)"/>
-        [System.Diagnostics.DebuggerHidden]
-        public static bool? GetValueAsBool(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.SanitizeToBool(DBOps.GetValue(DB, query, compiler));
-
-
-        /// <returns> The result of the query as a <see cref="string"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
-        /// <inheritdoc cref="GetValue(IDbConnection, Query, SqlKata.Compilers.Compiler)"/>
-        [System.Diagnostics.DebuggerHidden]
-        public static string GetValueAsString(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.SanitizeToString(DBOps.GetValue(DB, query, compiler));
-
-        /// <returns> The result of the query as an <see cref="int"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
-        /// <inheritdoc cref="GetValue(IDbConnection, Query, SqlKata.Compilers.Compiler)"/>
-        [System.Diagnostics.DebuggerHidden]
-        public static int? GetValueAsInt(IDbConnection DB, Query query, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.SanitizeToInt(DBOps.GetValue(DB, query, compiler));
-
         /// <summary>Return a single value from a DB Table</summary>
-        /// <param name="DB">Some DB Connection</param>
+        /// <param name="connection">Some DB Connection</param>
         /// <param name="tableName">Table to query</param>
         /// <param name="lookupColName">Column to to find a value in</param>
         /// <param name="lookupVal">Value to find in supplied column</param>
         /// <param name="returnColName">Return the value from this column</param>
         /// <param name="compiler">The SqlKata Compiler to use to compile the query</param>
         /// <returns><see cref="IDataReader"/>.GetValue() object. -- sanitizes <see cref="DBNull"/> to null. </returns>
-        public static object GetValue(IDbConnection DB, string tableName, string lookupColName, object lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler)
+        public static object GetValue(DbConnection connection, string tableName, string lookupColName, object lookupVal, string returnColName, Compiler compiler)
         {
-            SqlKata.Query qry = new SqlKata.Query().Select(returnColName).From(tableName).Where(lookupColName, lookupVal);
-            return GetValue(DB, qry, compiler ?? throw new ArgumentNullException(nameof(compiler)));
+            Query qry = new Query().Select(returnColName).From(tableName).Where(lookupColName, lookupVal);
+            return GetValue(connection, qry, compiler ?? throw new ArgumentNullException(nameof(compiler)));
         }
 
-        /// <returns> The result of the query as an <see cref="bool"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
-        /// <inheritdoc cref="GetValue(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
-        [System.Diagnostics.DebuggerHidden]
-        public static bool? GetValueAsBool(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.SanitizeToBool(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
 
+        /// <summary>
+        /// Compile the <paramref name="query"/> and run it against the <paramref name="connection"/>
+        /// </summary>
+        /// <param name="connection">database connection</param>
+        /// <param name="query">query designed to return a single value from the database</param>
+        /// <param name="compiler">compiler used to compile the query into the SQL statement</param>
+        /// <param name="cancellationToken">The cancellation</param>
+        /// <returns>
+        /// The first value read from the database. This was written when the goal of the query returning a single cell. 
+        /// <br/>Note: <see cref="DBNull"/> will be sanitized to <see langword="null"/>
+        /// </returns>
+        public static async Task<object> GetValueAsync(DbConnection connection, Query query, Compiler compiler, CancellationToken cancellationToken = default)
+        {
+            using (var cmd = connection.CreateCommand(query, compiler))
+            {
+                var shouldClose = await connection.OpenSafelyAsync(cancellationToken);
+                try
+                {
+                    return await cmd.ExecuteScalarAsync(cancellationToken);
+                }
+                finally
+                {
+                    if (shouldClose && connection.State != ConnectionState.Closed) connection.Close();
+                }
+            }
+        }
 
-        /// <returns> The result of the query as an <see cref="string"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
-        /// <inheritdoc cref="GetValue(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
-        [System.Diagnostics.DebuggerHidden]
-        public static string GetValueAsString(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.SanitizeToString(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
-
-        /// <returns> The result of the query as an <see cref="int"/> or <see langword="null"/> if the result return either null or <see cref="DBNull"/></returns>
-        /// <inheritdoc cref="GetValue(IDbConnection, string, string, object, string, SqlKata.Compilers.Compiler)"/>
-        [System.Diagnostics.DebuggerHidden]
-        public static int? GetValueAsInt(IDbConnection DB, string tableName, string lookupColName, string lookupVal, string returnColName, SqlKata.Compilers.Compiler compiler) =>
-            Extensions.SanitizeToInt(DBOps.GetValue(DB, tableName, lookupColName, lookupVal, returnColName, compiler));
-
+        /// <inheritdoc cref="GetValueAsync(DbConnection, Query, Compiler, CancellationToken)"/>
+        /// <inheritdoc cref="GetValue(DbConnection, string, string, object, string, Compiler)"/>
+        public static Task<object> GetValueAsync(DbConnection connection, string tableName, string lookupColName, object lookupVal, string returnColName, Compiler compiler, CancellationToken cancellationToken = default)
+        {
+            Query qry = new Query().Select(returnColName).From(tableName).Where(lookupColName, lookupVal);
+            return GetValueAsync(connection, qry, compiler ?? throw new ArgumentNullException(nameof(compiler)),cancellationToken);
+        }
 
         #endregion < Get return from DataTables / DB Connections >
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        #region < IDbConnection Dictionaries >
+        #region < Upsert >
 
-        /// <summary>Create Dictionary of all rows of all from the query results. 1st column is Key, 2nd column is Value.</summary>
-        [System.Diagnostics.DebuggerHidden]
-        public static void BuildDictionary(out Dictionary<int, string> Dict, IDbConnection Conn, string Query) => DBOps.GetDataTable(Conn, Query).BuildDictionary(out Dict);
+        /// <summary>
+        /// Tests for the <paramref name="table"/>'s <paramref name="primaryKey"/> existing. 
+        /// <br/>If it does not exist, create an insert query and execute it.
+        /// <br/>If the record does exist, perform an update query.
+        /// </summary>
+        /// <remarks>
+        /// This is not an object method or extension simply because Upserting may not always be a good idea, so I left it out of the default object functionality.
+        /// <br/> This method is not written to be the most efficient method, but universal. Better methods for upsertion likely exist depending on the database, such as SqlServer MERGE command.
+        /// </remarks>
+        /// <param name="table">The table to Insert/Update</param>
+        /// <param name="primaryKey">The row ID to search for within the <paramref name="table"/>'s primary key column</param>
+        /// <param name="columnValues">A dictionary of column names/values to update/insert</param>
+        /// <param name="insertPkey">When set true, add the <paramref name="primaryKey"/> value to the table's primary key column. Default is false to account for AutoNumber primary keys.</param>
+        /// <returns>The number of rows affected.</returns>
+        public static int Upsert(PrimaryKeyTable table, object primaryKey, IEnumerable<KeyValuePair<string, object>> columnValues, bool insertPkey = false)
+        {
+            using (DbConnection conn = table.Parent.GetConnection())
+            {
+                // Test is the value exists within the table
+                using (var cmd = conn.CreateCommand(table.Select().Where(table.PrimaryKey, primaryKey), table.Parent.Compiler))
+                {
+                    conn.Open();
+                    object value = cmd.ExecuteScalar();
+                    cmd.Dispose();
 
-        /// <summary>Create Dictionary of all rows of all from the query results. 1st column is Key, 2nd column is Value.</summary>
-        [System.Diagnostics.DebuggerHidden]
-        public static void BuildDictionary(out Dictionary<string, string> Dict, IDbConnection Conn, string Query) => DBOps.GetDataTable(Conn, Query).BuildDictionary(out Dict);
+                    //Decide which query to generate based on the result of the above query (If result is null, or value is null, do an insertion, otherwise update)
+                    Query query = (value is null || value is DBNull)
+                        /* INSERT Query  */ ? new Query(table.TableName, "INSERT").AsInsert(!insertPkey ? columnValues : columnValues.Concat(new KeyValuePair<string, object>[] { new KeyValuePair<string, object>(table.PrimaryKey, primaryKey) }))
+                        /* UPDATE Query  */ : new Query(table.TableName, "UPDATE").AsUpdate(columnValues).Where(table.PrimaryKey, primaryKey);
 
-        ///// <summary>Create Dictionary of all from the excel table. First Col in table is the Key, all other Cols are added to an array. </summary>
-        //public static void BuildDictionary(out Dictionary<string, string[]> Dict, string ExcelWorkBookPath, string TableName) => BuildDictionary(out Dict, ExcelOps.GetDataTable(ExcelWorkBookPath, TableName));
+                    using (var cmd2 = conn.CreateCommand(query, table.Parent.Compiler))
+                        return cmd2.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <inheritdoc cref="Upsert(PrimaryKeyTable, object, IEnumerable{KeyValuePair{string, object}}, bool)"/>
+        /// <param name="updateColumn">The column to update</param>
+        /// <param name="updateValue">The value to set the <paramref name="updateColumn"/> to</param>
+        /// <param name="insertPkey"/><param name="primaryKey"/><param name="table"/>
+        public static int Upsert(PrimaryKeyTable table, object primaryKey, string updateColumn, object updateValue, bool insertPkey = false)
+        => Upsert(table, primaryKey, DBOps.CreateKeyValuePair(updateColumn, updateValue),insertPkey);
+
+
+        /// <inheritdoc cref="Upsert(PrimaryKeyTable, object, IEnumerable{KeyValuePair{string, object}}, bool)"/>
+        /// <param name="columns">The column to update</param>
+        /// <param name="values">The values to set the <paramref name="columns"/> to</param>
+        /// <param name="insertPkey"/><param name="primaryKey"/><param name="table"/>
+        public static int Upsert(PrimaryKeyTable table, object primaryKey, IEnumerable<string> columns    , IEnumerable<object> values, bool insertPkey = false)
+            =>Upsert(table, primaryKey, DBOps.CreateKeyValuePairs(columns, values),insertPkey);
         
-        /// <summary>Create Dictionary of all from the query results. First Col in table is the Key, all other Cols are added to an array. </summary>
-        public static void BuildDictionary(out Dictionary<string, string[]> Dict, IDbConnection Conn, string Query) => DBOps.GetDataTable(Conn, Query).BuildDictionary(out Dict);
 
         #endregion
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        #region < Update DataBase >
-
-        /// <summary>Update the database</summary>
-        /// <param name="Conn"></param>
-        /// <param name="Tbl"></param>
-        private static void UpdateDatabase(IDbConnection Conn, DataTable Tbl) { }
-
-        #endregion
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     }
 
