@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>9.0</LangVersion>
+        <!-- This cannot as AnyCPU due to requiring the OLEDB driver, Must select either x86 or x64 -->
+        <Platforms>x86;x64</Platforms>
+        <AssemblyName>RFBCodeWorks.DataBaseObjects.MsOffice</AssemblyName>
+        <RootNamespace>RFBCodeWorks.DataBaseObjects.DataBaseTypes</RootNamespace>
+        
+        <!-- Nuget Stuff -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>$(AssemblyName)</PackageId>
+        <Product>$(AssemblyName)</Product>
+        <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageLicenseExpression></PackageLicenseExpression>
+        <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
+        <Authors>Robert Brenckman</Authors>
+        <Company />
+        <Copyright>Copyright 2023</Copyright>
+        <Version>1.0.0.0</Version>
+        <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+
+        <Description>
+            Extends RFBCodeWorks.DatabaseObjects to provides objects that represent an MSAccess database, as well as an MS EXcel workbook.
+
+            Using SQL to query an excel workbook also requires some special syntax, so the ExcelWorkSheet object is also provided to ease that translation.
+            The OLEDBConnection string will also be generated depending on the file extension (.xls vs .xslx/.xlsm), since each file format requires a different connection adapater.
+
+            The AccessDatabase object is a concrete class to use the MSAccess Compiler provided by RFBCodeWorks.SqlKata.MSOfficeCompilers (required nuget pkg)
+
+            Note: Due to requiring the OLEDB driver, this package is compiled for x86/x64 only.
+        </Description>
+        <PackageTags>SqlKata, DataBase</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Data.OleDb" Version="4.6.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\ExtensionMethods\System.Extensions\System.Extensions.csproj" />
+        <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
+        <ProjectReference Include="..\SqlKata.MSOfficeCompilers\SqlKata.MSOfficeCompilers.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <!-- License File housed in top-level of repo -->
+        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+    </ItemGroup>
+
+</Project>

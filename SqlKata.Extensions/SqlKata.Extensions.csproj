@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>RFBCodeWorks.SqlKata.Extensions</AssemblyName>
+    <RootNamespace>RFBCodeWorks.SqlKata.Extensions</RootNamespace>
+
+    <!-- Nuget Stuff -->
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Product>$(AssemblyName)</Product>
+    <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
+    <Authors>Robert Brenckman</Authors>
+    <Company />
+      <Copyright>Copyright 2023</Copyright>
+      <Version>1.0.0.0</Version>
+    <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+        
+    <PackageTags>SqlKata, DataBase</PackageTags>
+    <Description>
+          Contains several Extension Methods for the SqlKata library. Including but not limited to:
+          - ToDbCommand() -- Create a System.Data.Common.DbCommand of a specified type from a Query object
+          - AsInsert() -- Extension Overload that accepts a single Column+Value combination
+          - AsUpdate() -- Extension Overload that accepts a single Column+Value combination
+
+          Also contains helper objects that can assist with creating Select statements and WHERE clauses for evaluating single column conditions
+          - The 'SelectStatementBuilder' will compile into a SqlKata Query.
+          - The 'IWhereCondition' interface objects will apply their conditions to that Query.
+      </Description>
+  </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="SqlKata" Version="2.3.2" />
+  </ItemGroup>
+
+</Project>

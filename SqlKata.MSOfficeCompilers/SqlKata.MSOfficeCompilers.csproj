@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <AssemblyName>RFBCodeWorks.SqlKata.MsOfficeCompilers</AssemblyName>
+        <RootNamespace>RFBCodeWorks.SqlKata.MsOfficeCompilers</RootNamespace>
+
+        <!-- Nuget Stuff -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>$(AssemblyName)</PackageId>
+        <Product>$(AssemblyName)</Product>
+        <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageLicenseExpression></PackageLicenseExpression>
+        <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
+        <Authors>Robert Brenckman</Authors>
+        <Company />
+        <Copyright>Copyright 2023</Copyright>
+        <Version>1.0.0.0</Version>
+        <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+        <PackageTags>SqlKata, Access, Excel, Sql</PackageTags>
+        <Description>Providers SqlKata Sql compilers for Microsoft Access and Excel Workbooks</Description>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <!-- License File housed in top-level of repo -->
+        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="MsAccessSqlResult.cs" />
+      <Compile Remove="MsExcelSqlResult.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="MsAccessSqlResult.cs" />
+        <None Include="MsExcelSqlResult.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="SqlKata" Version="2.3.2" />
+    </ItemGroup>
+
+</Project>

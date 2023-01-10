@@ -5,153 +5,265 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using RFBCodeWorks.SqlKata.Extensions;
 
-namespace DataBaseObjects
+namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
     /// Abstract base class for database structures
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public abstract class AbstractDataBase<T> : IDatabase where T : DbConnection
+    /// <typeparam name="TConnectionType">The type of <see cref="DbConnection"/> this database utilizes</typeparam>
+    /// <typeparam name="TCommandType">The type of <see cref="DbCommand"/> that can be used with this <typeparamref name="TConnectionType"/></typeparam>
+    public abstract class AbstractDataBase<TConnectionType, TCommandType> : IDatabase 
+        where TConnectionType : DbConnection 
+        where TCommandType: DbCommand, new()
     {
-        ///// <summary>
-        ///// Object that can be used to ensure thread safety by limiting the number of connections to the database to one
-        ///// </summary>
-        //protected object dbLock = new object();
-
+        /// <summary>
+        /// Create a new abstract database
+        /// </summary>
+        /// <remarks>
+        /// <see cref="ConnectionString"/> must be set by derived class!
+        /// </remarks>
         protected AbstractDataBase() { }
+
+        /// <summary>
+        /// Create a new Database object with the supplied connection string or database name
+        /// </summary>
+        /// <param name="connectionString">The connection string to the database</param>
         protected AbstractDataBase(string connectionString) { ConnectionString = connectionString; }
 
+        /// <summary>
+        /// Specify the compiler to use with this database object
+        /// </summary>
         public abstract Compiler Compiler { get; }
 
-        public virtual string ConnectionString { get; init; }
+        /// <summary>
+        /// The database connection string
+        /// </summary> 
+        public string ConnectionString { get; protected set; }
 
         /// <summary>
         /// Create a new <see cref="DbConnection"/>
         /// </summary>
         /// <returns>new object whose type is derived from <see cref="DbConnection"/></returns>
-        public abstract T GetDatabaseConnection();
+        public abstract TConnectionType GetConnection();
 
-        IDbConnection IDatabase.GetDatabaseConnection() => GetDatabaseConnection();
+        DbConnection IDatabase.GetConnection() => GetConnection();
 
-        /// <summary>
-        /// Attempt to briefly open the connection to the database to check if it is accessible.
-        /// </summary>
-        /// <returns>TRUE if the connection was opened successfully, otherwise false</returns>
-        public virtual bool TestDatabaseConnection(out Exception e)
-        {
-            try
-            {
-                using (var db = GetDatabaseConnection())
-                {
-                    db.Open();
-                    db.Close();
-                }
-                e = null;
-                return true;
-            }catch(Exception ex)
-            {
-                e = ex;
-                return false;
-            }
-        }
+
+        #region < Test Connection >
+
+        /// <inheritdoc cref="DBOps.TestConnection(IDbConnection, out Exception)"/>
+        public bool TestDatabaseConnection(out Exception e) => DBOps.TestConnection(this.GetConnection(), out e);
 
         /// <inheritdoc cref="TestDatabaseConnection(out Exception)"/>
-        public bool TestDatabaseConnection() => TestDatabaseConnection(out _);
+        public bool TestDatabaseConnection() => DBOps.TestConnection(this.GetConnection());
 
-        /// <inheritdoc cref="TestDatabaseConnection(out Exception)"/>
-        public Task<bool> TestDatabaseConnectionAsync() => Task.Run(TestDatabaseConnection);
+        /// <inheritdoc cref="DBOps.TestConnectionAsync(DbConnection, CancellationToken)"/>
+        public Task<(bool, Exception)> TestDatabaseConnectionAsync(CancellationToken cancellationToken = default) => DBOps.TestConnectionAsync(this.GetConnection(), cancellationToken);
+
+        #endregion
+
+
+        #region < Get DataRow >
 
         /// <inheritdoc/>
-        /// <exception cref="Exception"/>
+        /// <exception cref="InvalidExpressionException"/>
         public virtual DataRow GetDataRow(Query query)
         {
-            var DT = GetDataTable(query);
-            if (DT is null) return null;
-            if (DT.Rows.Count > 1) throw new Exception("Multiple Matches Found when expected only a single match!");
-            if (DT.Rows.Count == 1) return DT.Rows[0];
+            var dt = GetDataTable(query);
+            if (dt is null) return null;
+            if (dt.Rows.Count > 1) throw new InvalidExpressionException("Query returned multiple rows when a single row was expected!");
+            if (dt.Rows.Count == 1) return dt.Rows[0];
             return null;
         }
 
         /// <inheritdoc/>
+        public virtual async Task<DataRow> GetDataRowAsync(Query query, CancellationToken cancellationToken = default)
+        {
+            var dt = await GetDataTableAsync(query, cancellationToken);
+            if (dt is null) return null;
+            if (dt.Rows.Count > 1) throw new InvalidExpressionException("Query returned multiple rows when a single row was expected!");
+            if (dt.Rows.Count == 1) return dt.Rows[0];
+            return null;
+        }
+
+        #endregion
+
+
+        #region < Get DataTable >
+
+        /// <inheritdoc/>
         public virtual DataTable GetDataTable(Query query)
         {
-            string queryString = this.Compiler.Compile(query).ToString();
-            return DBOps.GetDataTable(this.GetDatabaseConnection(), queryString);
+            using (var conn = this.GetConnection())
+            {
+                using (var cmd = conn.CreateCommand(query, this.Compiler))
+                    return DBOps.GetDataTable(conn, cmd);
+            }
         }
 
         /// <inheritdoc/>
-        public virtual DataTable GetDataTable(string query)
+        public virtual DataTable GetDataTable(string query, params KeyValuePair<string, object>[] parameters)
         {
-            return DBOps.GetDataTable(this.GetDatabaseConnection(), query);
+            using (var conn = this.GetConnection())
+                return DBOps.GetDataTable(conn, query, parameters);
         }
 
         /// <inheritdoc/>
-        public virtual object GetValue(Query query)
+        public virtual Task<DataTable> GetDataTableAsync(Query query, CancellationToken cancellationToken = default)
         {
-            return DBOps.GetValue(this.GetDatabaseConnection(), query, Compiler);
+            cancellationToken.ThrowIfCancellationRequested();
+            using (var conn = this.GetConnection())
+            {
+                using (var cmd = conn.CreateCommand(query, this.Compiler))
+                    return DBOps.GetDataTableAsync(conn, cmd, cancellationToken);
+            }
         }
 
         /// <inheritdoc/>
-        public virtual object GetValue(string TableName, string LookupColName, object LookupVal, string ReturnColName)
+        public virtual Task<DataTable> GetDataTableAsync(string query, CancellationToken cancellationToken = default, params KeyValuePair<string, object>[] parameters)
         {
-            return GetValue(new Query(TableName).Select(ReturnColName).Where(LookupColName, LookupVal));
+            cancellationToken.ThrowIfCancellationRequested();
+            using (var conn = GetConnection())
+            {
+                using (var cmd = conn.CreateCommand(query, parameters))
+                {
+                    return DBOps.GetDataTableAsync(conn, cmd, cancellationToken);
+                }
+            }
         }
 
         /// <inheritdoc/>
-        public virtual Task<DataTable> GetDataTableAsync(Query query)
-        {
-            return Task.Run(() => GetDataTable(query));
-        }
-
-        /// <inheritdoc/>
-        public virtual Task<DataTable> GetDataTableAsync(string query)
-        {
-            return Task.Run(() => GetDataTable(query));
-        }
-
-        /// <inheritdoc/>
-        public virtual DataTable GetDataTableByName(string tableName)
+        public DataTable GetDataTableByName(string tableName)
         {
             return GetDataTable(new Query(tableName));
         }
 
         /// <inheritdoc/>
-        public Task<DataTable> GetDataTableByNameAsync(string tableName)
+        public Task<DataTable> GetDataTableByNameAsync(string tableName, CancellationToken cancellationToken = default)
         {
-            return Task.Run(() => GetDataTableByNameAsync(tableName));
+            return GetDataTableAsync(new Query(tableName), cancellationToken);
+        }
+
+        #endregion
+
+
+        #region < GetValue >
+
+        /// <inheritdoc/>
+        public virtual object GetValue(Query query)
+        {
+            using (var conn = this.GetConnection())
+                return DBOps.GetValue(conn, query, Compiler);
         }
 
         /// <inheritdoc/>
-        public virtual Task<int> RunAction(Query query)
+        public object GetValue(string tableName, string lookupColName, object lookupVal, string returnColName)
         {
-            return DBOps.RunAction(this, query);
+            return GetValue(new Query(tableName).Select(returnColName).Where(lookupColName, lookupVal));
         }
 
         /// <inheritdoc/>
-        public virtual Task<int> RunAction(string query)
+        public virtual Task<object> GetValueAsync(Query query, CancellationToken cancellationToken = default)
         {
-            return DBOps.RunAction(this.GetDatabaseConnection(), query);
+            using (var conn = this.GetConnection())
+                return DBOps.GetValueAsync(conn, query, this.Compiler, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public Task<DataRow> GetDataRowAsync(Query query)
+        public Task<object> GetValueAsync(string tableName, string lookupColName, object lookupVal, string returnColName, CancellationToken cancellationToken = default)
         {
-            return Task.Run(() => GetDataRow(query));
+            return GetValueAsync(new Query(tableName).Select(returnColName).Where(lookupColName, lookupVal), cancellationToken);
+        }
+
+        #endregion
+
+
+        #region < RunAction >
+
+        /// <inheritdoc/>
+        public virtual int RunAction(TCommandType command)
+        {
+            using (command)
+            using (var conn = this.GetConnection())
+            {
+                command.Connection = conn;
+                conn.Open();
+                return command.ExecuteNonQuery();
+            }
         }
 
         /// <inheritdoc/>
-        public Task<object> GetValueAsync(Query query)
+        /// <remarks>
+        /// Executes via <see cref="RunAction(TCommandType)"/>
+        /// </remarks>
+        public int RunAction(Query query)
         {
-            return Task.Run(() => GetValue(query));
+            return RunAction(query.ToDbCommand<TCommandType>(Compiler));
         }
 
         /// <inheritdoc/>
-        public Task<object> GetValueAsync(string TableName, string LookupColName, object LookupVal, string ReturnColName)
+        /// <remarks>
+        /// Executes via <see cref="RunAction(TCommandType)"/>
+        /// </remarks>
+        public int RunAction(string query, params KeyValuePair<string, object>[] parameters)
         {
-            return Task.Run(() => GetValue(TableName, LookupColName, LookupVal, ReturnColName));
+            return RunAction(DBCommands.CreateCommand<TCommandType>(query, parameters));
         }
+
+        /// <inheritdoc/>
+        public virtual async Task<int> RunActionAsync(TCommandType command, CancellationToken cancellationToken = default)
+        {
+            using (command)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                using (var conn = this.GetConnection())
+                {
+                    command.Connection = conn;
+                    await conn.OpenAsync(cancellationToken);
+                    return await command.ExecuteNonQueryAsync(cancellationToken);
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public Task<int> RunActionAsync(Query query, CancellationToken cancellationToken = default)
+        {
+            return RunActionAsync(query.ToDbCommand<TCommandType>(Compiler), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public Task<int> RunActionAsync(string query, CancellationToken cancellationToken = default, params KeyValuePair<string, object>[] parameters)
+        {
+            return RunActionAsync(DBCommands.CreateCommand<TCommandType>(query, parameters), cancellationToken);
+        }
+
+        #endregion
+
+
+        #region < Explicit Interface >
+
+        int IDatabase.RunAction(DbCommand command)
+        {
+            if (command is TCommandType cmd)
+                return RunAction(cmd);
+            else
+                throw new ArgumentException("DbCommand object was not of a compatible type for this database");
+        }
+
+        Task<int> IDatabase.RunActionAsync(DbCommand command, CancellationToken cancellationToken)
+        {
+            if (command is TCommandType cmd)
+                return RunActionAsync(cmd, cancellationToken);
+            else
+                throw new ArgumentException("DbCommand object was not of a compatible type for this database");
+        }
+
+        #endregion
+
 
     }
 }

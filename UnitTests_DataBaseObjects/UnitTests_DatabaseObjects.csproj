@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+
+    <IsPackable>false</IsPackable>
+
+    <Platforms>x86;x64</Platforms>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.0.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.0.0" />
+    <PackageReference Include="coverlet.collector" Version="3.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
+    <ProjectReference Include="..\MsAccessInterop\MsAccessInterop.csproj" />
+    
+    <ProjectReference Include="..\DataBaseObjects.MsOffice\DataBaseObjects.MsOffice.csproj" />
+    <ProjectReference Include="..\DataBaseObjects.SqLite\DataBaseObjects.SqLite.csproj" />
+      <ProjectReference Include="..\SqlKata.MSOfficeCompilers\SqlKata.MSOfficeCompilers.csproj" />
+      <ProjectReference Include="..\SqlKata.Extensions\SqlKata.Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestWorkbook.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
