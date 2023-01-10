@@ -4,12 +4,12 @@ using System.Text.RegularExpressions;
 using SqlKata.Compilers;
 using SqlKata;
 
-namespace RFBCodeWorks.SqlKataCompilers
+namespace RFBCodeWorks.SqlKata.MsOfficeCompilers
 {
     /// <summary>
     /// Compiler to use when working with an Excel Workbook
     /// </summary>
-    public class ExcelWorkbookCompiler : SqlKata.Compilers.Compiler
+    public class ExcelWorkbookCompiler : Compiler
     {
 
         /*  
@@ -63,33 +63,20 @@ namespace RFBCodeWorks.SqlKataCompilers
                 return base.CompileTableExpression(ctx, from);
         }
 
-        /// <remarks>
-        /// Wraps the SheetNames
-        /// </remarks>
-        /// <inheritdoc/>
-        public override string WrapValue(string value) => base.WrapValue(value);
-
-        private string SanitizeConditionValue(object conditionValue) => "'" + conditionValue.ToString() + "'";
-
-        /// <inheritdoc/>
-        protected override string CompileBasicCondition(SqlResult ctx, BasicCondition x)
-        {
-            x.Value = SanitizeConditionValue(x.Value);
-            return base.CompileBasicCondition(ctx, x);
-        }
 
         /// <inheritdoc/>
         protected override string CompileBasicStringCondition(SqlResult ctx, BasicStringCondition x)
         {
-            if (new[] { "like", "ilike", "alike" }.Contains(x.Operator.ToLowerInvariant()))
-            {
-                // Convert 'LIKE' to 'ALIKE' and replace any asterisks with percent symbols.
-                x.Operator = "ALIKE";
-                if (x.Value is string)
-                    x.Value = ((string)x.Value).Replace('*', '%');
-            }
-            x.Value = SanitizeConditionValue(x.Value);
+            MSAccessCompiler.SanitizeWildCards(x);
             return base.CompileBasicStringCondition(ctx, x);
+        }
+
+        /// <inheritdoc/>
+        public override string CompileJoin(SqlResult ctx, Join join, bool isNested = false)
+        {
+            var val = base.CompileJoin(ctx, join, isNested);
+            if (val is null) return null;
+            return MSAccessCompiler.CompileJoin(val);
         }
 
         /// <summary>
@@ -102,6 +89,14 @@ namespace RFBCodeWorks.SqlKataCompilers
             // ACCESS does not support the 'Limit X' command, use 'TOP' instead -> See the ColumnCompiler override
             return null;
         }
+
+        /// <remarks> MS Excel does not support this function </remarks>
+        /// <inheritdoc/>
+        public override string CompileLower(string value) => value;
+
+        /// <remarks> MS Excel does not support this function </remarks>
+        /// <inheritdoc/>
+        public override string CompileUpper(string value) => value;
 
         /// <summary>
         /// Compiles the columns and adds in the 'TOP' command if 'Limit' was specified
@@ -137,10 +132,5 @@ namespace RFBCodeWorks.SqlKataCompilers
 
             return compiled;
         }
-
-        //public override SqlResult GetNewSqlResult()
-        //{
-        //    return new MSAccessCompiler.MsAccessSqlResult();
-        //}
     }
 }
