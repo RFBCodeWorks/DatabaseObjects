@@ -4,8 +4,11 @@ using System.Text;
 using Dao = Microsoft.Office.Interop.Access.Dao;
 using DataTypeEnum = Microsoft.Office.Interop.Access.Dao.DataTypeEnum;
 
-namespace RFBCodeWorks.DatabaseObjects.MsAccessDao
+namespace RFBCodeWorks.MsAccessDao
 {
+    /// <summary>
+    /// Static methods to interact with and defines tables using DAO
+    /// </summary>
     public static class TableCreation
     {
         /// <inheritdoc cref="DatabaseProperties.GetDataTypeEnum{T}"/>
@@ -90,17 +93,11 @@ namespace RFBCodeWorks.DatabaseObjects.MsAccessDao
             return tb;
         }
 
-        private static void TUUUUU()
-        {
-            var sql = "UPDATE @TB AS ds" +
-                " SET ds.@COL = US.@COL" +
-                "FROM (SELECT @COL FROM @TB2) AS US" +
-                "WHERE ds.@PK = US.@PK";
-
-
-
-        }
-
+        /// <summary>
+        /// Create a new <see cref="Dao.TableDef"/> within the specified <paramref name="db"/>. 
+        /// <br/> The 
+        /// Note: The table def will be added to the database via <see cref="Dao.TableDefs.Append(object)"/> prior to being returned from the method
+        /// </summary>
         /// <inheritdoc cref="CreateTable(Dao.Database, string, Dao.TableDefAttributeEnum, string, string)"/>
         public static Dao.TableDef CreateAttachedTable(this Dao.Database db, string tableName, string sourceTableName, string connect,
             Dao.TableDefAttributeEnum attributes = Dao.TableDefAttributeEnum.dbSystemObject | Dao.TableDefAttributeEnum.dbAttachedTable)
@@ -117,6 +114,8 @@ namespace RFBCodeWorks.DatabaseObjects.MsAccessDao
         /// <param name="Required">set TRUE if this is a required field</param>
         /// <param name="AllowZeroLength">Set true if allowing null values</param>
         /// <param name="DefaultValue">Default Value to use</param>
+        /// <param name="IsPrimaryKey">Set TRUE if the field being created is intended to be the primary key for the table</param>
+        /// <param name="IsIndex">set TRUE if this column will be used an an indexer reference for the table.</param>
         /// <returns>The created field</returns>
         public static Dao.Field CreateField(this Dao.TableDef tblDef, string ColName, DataTypeEnum fieldType, bool Required = false, bool AllowZeroLength = false, object DefaultValue = null, bool IsPrimaryKey = false, bool IsIndex = false)
         {

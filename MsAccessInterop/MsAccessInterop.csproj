@@ -1,14 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>9.0</LangVersion>
-    <RootNamespace>RFBCodeWorks.DatabaseObjects.MsAccessDao</RootNamespace>
-    <AssemblyName>RFBCodeWorks.DatabaseObjects.MsAccess.Dao</AssemblyName>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>9.0</LangVersion>
+        <RootNamespace>RFBCodeWorks.MsAccessDao</RootNamespace>
+        <AssemblyName>RFBCodeWorks.MsAccessDao</AssemblyName>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Office.Interop.Access.Dao" Version="15.0.4420.1018" />
-  </ItemGroup>
+        <!-- Nuget Stuff -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>$(AssemblyName)</PackageId>
+        <Product>$(AssemblyName)</Product>
+        <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageLicenseExpression></PackageLicenseExpression>
+        <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
+        <Authors>Robert Brenckman</Authors>
+        <Company />
+        <Copyright>Copyright 2023</Copyright>
+        <Version>1.0.0.0</Version>
+        <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+        <Description>
+            Helper Methods to make interacting with MS Access Dao easier.
+            - Contains methods for reading/writing properties to the database
+            - Contains methods for creating new tables / fields via DAO
+            - Contains a method for using the 'Compact' functionality of an MS Access database.
+        </Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- License File housed in top-level of repo -->
+        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Office.Interop.Access.Dao" Version="15.0.4420.1018" />
+    </ItemGroup>
 
 </Project>

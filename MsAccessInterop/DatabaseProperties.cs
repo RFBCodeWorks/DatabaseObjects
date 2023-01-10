@@ -2,7 +2,7 @@
 using Dao = Microsoft.Office.Interop.Access.Dao;
 using DataTypeEnum = Microsoft.Office.Interop.Access.Dao.DataTypeEnum;
 
-namespace RFBCodeWorks.DatabaseObjects.MsAccessDao
+namespace RFBCodeWorks.MsAccessDao
 {
     /// <summary>
     /// Static methods for reading/writing properties to the database file
@@ -24,19 +24,6 @@ namespace RFBCodeWorks.DatabaseObjects.MsAccessDao
         }
 
         /// <summary>
-        /// Gets the value of a property by its index from the database
-        /// </summary>
-        /// <param name="db">The database to retrive a property from</param>
-        /// <param name="propertyName">The name of the property to retrieve</param>
-        /// <returns>The property object</returns>
-        public static Dao.Property GetProperty(this Dao.Database db, int propertyIndex)
-        {
-            if (db is null) throw new ArgumentNullException(nameof(db));
-            if (propertyIndex < 0) throw new ArgumentOutOfRangeException(nameof(propertyIndex), "propertyIndex must be greater or equal to than 0");
-            return db.Properties[propertyIndex];
-        }
-
-        /// <summary>
         /// Gets the value of a named property from the database
         /// </summary>
         /// <param name="db">The database to retrive a property from</param>
@@ -51,7 +38,20 @@ namespace RFBCodeWorks.DatabaseObjects.MsAccessDao
         /// Gets the value of a property by its index from the database
         /// </summary>
         /// <param name="db">The database to retrive a property from</param>
-        /// <param name="propertyName">The name of the property to retrieve</param>
+        /// <param name="propertyIndex">The index of the property to retrieve</param>
+        /// <returns>The property object</returns>
+        public static Dao.Property GetProperty(this Dao.Database db, int propertyIndex)
+        {
+            if (db is null) throw new ArgumentNullException(nameof(db));
+            if (propertyIndex < 0) throw new ArgumentOutOfRangeException(nameof(propertyIndex), "propertyIndex must be greater or equal to than 0");
+            return db.Properties[propertyIndex];
+        }
+
+        /// <summary>
+        /// Gets the value of a property by its index from the database
+        /// </summary>
+        /// <param name="db">The database to retrive a property from</param>
+        /// <param name="propertyIndex">The index of the property to retrieve</param>
         /// <returns>The property object</returns>
         public static object GetPropertyValue(this Dao.Database db, int propertyIndex)
         {
@@ -66,6 +66,7 @@ namespace RFBCodeWorks.DatabaseObjects.MsAccessDao
         /// <returns>The value of the property read from the <paramref name="db"/></returns>
         /// <inheritdoc cref="GetDataTypeEnum{T}"/>
         /// <inheritdoc cref="GetPropertyValue(Dao.Database, string)"/>
+        /// <param name="db"/><param name="propertyName"/>
         public static T InitializeProperty<T>(this Dao.Database db, string propertyName, T defaultValue)
         {
             if (db is null) throw new ArgumentNullException(nameof(db));
@@ -202,8 +203,10 @@ namespace RFBCodeWorks.DatabaseObjects.MsAccessDao
                     return DataTypeEnum.dbBoolean; // 1
 
                 default:
-                    throw new NotImplementedException("This translation method does not have the provided type defined. \n" +
+                    var e = new NotImplementedException("This translation method does not have the provided type defined. \n" +
                         "Expected types include: char, string, sbyte, byte, int, short, long, float, single, double, Guid, decimal, DateTime, and bool");
+                    e.Data.Add("Type", typeof(T));
+                    throw e;
             }
         }
     }

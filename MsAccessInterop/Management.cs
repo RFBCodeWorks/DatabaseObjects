@@ -5,8 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Dao = Microsoft.Office.Interop.Access.Dao;
 
-namespace RFBCodeWorks.DatabaseObjects.MsAccessDao
+namespace RFBCodeWorks.MsAccessDao
 {
+    /// <summary>
+    /// Methods for interacting Creating, Opening, and Compacting Access Database objects
+    /// </summary>
     public static class Management
     {
         /// <summary>
@@ -166,7 +169,7 @@ namespace RFBCodeWorks.DatabaseObjects.MsAccessDao
         /// </summary>
         /// <param name="password"></param>
         /// <returns></returns>
-        public static string dbLangGeneral(string password = "")
+        public static string DbLangGeneral(string password = "")
         {
             if (string.IsNullOrWhiteSpace(password))
                 return Dao.LanguageConstants.dbLangGeneral;
