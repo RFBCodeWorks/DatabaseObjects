@@ -7,9 +7,9 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
     /// Base Database class for a Sql Server Database
     /// <br/> Utilizes <see cref="Microsoft.Data.SqlClient.SqlConnection" />
     /// </summary>
-    public class SqlServerDataBase : AbstractDataBase<SqlConnection>
+    public class SqlServerDataBase : AbstractDataBase<SqlConnection, SqlCommand>
     {
-        private static readonly Compiler DefaultCompiler = new SqlKata.Compilers.SqlServerCompiler();
+        private static readonly Compiler DefaultCompiler = new SqlServerCompiler();
 
         /// <summary>
         /// Generate a new <see cref="SqlServerDataBase"/>
@@ -31,7 +31,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         public override Compiler Compiler => DefaultCompiler;
 
         /// <inheritdoc/>
-        public override SqlConnection GetDatabaseConnection()
+        public override SqlConnection GetConnection()
         {
             return new SqlConnection(this.ConnectionString);
         }
@@ -39,23 +39,23 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// <summary>
         /// Generate a new <see cref="SqlConnection"/>
         /// </summary>
-        /// <param name="path">path to the database</param>
-        /// <param name="password"></param>
-        /// <returns>new <see cref="OleDbConnection"/></returns>
-        public static SqlConnection GenerateSqlConnection(string connectionString, SqlCredential credentials = null)
+        /// <returns>new <see cref="SqlConnection"/></returns>
+        /// <inheritdoc cref="SqlConnection.SqlConnection(string, SqlCredential)"/>
+        public static SqlConnection GenerateSqlConnection(string connectionString, SqlCredential credential = null)
         {
-            return credentials is null ? new SqlConnection(connectionString) : new SqlConnection(connectionString, credentials);
+            return credential is null ? new SqlConnection(connectionString) : new SqlConnection(connectionString, credential);
         }
 
         /// <summary>
         /// Generate a new <see cref="SqlConnection"/>
         /// </summary>
-        /// <param name="path">path to the database</param>
-        /// <param name="password"></param>
-        /// <returns>new <see cref="OleDbConnection"/></returns>
-        public static SqlConnection GenerateSqlConnection(SqlConnectionStringBuilder connectionString, SqlCredential credentials = null)
+        /// <param name="connectionString">A <see cref="SqlConnectionStringBuilder"/> that will provide its connection string</param>
+        /// <returns>new <see cref="SqlConnection"/></returns>
+        /// <inheritdoc cref="SqlConnection.SqlConnection(string, SqlCredential)"/>
+        /// <param name="credential"/>
+        public static SqlConnection GenerateSqlConnection(SqlConnectionStringBuilder connectionString, SqlCredential credential = null)
         {
-            return credentials is null ? new SqlConnection(connectionString.ConnectionString) : new SqlConnection(connectionString.ConnectionString, credentials);
+            return credential is null ? new SqlConnection(connectionString.ConnectionString) : new SqlConnection(connectionString.ConnectionString, credential);
         }
 
         /// <summary>
@@ -69,14 +69,15 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// <returns></returns>
         public static SqlConnectionStringBuilder GenerateSqlServerConnectionString(string serverAddress, string dataSource, string userID = "", string password = "", bool encrypt = false)
         {
-            var bldr = new SqlConnectionStringBuilder();
-            bldr["Server"] = serverAddress;
-            bldr.DataSource = dataSource;
-            bldr.ConnectRetryCount = 3;
-            bldr.Encrypt = encrypt;
-            bldr.UserID = userID;
-            bldr.Password = password;
-            return bldr;
+            return new SqlConnectionStringBuilder
+            {
+                ["Server"] = serverAddress,
+                DataSource = dataSource,
+                ConnectRetryCount = 3,
+                Encrypt = encrypt,
+                UserID = userID ?? string.Empty,
+                Password = password
+            };
         }
     }
 }

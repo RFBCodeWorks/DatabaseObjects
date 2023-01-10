@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>RFBCodeWorks.DatabaseObjects.SqlServer</AssemblyName>
+    <RootNamespace>RFBCodeWorks.DataBaseObjects.DataBaseTypes</RootNamespace>
+
+      <!-- Nuget Stuff -->
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <PackageId>$(AssemblyName)</PackageId>
+      <Product>$(AssemblyName)</Product>
+      <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+      <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+      <PackageLicenseExpression></PackageLicenseExpression>
+      <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
+      <Authors>Robert Brenckman</Authors>
+      <Company />
+      <Copyright>Copyright 2023</Copyright>
+      <Version>1.0.0.0</Version>
+      <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+      <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+      <Description>Adds the 'SqlServerDatabase' class to the RFBCodeWorks.DataBaseObjects.DataBaseTypes namespace</Description>
+        
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!--
+        https://devblogs.microsoft.com/dotnet/introducing-the-new-microsoftdatasqlclient/
+        Microsoft.Data.SqlClient supercedes System.Data.SqlClient, and should be used going forward per the above blog
+        -->
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
+      
+    </ItemGroup>
+
+    <ItemGroup>
+    <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+    <!-- License File housed in top-level of repo -->
+    <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+    </ItemGroup>
+</Project>

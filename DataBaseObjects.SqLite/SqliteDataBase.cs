@@ -6,31 +6,41 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
     /// <summary>
     /// Base Database class for a SqlLite Database
     /// </summary>
-    public class SqlLiteDataBase : AbstractDataBase<SqliteConnection>
+    public class SqliteDataBase : AbstractDataBase<SqliteConnection, SqliteCommand>
     {
-        private static readonly Compiler DefaultCompiler = new SqlKata.Compilers.SqliteCompiler();
+        private static readonly Compiler DefaultCompiler = new CorrectedCompiler();
+
+        // Corrects the following issue: https://github.com/sqlkata/querybuilder/issues/655
+        private class CorrectedCompiler : SqliteCompiler 
+        { 
+            public CorrectedCompiler() : base()
+            { 
+                this.OpeningIdentifier = "[";
+                this.ClosingIdentifier = "]";
+            } 
+        }
 
         /// <summary>
-        /// Generate a new <see cref="SqlLiteDataBase"/>
+        /// Generate a new <see cref="SqliteDataBase"/>
         /// </summary>
         /// <inheritdoc/>
-        protected SqlLiteDataBase() : base() { }
+        protected SqliteDataBase() : base() { }
 
         /// <summary>
-        /// Generate a new <see cref="SqlLiteDataBase"/>
+        /// Generate a new <see cref="SqliteDataBase"/>
         /// </summary>
         /// <param name="connectionString">
         /// The connection string to the database. 
         /// <br/>For help see: 
         /// <br/> <see href="https://www.connectionstrings.com/sqlite/"/>
         /// </param>
-        public SqlLiteDataBase(string connectionString) : base(connectionString) { }
+        public SqliteDataBase(string connectionString) : base(connectionString) {  }
 
         /// <inheritdoc/>
         public override Compiler Compiler => DefaultCompiler;
 
         /// <inheritdoc/>
-        public override SqliteConnection GetDatabaseConnection()
+        public override SqliteConnection GetConnection()
         {
             return new SqliteConnection(this.ConnectionString);
         }
@@ -42,8 +52,10 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// <returns>A new <see cref="SqliteConnectionStringBuilder"/> with the DataSource set</returns>
         public static SqliteConnectionStringBuilder GenerateSqlLiteConnectionString(string path)
         {
-            var bldr = new SqliteConnectionStringBuilder();
-            bldr.DataSource = path;
+            var bldr = new SqliteConnectionStringBuilder
+            {
+                DataSource = path
+            };
             return bldr;
         }
 
