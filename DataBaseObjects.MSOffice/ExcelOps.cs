@@ -1,5 +1,4 @@
-﻿using RFBCodeWorks.DataBaseObjects.Exceptions;
-using RFBCodeWorks.SystemExtensions;
+﻿using RFBCodeWorks.SystemExtensions;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -25,7 +24,7 @@ namespace RFBCodeWorks.DataBaseObjects
             return DBOps.TestConnection(GetConnection(workbookPath));
         }
 
-        /// <inheritdoc cref="ConnectionStringBuilders.ExcelWorkbooks.GetConnection(string, bool?)"/>
+        /// <inheritdoc cref="RFBCodeWorks.DataBaseObjects.DataBaseTypes.ExcelWorkBook.GetConnection(string, bool?)"/>
         public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = null) 
             => RFBCodeWorks.DataBaseObjects.DataBaseTypes.ExcelWorkBook.GetConnection(workbookPath, hasHeaders);
 
@@ -36,11 +35,16 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <param name="SheetName">name of the sheet</param>
         /// <param name="hasHeaders">treat the first row as table headers</param>
         /// <returns>a <see cref="DataTable"/> that represents the specified <paramref name="SheetName"/></returns>
+        /// <exception cref="System.IO.FileNotFoundException"/>
+        /// <exception cref="ExcelTableNotFoundException"/>
+        /// <exception cref="ArgumentException"/>
         // Getting a table from an excel workbook:  https://stackoverflow.com/questions/33994160/read-excel-table-data-using-c-sharp
-        public static DataTable GetDataTable(string ExcelWorkBookPath, string SheetName, bool hasHeaders = true)
+        public static DataTable GetDataTable(string ExcelWorkBookPath, string SheetName, bool? hasHeaders = true)
         {
             // Get Connection to workbook
-            DataTable DT = new DataTable();
+            DataTable DT = new();
+
+            if (!System.IO.File.Exists(ExcelWorkBookPath)) throw new System.IO.FileNotFoundException("Excel Workbook Not Found", ExcelWorkBookPath);
 
             //Grab data
             try
@@ -53,7 +57,7 @@ namespace RFBCodeWorks.DataBaseObjects
                     //int TableNameCol = DBOps.GetColNum(schemaTable, "TABLE_NAME");
                     string TblName = ""; bool tblFound = false;
                     string Tbl = SheetName;
-                    if (Tbl.Substring(Tbl.Length - 1) != "$") Tbl = Tbl + "$";
+                    if (Tbl.Substring(Tbl.Length - 1) != "$") Tbl += "$";
                     foreach (DataRow Row in schemaTable.Rows)
                     {
                         TblName = Row["TABLE_NAME"].ToString();
@@ -61,10 +65,11 @@ namespace RFBCodeWorks.DataBaseObjects
                     }
                     if (tblFound == false) throw new ExcelTableNotFoundException("Unable to find ' " + SheetName + " ' in workbook: " + ExcelWorkBookPath);
 
-                    string query = $"SELECT * FROM [{TblName}]";
-                    OleDbDataAdapter daexcel = new OleDbDataAdapter(query, conn);
-                    DT.Locale = System.Globalization.CultureInfo.CurrentCulture; // Don't need I think...
-                    daexcel.Fill(DT);
+                    using (OleDbDataAdapter daexcel = new OleDbDataAdapter($"SELECT * FROM [{TblName}]", conn))
+                    {
+                        DT.Locale = System.Globalization.CultureInfo.CurrentCulture; // Don't need I think...
+                        daexcel.Fill(DT);
+                    }
                     conn.Close();
                 }
             }
@@ -72,7 +77,7 @@ namespace RFBCodeWorks.DataBaseObjects
             {
                 E.AddVariableData(nameof(ExcelWorkBookPath), ExcelWorkBookPath);
                 E.AddVariableData(nameof(SheetName), SheetName);
-                throw E;
+                throw;
             }
             return DT;
         }
@@ -96,7 +101,7 @@ namespace RFBCodeWorks.DataBaseObjects
 
 
         /// <summary>Create Dictionary of all from the excel table. 1st column is Key, 2nd column is Value.</summary>
-        /// <inheritdoc cref="BuildDictionary(out Dictionary{string, string}, DataTable, int, int)"/>
+        /// <inheritdoc cref="DataTableExtensions.BuildDictionary(DataTable, out Dictionary{string, string}, string, string)"/>
         [System.Diagnostics.DebuggerHidden]
         public static void BuildDictionary(out Dictionary<string, string> Dict, string ExcelWorkBookPath, string SheetName, string KeyColumn, string ValueColumn) => ExcelOps.GetDataTable(ExcelWorkBookPath, SheetName).BuildDictionary(out Dict, KeyColumn, ValueColumn);
 

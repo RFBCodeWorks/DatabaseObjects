@@ -7,7 +7,10 @@ using System.Text;
 
 namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
 {
-    public class MSAccessDataBase : AbstractDataBase<OleDbConnection>
+    /// <summary>
+    /// Create a new Database Object that represents an MS Access Database, and utilizes the <see cref="RFBCodeWorks.SqlKata.MsOfficeCompilers.MSAccessCompiler"/>
+    /// </summary>
+    public class MSAccessDataBase : AbstractDataBase<OleDbConnection, OleDbCommand>
     {
         /// <summary>
         /// Create an <see cref="MSAccessDataBase"/> connection from the specified <paramref name="connectionString"/>
@@ -19,14 +22,17 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// Generate an ACE connection to the MS Access database at the specified <paramref name="path"/>
         /// </summary>
         /// <returns/>
-        /// <inheritdoc cref="ConnectionStringBuilders.AccessDB.GenerateACEConnectionString(string, string)"/>
+        /// <inheritdoc cref="GenerateACEConnectionString(string, string)"/>
         public MSAccessDataBase(string path, string password) : base(GenerateACEConnectionString(path, password)) { }
 
         /// <inheritdoc/>
-        public override Compiler Compiler => RFBCodeWorks.SqlKataCompilers.MSAccessCompiler.AccessCompiler;
+        public override Compiler Compiler => RFBCodeWorks.SqlKata.MsOfficeCompilers.MSAccessCompiler.AccessCompiler;
+
+
+        #region < Connection Strings >
 
         /// <inheritdoc/>
-        public override OleDbConnection GetDatabaseConnection()
+        public override OleDbConnection GetConnection()
         {
             return new OleDbConnection(ConnectionString);
         }
@@ -84,6 +90,9 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         {
             return new OleDbConnection(GenerateJetConnectionString(path, dbPassword));
         }
+
+        #endregion
+
 
     }
 }
