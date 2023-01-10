@@ -4,21 +4,24 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
+using System.Data.Common;
+using SqlKata;
 
 namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
-    /// <inheritdoc cref="ISimpleKeyDataBaseTable"/>
+    /// <inheritdoc cref="IPrimaryKeyTable"/>
     /// </summary>
-    public class SimpleKeyDatabaseTable : DataBaseTable, ISimpleKeyDataBaseTable
+    public class PrimaryKeyTable : DataBaseTable, IPrimaryKeyTable
     {
         /// <summary>
-        /// Create a new <see cref="SimpleKeyDatabaseTable"/>
+        /// Create a new <see cref="PrimaryKeyTable"/>
         /// </summary>
         /// <param name="primaryKey"><inheritdoc cref="PrimaryKey" path="*"/> </param>
         /// <inheritdoc cref="DataBaseTable.DataBaseTable(IDatabase, string)"/>
         /// <param name="parent"/><param name="tableName"/>
-        public SimpleKeyDatabaseTable(IDatabase parent, string tableName, string primaryKey) : base(parent, tableName)
+        public PrimaryKeyTable(IDatabase parent, string tableName, string primaryKey) : base(parent, tableName)
         {
             if (string.IsNullOrWhiteSpace(primaryKey)) throw new ArgumentException("primaryKey parameter is null or empty!", nameof(primaryKey));
             PrimaryKey = primaryKey;
@@ -27,36 +30,15 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <inheritdoc/>
         public string PrimaryKey { get; }
 
-        #region < DataReturn >
+        #region < GetValue >
 
         /// <remarks> All DataReturn routines that exist within <see cref="DataBaseTable"/> utilize this method, so error logging the database request can have one central location </remarks>
         /// <inheritdoc/>
-        public virtual object GetValue(object primaryKeyValue, string returnColName) => Parent.GetValue(TableName, PrimaryKey, primaryKeyValue, returnColName);
+        public virtual object GetValue(object primaryKeyValue, string returnColName) => GetValue(PrimaryKey, primaryKeyValue, returnColName);
 
         /// <inheritdoc/>
-        public virtual bool? GetValueAsBool(object primaryKeyValue, string returnColName) => GetValue(primaryKeyValue, returnColName).SanitizeToBool();
+        public virtual Task<object> GetValueAsync(object primaryKeyValue, string returnColName, CancellationToken cancellationToken = default) => GetValueAsync(PrimaryKey, primaryKeyValue, returnColName, cancellationToken);
 
-        /// <inheritdoc/>
-        public virtual string GetValueAsString(object primaryKeyValue, string returnColName) => GetValue(primaryKeyValue, returnColName).SanitizeToString();
-
-        /// <inheritdoc/>
-        public virtual int? GetValueAsInt(object primaryKeyValue, string returnColName) => GetValue(primaryKeyValue, returnColName).SanitizeToInt();
-
-        #region < Async Methods >
-
-        /// <inheritdoc/>
-        public virtual Task<object> GetValueAsync(object primaryKeyValue, string returnColName) => Task.Run(() => GetValue(primaryKeyValue, returnColName));
-
-        /// <inheritdoc/>
-        public virtual Task<bool?> GetValueAsBoolAsync(object primaryKeyValue, string returnColName) => Task.Run(() => GetValueAsBool(primaryKeyValue, returnColName));
-
-        /// <inheritdoc/>
-        public virtual Task<string> GetValueAsStringAsync(object primaryKeyValue, string returnColName) => Task.Run(() => GetValueAsString(primaryKeyValue, returnColName));
-
-        /// <inheritdoc/>
-        public virtual Task<int?> GetValueAsIntAsync(object primaryKeyValue, string returnColName) => Task.Run(() => GetValueAsInt(primaryKeyValue, returnColName));
-
-        #endregion
         #endregion
 
         #region < GetDataRow >
@@ -68,9 +50,9 @@ namespace RFBCodeWorks.DataBaseObjects
         }
 
         /// <inheritdoc/>
-        public virtual Task<DataRow> GetDataRowAsync(object primaryKeyValue)
+        public virtual Task<DataRow> GetDataRowAsync(object primaryKeyValue, CancellationToken cancellationToken = default)
         {
-            return Task.Run(() => GetDataRow(primaryKeyValue));
+            return Parent.GetDataRowAsync(this.Select().Where(PrimaryKey, primaryKeyValue), cancellationToken);
         }
 
 
@@ -104,6 +86,28 @@ namespace RFBCodeWorks.DataBaseObjects
             return dictionaryBuilder(GetDataTable(AddPrimaryKeyToArray(valueColumns)));
         }
 
+
+        #region < Update >
+
+        /// <param name="primaryKey">The value to search for within the PrimaryKey column</param>
+        /// <inheritdoc cref="DataBaseTable.Update(IEnumerable{KeyValuePair{string, object}}, SqlKata.Extensions.IWhereCondition[])"/>
+        /// <inheritdoc cref="Update(object, KeyValuePair{string, object}[])"/>
+        /// <param name="values"/>
+        public virtual int Update(object primaryKey, params KeyValuePair<string, object>[] values)
+        {
+            return Update(values, new RFBCodeWorks.SqlKata.Extensions.WhereColumnValue(PrimaryKey, primaryKey));
+        }
+
+        /// <inheritdoc cref="DataBaseTable.UpdateAsync(IEnumerable{KeyValuePair{string, object}}, CancellationToken, SqlKata.Extensions.IWhereCondition[])"/>
+        /// <inheritdoc cref="Update(object, KeyValuePair{string, object}[])"/>
+        public virtual Task<int> UpdateAsync(object primaryKey, CancellationToken cancellationToken = default, params KeyValuePair<string, object>[] values)
+        {
+            return UpdateAsync(values, cancellationToken, new RFBCodeWorks.SqlKata.Extensions.WhereColumnValue(PrimaryKey, primaryKey));
+        }
+
+        #endregion
+
+
         /// <summary>
         /// Sanitizes input columns to ensure that the primary key is the first item in the list
         /// </summary>
@@ -116,7 +120,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// </returns>
         protected virtual string[] AddPrimaryKeyToArray(string[] columns)
         {
-            if (columns is null || columns.Length == 0) return new string[] { };
+            if (columns is null || columns.Length == 0) return Array.Empty<string>();
             var list = columns.ToList();
             list.Remove(PrimaryKey);
             list.Insert(0, PrimaryKey);
