@@ -1,8 +1,9 @@
-﻿using RFBCodeWorks.SystemExtensions;
+﻿using SqlKata;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace RFBCodeWorks.DataBaseObjects
@@ -11,8 +12,14 @@ namespace RFBCodeWorks.DataBaseObjects
     /// Functions specific to Excel Workbooks
     /// </summary>
     /// *  Connection Strings: https://www.connectionstrings.com/excel/
-    public class ExcelOps
+    public static class ExcelOps
     {
+        /// <summary>
+        /// Add a new pair to the <see cref="Exception.Data"/>
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void AddVariableData(this Exception e, object key, object value) => e.Data.Add(key, value);
+
         /// <summary>
         /// Test the <see cref="OleDbConnection"/> to the specified <paramref name="workbookPath"/>
         /// </summary>
@@ -84,26 +91,35 @@ namespace RFBCodeWorks.DataBaseObjects
 
         /// <param name="ExcelWorkBookPath">Excel Workbook to look up</param>
         /// <param name="SheetName">Sheet Name to grab from the excel workbook</param>
-        /// <inheritdoc cref="DataTableExtensions.GetValueAsBool(DataTable, int, string, int)"/>
-        /// <param name="LookupVal"/><param name="LookupCol"/><param name="ReturnCol"/>
-        public static bool GetValueAsBool(string ExcelWorkBookPath, string SheetName, string LookupCol, string LookupVal, string ReturnCol) => ExcelOps.GetDataTable(ExcelWorkBookPath, SheetName).GetValueAsBool(LookupCol, LookupVal, ReturnCol);
+        /// <inheritdoc cref="AbstractDataBase{TConnectionType, TCommandType}.GetValue(string, string, object, string)"/>
+        /// <param name="lookupVal"/><param name="lookupColName"/><param name="returnColName"/>
+        public static object GetValue(string ExcelWorkBookPath, string SheetName, string lookupColName, string lookupVal, string returnColName)
+        {
+            return new RFBCodeWorks.DataBaseObjects.DataBaseTypes.ExcelWorkBook(ExcelWorkBookPath).GetValue(SheetName, lookupColName, lookupVal, returnColName);
+        }
 
+        /// <returns><inheritdoc cref="ObjectSanitizing.SanitizeToBool(object)"/></returns>
+        /// <inheritdoc cref="GetValue(string, string, string, string, string)"/>
+        public static bool? GetValueAsBool(string ExcelWorkBookPath, string SheetName, string lookupColName, string lookupVal, string returnColName) 
+            => GetValue(ExcelWorkBookPath, SheetName, lookupColName, lookupVal, returnColName).SanitizeToBool();
 
-        /// <inheritdoc cref="DataTableExtensions.GetValueAsString(DataTable, int, string, int)"/>
-        /// <inheritdoc cref="GetValueAsBool(string, string, string, string, string)"/>
+        /// <returns><inheritdoc cref="ObjectSanitizing.SanitizeToString(object, IFormatProvider)"/></returns>
+        /// <inheritdoc cref="GetValue(string, string, string, string, string)"/>
         [System.Diagnostics.DebuggerHidden]
-        public static string GetValueAsString(string ExcelWorkBookPath, string SheetName, string LookupCol, string LookupVal, string ReturnCol) => ExcelOps.GetDataTable(ExcelWorkBookPath, SheetName).GetValueAsString(LookupCol, LookupVal, ReturnCol);
+        public static string GetValueAsString(string ExcelWorkBookPath, string SheetName, string lookupColName, string lookupVal, string returnColName)
+            => GetValue(ExcelWorkBookPath, SheetName, lookupColName, lookupVal, returnColName).ToString();
 
-        /// <inheritdoc cref="DataTableExtensions.GetValueAsInt(DataTable, int, string, int)"/>
-        /// <inheritdoc cref="GetValueAsBool(string, string, string, string, string)"/>
+        /// <returns><inheritdoc cref="ObjectSanitizing.SanitizeToInt(object)"/></returns>
+        /// <inheritdoc cref="GetValue(string, string, string, string, string)"/>
         [System.Diagnostics.DebuggerHidden]
-        public static int GetValueAsInt(string ExcelWorkBookPath, string SheetName, string LookupCol, string LookupVal, string ReturnCol) => ExcelOps.GetDataTable(ExcelWorkBookPath, SheetName).GetValueAsInt(LookupCol, LookupVal, ReturnCol);
+        public static int? GetValueAsInt(string ExcelWorkBookPath, string SheetName, string lookupColName, string lookupVal, string returnColName)
+            => GetValue(ExcelWorkBookPath, SheetName, lookupColName, lookupVal, returnColName).SanitizeToInt();
 
 
-        /// <summary>Create Dictionary of all from the excel table. 1st column is Key, 2nd column is Value.</summary>
-        /// <inheritdoc cref="DataTableExtensions.BuildDictionary(DataTable, out Dictionary{string, string}, string, string)"/>
-        [System.Diagnostics.DebuggerHidden]
-        public static void BuildDictionary(out Dictionary<string, string> Dict, string ExcelWorkBookPath, string SheetName, string KeyColumn, string ValueColumn) => ExcelOps.GetDataTable(ExcelWorkBookPath, SheetName).BuildDictionary(out Dict, KeyColumn, ValueColumn);
+        ///// <summary>Create Dictionary of all from the excel table. 1st column is Key, 2nd column is Value.</summary>
+        ///// <inheritdoc cref="DataTableExtensions.BuildDictionary(DataTable, out Dictionary{string, string}, string, string)"/>
+        //[System.Diagnostics.DebuggerHidden]
+        //public static void BuildDictionary(out Dictionary<string, string> Dict, string ExcelWorkBookPath, string SheetName, string KeyColumn, string ValueColumn) => ExcelOps.GetDataTable(ExcelWorkBookPath, SheetName).BuildDictionary(out Dict, KeyColumn, ValueColumn);
 
     }
 

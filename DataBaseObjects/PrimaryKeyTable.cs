@@ -72,7 +72,7 @@ namespace RFBCodeWorks.DataBaseObjects
                 while (Rdr.Read())
                 {
                     string val;
-                    int key = (int)Extensions.SanitizeToInt(Rdr.GetValue(0));
+                    int key = (int)ObjectSanitizing.SanitizeToInt(Rdr.GetValue(0));
                     if (Rdr.IsDBNull(1)) { val = string.Empty; } else { val = Rdr.GetValue(1).ToString(); }
                     Dict.Add(key, val);
                 }

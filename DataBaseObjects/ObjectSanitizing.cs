@@ -11,7 +11,7 @@ namespace RFBCodeWorks.DataBaseObjects
     /// <summary>
     /// Contains various extension methods 
     /// </summary>
-    public static partial class Extensions
+    public static partial class ObjectSanitizing
     {
         /// <summary>
         /// Add a new pair to the <see cref="Exception.Data"/>

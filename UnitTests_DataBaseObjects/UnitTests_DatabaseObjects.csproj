@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
-    <ProjectReference Include="..\MsAccessInterop\MsAccessInterop.csproj" />
+    <ProjectReference Include="..\MsAccessInterop\MsAccessDao.csproj" />
     
     <ProjectReference Include="..\DataBaseObjects.MsOffice\DataBaseObjects.MsOffice.csproj" />
     <ProjectReference Include="..\DataBaseObjects.SqLite\DataBaseObjects.SqLite.csproj" />

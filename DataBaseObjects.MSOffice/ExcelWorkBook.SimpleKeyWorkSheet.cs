@@ -15,7 +15,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// <summary>
         /// Represents an Excel Worksheet that has a column that acts as a primary key
         /// </summary>
-        public class SimpleKeyWorkSheet : WorkSheet, IPrimaryKeyTable
+        public class PrimaryKeyWorksheet : WorkSheet, IPrimaryKeyTable
         {
 
             /// <summary>
@@ -26,7 +26,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
             /// <param name="sheetName"/>
             /// <param name="primaryKey"><inheritdoc cref="PrimaryKey" path="*"/></param>
             /// <param name="hasHeaders"/>
-            public SimpleKeyWorkSheet(ExcelWorkBook workbook, string sheetName, string primaryKey, bool? hasHeaders = true) : base(workbook, sheetName, hasHeaders)
+            public PrimaryKeyWorksheet(ExcelWorkBook workbook, string sheetName, string primaryKey, bool? hasHeaders = true) : base(workbook, sheetName, hasHeaders)
             {
                 PrimaryKey = !string.IsNullOrWhiteSpace(primaryKey) ? primaryKey : throw new ArgumentException("Invalid Primary Key");
             }
@@ -82,7 +82,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
             /// Gets a value from the worksheet, then attempts to convert it to an integer
             /// </summary>
             /// <returns>If successfull, returns an integer. If the cell is empty, returns null.</returns>
-            /// <inheritdoc cref="Extensions.SanitizeToInt(object)"/>
+            /// <inheritdoc cref="ObjectSanitizing.SanitizeToInt(object)"/>
             public int? GetValueAsInt(object PrimaryKeyValue, string ReturnColName) => GetValue(PrimaryKeyValue, ReturnColName).SanitizeToInt();
 
             /// <inheritdoc/>
@@ -132,7 +132,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
                     while (Rdr.Read())
                     {
                         string val;
-                        string key = Extensions.SanitizeToString(Rdr.GetValue(0));
+                        string key = ObjectSanitizing.SanitizeToString(Rdr.GetValue(0));
                         if (Rdr.IsDBNull(1)) { val = string.Empty; } else { val = Rdr.GetValue(1).SanitizeToString(); }
                         if (!string.IsNullOrWhiteSpace(key)) Dict.Add(key, val);
                     }

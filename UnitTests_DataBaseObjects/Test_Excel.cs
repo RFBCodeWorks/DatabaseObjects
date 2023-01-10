@@ -134,13 +134,13 @@ namespace ExcelTests
         {
             public TestWorkbook() : base(GetWorkbookLocation())
             {
-                DataSheet = new SimpleKeyWorkSheet(this, "DataSheet", "ID", true);
+                DataSheet = new PrimaryKeyWorksheet(this, "DataSheet", "ID", true);
                 MissingSheet = new WorkSheet(this, "ThisSheetDoesNotExist");
             }
 
             private static string GetWorkbookLocation() => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestWorkbook.xlsx");
 
-            public Excel.SimpleKeyWorkSheet DataSheet { get; }
+            public Excel.PrimaryKeyWorksheet DataSheet { get; }
 
             public Excel.WorkSheet MissingSheet { get; }
         }

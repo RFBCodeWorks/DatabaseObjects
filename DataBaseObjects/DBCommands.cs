@@ -114,10 +114,10 @@ namespace RFBCodeWorks.DataBaseObjects
 
         #endregion
 
-        #region < Update COlumn From Upstream >
+        #region < Update Column From Upstream >
 
         /// <inheritdoc cref="UpdateColumnFromUpstream{T}(T, string, string, string, string)"/>
-        public static DbCommand UpdateColumnFromUpstream(this DbConnection db, string localTable = "", string pKeyColumn = "Id",  string remoteTable = "", string updateColumn = "")
+        public static DbCommand UpdateColumnFromUpstream(DbConnection db, string localTable = "", string pKeyColumn = "Id",  string remoteTable = "", string updateColumn = "")
         {
             return UpdateColumnFromUpstream(db.CreateCommand(), localTable, pKeyColumn, remoteTable, updateColumn);
         }
@@ -169,7 +169,7 @@ namespace RFBCodeWorks.DataBaseObjects
 
 
         /// <inheritdoc cref="InsertIntoFrom{T}(T, string, string, string)"/>
-        public static DbCommand InsertIntoFrom(this DbConnection db, string localTable = "", string remoteTable = "", string updateColumn = "")
+        public static DbCommand InsertIntoFrom(DbConnection db, string localTable = "", string remoteTable = "", string updateColumn = "")
         {
             return InsertIntoFrom(db.CreateCommand(), localTable, remoteTable, updateColumn);
         }
@@ -212,7 +212,7 @@ namespace RFBCodeWorks.DataBaseObjects
         #region < InsertMissingRecords >
 
         /// <inheritdoc cref="InsertMissingRecords{T}(T, string, string, string)"/>
-        public static DbCommand InsertMissingRecords(this DbConnection db, string localTable = "", string remoteTable = "", string updateColumn = "")
+        public static DbCommand InsertMissingRecords(DbConnection db, string localTable = "", string remoteTable = "", string updateColumn = "")
         {
             return InsertMissingRecords(db.CreateCommand(), localTable, remoteTable, updateColumn);
         }
@@ -257,7 +257,7 @@ namespace RFBCodeWorks.DataBaseObjects
         #region < RemoveLoneyRecords >
 
         /// <inheritdoc cref="RemoveLonelyRecords{T}(T, string, string, string)"/>
-        public static DbCommand RemoveLonelyRecords(this DbConnection db, string localTable = "", string remoteTable = "", string updateColumn = "")
+        public static DbCommand RemoveLonelyRecords(DbConnection db, string localTable = "", string remoteTable = "", string updateColumn = "")
         {
             return RemoveLonelyRecords(db.CreateCommand(), localTable, remoteTable, updateColumn);
         }

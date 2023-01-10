@@ -20,6 +20,7 @@
         <Version>1.0.0.0</Version>
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
         <Description>
             Helper Methods to make interacting with MS Access Dao easier.
             - Contains methods for reading/writing properties to the database
@@ -31,6 +32,7 @@
     <ItemGroup>
         <!-- License File housed in top-level of repo -->
         <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+        <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.Office.Interop.Access.Dao" Version="15.0.4420.1018" />

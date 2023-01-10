@@ -19,6 +19,8 @@
         <Version>1.0.0.0</Version>
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
+
         <Description>Adds the 'SqlLiteDatBase' class to the RFBCodeWorks.DataBaseObjects.DataBaseTypes namespace</Description>
     </PropertyGroup>
 
@@ -26,6 +28,7 @@
     <ItemGroup>
         <!-- License File housed in top-level of repo -->
         <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+        <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.1" />

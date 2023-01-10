@@ -19,10 +19,11 @@
         <Authors>Robert Brenckman</Authors>
         <Company />
         <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.0</Version>
+        <Version>1.0.0.2</Version>
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
-
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
+        
         <Description>
             Extends RFBCodeWorks.DatabaseObjects to provides objects that represent an MSAccess database, as well as an MS EXcel workbook.
 
@@ -41,13 +42,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\ExtensionMethods\System.Extensions\System.Extensions.csproj" />
         <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
         <ProjectReference Include="..\SqlKata.MSOfficeCompilers\SqlKata.MSOfficeCompilers.csproj" />
     </ItemGroup>
     <ItemGroup>
         <!-- License File housed in top-level of repo -->
         <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+        <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

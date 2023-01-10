@@ -18,9 +18,10 @@
         <Authors>Robert Brenckman</Authors>
         <Company />
         <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.0</Version>
+        <Version>1.0.0.2</Version>
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
 
 
         <Description>
@@ -38,9 +39,16 @@
 
     <ItemGroup>
         <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+        <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\SqlKata.Extensions\SqlKata.Extensions.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Readme.md">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>

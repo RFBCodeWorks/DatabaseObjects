@@ -20,12 +20,14 @@
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
         <PackageTags>SqlKata, Access, Excel, Sql</PackageTags>
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
         <Description>Providers SqlKata Sql compilers for Microsoft Access and Excel Workbooks</Description>
     </PropertyGroup>
     
     <ItemGroup>
         <!-- License File housed in top-level of repo -->
         <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+        <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
     <ItemGroup>
       <Compile Remove="MsAccessSqlResult.cs" />

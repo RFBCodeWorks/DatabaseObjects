@@ -19,8 +19,9 @@
       <Version>1.0.0.0</Version>
     <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
     <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
-        
-    <PackageTags>SqlKata, DataBase</PackageTags>
+      <PackageReadmeFile>Readme.md</PackageReadmeFile>
+
+      <PackageTags>SqlKata, DataBase</PackageTags>
     <Description>
           Contains several Extension Methods for the SqlKata library. Including but not limited to:
           - ToDbCommand() -- Create a System.Data.Common.DbCommand of a specified type from a Query object
@@ -35,6 +36,7 @@
 
     <ItemGroup>
         <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+        <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SqlKata" Version="2.3.2" />
