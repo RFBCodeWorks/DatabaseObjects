@@ -4,7 +4,7 @@ using System.Text;
 using System.Linq;
 using RFBCodeWorks.DataBaseObjects;
 using SqlKata;
-using RFBCodeWorks.SystemExtensions;
+using System.Runtime.CompilerServices;
 
 namespace RFBCodeWorks.DataBaseObjects
 {
@@ -13,33 +13,11 @@ namespace RFBCodeWorks.DataBaseObjects
     /// </summary>
     public static partial class Extensions
     {
-
         /// <summary>
-        /// Generate a new KeyValuePair array that consists of a single pair
+        /// Add a new pair to the <see cref="Exception.Data"/>
         /// </summary>
-        public static KeyValuePair<T,O>[] ConvertToKeyValuePairArray<T,O>(T key, O value)
-        {
-            return new KeyValuePair<T, O>[] { new KeyValuePair<T, O>(key, value) };
-        }
-
-        /// <summary>
-        /// Generate a new KeyValuePair array contains all the keys and values.
-        /// <br/> <paramref name="keys"/> and <paramref name="values"/> count are expected to match.
-        /// </summary>
-        public static KeyValuePair<T, O>[] ConvertToKeyValuePairArray<T, O>(IEnumerable<T> keys, IEnumerable<O> values)
-        {
-            if (keys.Count() != values.Count()) throw new ArgumentException("Cannot convert to KeyValuePair array - Number of keys does not match number of values");
-
-            int count = keys.Count();
-            var list = new List<KeyValuePair<T, O>>();
-            var keyList = keys.ToArray();
-            var valueList = values.ToArray();
-            for (int i = 0; i < count; i++)
-            {
-                list.Add(new KeyValuePair<T, O>(keyList[i], valueList[i]));
-            }
-            return list.ToArray();
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void AddVariableData(this Exception e, object key, object value) => e.Data.Add(key, value);
 
         /// <summary>
         /// Sanitizes an object and does basic checking to return either TRUE or FALSE.
@@ -162,31 +140,4 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <inheritdoc cref="SanitizeToInt(object)"/>
         public static string SanitizeOrDefaultString(this object value) => SanitizeToString(value) ?? string.Empty;
     }
-
-}
-
-namespace SqlKata
-{
-    /// <summary>s
-    /// Contains various extension methods for <see cref="SqlKata.Query"/> class
-    /// </summary>
-    public static class QueryAsExtensions
-    {
-        /// <param name="updateCol">Column to Update</param>
-        /// <param name="newVal">Value for the column</param>
-        /// <inheritdoc cref="SqlKata.Query.AsInsert(IEnumerable{KeyValuePair{string, object}}, bool)"/>
-        /// <param name="qry"/>
-        /// <param name="returnID"/>
-        public static SqlKata.Query AsInsert(this SqlKata.Query qry, string updateCol, object newVal, bool returnID = false)
-            => qry.AsInsert(RFBCodeWorks.DataBaseObjects.Extensions.ConvertToKeyValuePairArray(updateCol, newVal), returnID);
-
-        /// <param name="updateCol">Column to Update</param>
-        /// <param name="newVal">Value for the column</param>
-        /// <inheritdoc cref="SqlKata.Query.AsUpdate(IEnumerable{KeyValuePair{string, object}})" />
-        /// <param name="qry"/>
-        public static SqlKata.Query AsUpdate(this SqlKata.Query qry, string updateCol, object newVal)
-            => qry.AsUpdate(RFBCodeWorks.DataBaseObjects.Extensions.ConvertToKeyValuePairArray(updateCol, newVal));
-
-    }
-    
 }
