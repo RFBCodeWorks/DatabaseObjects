@@ -30,16 +30,16 @@ namespace RFBCodeWorks.DataBaseObjects
             return new DataBaseTable(DataBaseReference, tableName);
         }
 
-        /// <inheritdoc cref="SimpleKeyDatabaseTable.SimpleKeyDatabaseTable"/>
-        public virtual SimpleKeyDatabaseTable CreateTable(string tableName, string primaryKey)
+        /// <inheritdoc cref="PrimaryKeyTable.PrimaryKeyTable"/>
+        public virtual PrimaryKeyTable CreateTable(string tableName, string primaryKey)
         {
             if (string.IsNullOrWhiteSpace(tableName)) throw new ArgumentException(nameof(tableName));
             if (string.IsNullOrWhiteSpace(primaryKey)) throw new ArgumentException(nameof(primaryKey));
-            return new SimpleKeyDatabaseTable(DataBaseReference, tableName, primaryKey);
+            return new PrimaryKeyTable(DataBaseReference, tableName, primaryKey);
         }
 
-        /// <inheritdoc cref="CompoundKeyDatabaseTable.CompoundKeyDatabaseTable"/>
-        public virtual CompoundKeyDatabaseTable CreateTable(string tableName, params string[] compoundKeyColumns)
+        /// <inheritdoc cref="CompositeKeyTable.CompositeKeyTable"/>
+        public virtual CompositeKeyTable CreateTable(string tableName, params string[] compoundKeyColumns)
         {
             if (string.IsNullOrWhiteSpace(tableName)) throw new ArgumentException(nameof(tableName));
             if (compoundKeyColumns is null) throw new ArgumentNullException(nameof(compoundKeyColumns));
@@ -49,7 +49,7 @@ namespace RFBCodeWorks.DataBaseObjects
                 if (string.IsNullOrWhiteSpace(s))
                     throw new ArgumentException("atleast one of the column names in the compoundKeyColumns parameter was null or empty!");
             }
-            return new CompoundKeyDatabaseTable(DataBaseReference, tableName, compoundKeyColumns);
+            return new CompositeKeyTable(DataBaseReference, tableName, compoundKeyColumns);
         }
     }
     

@@ -2,8 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using RFBCodeWorks.SqlKata.Extensions;
+using SqlKata.Compilers;
 
 namespace RFBCodeWorks.DataBaseObjects
 {
@@ -64,123 +68,129 @@ namespace RFBCodeWorks.DataBaseObjects
         #region < GetDataTable >
 
         /// <summary>
-        /// Request the columns from the table.
+        /// Request the columns from the table via a <see cref="Query"/>
         /// </summary>
-        /// <param name="columns">The columns retrieve. <br/> <see langword="null"/>, an empty array, or "*" will return the entire column list.</param>
+        /// <param name="columns">The columns to retrieve. 
+        /// <br/> Note: <see langword="null"/>, an empty array, or "*" will return the entire column list.
+        /// <br/> <see cref="Query.Select(string[])"/>
+        /// </param>
         /// <returns>a new DataTable with the results of the query</returns>
+        /// <remarks>
+        /// Uses the following queries to build the statement:
+        /// <br/> - <see cref="Query.Select(string[])"/>
+        /// </remarks>
         DataTable GetDataTable(params string[] columns);
 
         /// <inheritdoc cref="GetDataTable(string[])"/>
-        /// <inheritdoc cref="BaseQuery{Q}.WhereRaw(string, object[])"/>
-        /// <param name="columns"/>
-        /// <param name="WhereString">the raw 'WHERE' statement</param>
-        DataTable GetDataTable(string[] columns, string WhereString);
-
-        /// <param name="bindings">The bindings to apply to the DBCommand</param>
-        /// <inheritdoc cref="GetDataTable(string[], string)"/>
-        /// <param name="WhereString"/>
-        /// <param name="columns"/>
-        DataTable GetDataTable(string[] columns, string WhereString, params object[] bindings);
-
-        /// <inheritdoc cref="GetDataTable(string[])"/>
-        Task<DataTable> GetDataTableAsync(params string[] columns);
-
-        /// <inheritdoc cref="GetDataTable(string[], string)"/>
-        Task<DataTable> GetDataTableAsync(string[] columns, string WhereString);
+        Task<DataTable> GetDataTableAsync(CancellationToken cancellationToken = default, params string[] columns);
 
         #endregion
 
-        #region < Insert / UpSert >
+        #region < GetValue >
 
-        /// <param name="ColNames">array of column names to update</param>
-        /// <param name="ColValues">array of values to pass into the table</param>
-        /// <inheritdoc cref="Upsert(string, object, IEnumerable{string}, IEnumerable{object}, bool)"/>
-        int Insert(IEnumerable<string> ColNames, IEnumerable<object> ColValues);
+        /// <inheritdoc cref="DBOps.GetValue(System.Data.Common.DbConnection, string, string, object, string, Compiler)"/>
+        object GetValue(string lookupColName, object lookupVal, string returnColName);
+
+        /// <inheritdoc cref="DBOps.GetValueAsync(System.Data.Common.DbConnection, string, string, object, string, Compiler, System.Threading.CancellationToken)"/>
+        Task<object> GetValueAsync(string lookupColName, object lookupVal, string returnColName, System.Threading.CancellationToken cancellationToken = default);
+
+        #endregion
+
+        #region < Insert  >
+
+        /// <summary>Insert a new row into the table.</summary>
+        /// <param name="values">a collection of ColumnName (key) and values</param>
+        /// <inheritdoc cref="DbCommand.ExecuteNonQuery"/>
+        int Insert(IEnumerable<KeyValuePair<string,object>> values);
+
+        /// <summary>Insert a new row into the table.</summary>
+        /// <param name="columns">array of column names. This should be all of the required columns within the table. The number of items must match (and be in the same order as) the <paramref name="values"/>values</param>
+        /// <param name="values">array of values to pass into the table</param>
+        /// <inheritdoc cref="DbCommand.ExecuteNonQuery"/>
+        int Insert(IEnumerable<string> columns, IEnumerable<object> values);
+
+        /// <inheritdoc cref="Insert(IEnumerable{KeyValuePair{string, object}})"/>
+        /// <inheritdoc cref="DbCommand.ExecuteNonQueryAsync(CancellationToken)"/>
+        Task<int> InsertAsync(IEnumerable<KeyValuePair<string, object>> values, CancellationToken cancellationToken = default);
+
+        /// <inheritdoc cref="Insert(IEnumerable{string}, IEnumerable{object})"/>
+        /// <inheritdoc cref="DbCommand.ExecuteNonQueryAsync(CancellationToken)"/>
+        Task<int> InsertAsync(IEnumerable<string> columns, IEnumerable<object> values, CancellationToken cancellationToken = default);
+
+        #endregion
+
+        #region < Update >
 
         /// <summary>
-        /// Check the table if a value exists. If it does, update it. If it does not, insert the value into a new row. <br/>
-        /// If multiple matches are found, updates all the values accordingly.
+        /// Update the table's values. Any rows that are matched by the <paramref name="whereStatements"/> will be updated.
         /// </summary>
-        /// <param name="SearchCol">column name to search within</param>
-        /// <param name="SearchValue">value to search for within the <paramref name="SearchCol"/></param>
-        /// <param name="UpdateColName">column name to apply the <paramref name="UpdateColValue"/> into</param>
-        /// <param name="UpdateColValue">new value for the field</param>
-        /// <param name="InsertOnly">If TRUE, will not update the value in the table if any value already exists</param>
-        /// <returns><inheritdoc cref="IDbCommand.ExecuteNonQuery"/></returns>
-        int Upsert(string SearchCol, object SearchValue, string UpdateColName, object UpdateColValue, bool InsertOnly = false);
+        /// <param name="values">a collection of ColumnName (key) and values</param>
+        /// <param name="whereStatements">The collection of <see cref="IWhereCondition"/>s that will be used to generate the sql</param>
+        /// <inheritdoc cref="DbCommand.ExecuteNonQuery"/>
+        int Update(IEnumerable<KeyValuePair<string, object>> values, params IWhereCondition[] whereStatements);
 
-        /// <param name="UpdateColNames">array of column names to update</param>
-        /// <param name="UpdateColValues">array of values to pass into the table</param>
-        /// <inheritdoc cref="Upsert(string, object, string, object, bool)"/>
-        /// <param name="SearchCol"/> <param name="SearchValue"/> <param name="InsertOnly"/>
-        int Upsert(string SearchCol, object SearchValue, IEnumerable<string> UpdateColNames, IEnumerable<object> UpdateColValues, bool InsertOnly = false);
+        /// <summary>
+        /// Update the table's values. Any rows that are matched by the <paramref name="whereStatements"/> will be updated.
+        /// </summary>
+        /// <param name="columns">array of column names. This should be all of the required columns within the table. The number of items must match (and be in the same order as) the <paramref name="values"/>values</param>
+        /// <param name="values">array of values to pass into the table.</param>
+        /// <param name="whereStatements">The collection of <see cref="IWhereCondition"/>s that will be used to generate the sql</param>
+        /// <inheritdoc cref="Insert(IEnumerable{string}, IEnumerable{object})"/>
+        /// <inheritdoc cref="DbCommand.ExecuteNonQuery"/>
+        int Update(IEnumerable<string> columns, IEnumerable<object> values, params IWhereCondition[] whereStatements);
+
+        /// <inheritdoc cref="Update(IEnumerable{KeyValuePair{string, object}}, IWhereCondition[])"/>
+        /// <inheritdoc cref="DbCommand.ExecuteNonQueryAsync(CancellationToken)"/>
+        Task<int> UpdateAsync(IEnumerable<KeyValuePair<string, object>> values, CancellationToken cancellationToken = default, params IWhereCondition[] whereStatements);
+
+        /// <inheritdoc cref="Update(IEnumerable{string}, IEnumerable{object}, IWhereCondition[])"/>
+        /// <inheritdoc cref="DbCommand.ExecuteNonQueryAsync(CancellationToken)"/>
+        Task<int> UpdateAsync(IEnumerable<string> columns, IEnumerable<object> values, CancellationToken cancellationToken = default, params IWhereCondition[] whereStatements);
 
         #endregion
+
     }
 
     /// <summary>
     /// DataBase table that has a single column as a primary key
     /// </summary>
-    public interface ISimpleKeyDataBaseTable : IDataBaseTable
+    public interface IPrimaryKeyTable : IDataBaseTable
     {
         /// <summary>
         /// Name of the PrimaryKey Column
         /// </summary>
         string PrimaryKey { get; }
 
-        #region < DataReturn >
+        #region < GetValue >
 
         /// <summary>
-        /// Search the table for the value, then return the result
+        /// Search the table's primary key column for the <paramref name="primaryKey"/>, then return the result from the <paramref name="returnColumn"/>
         /// </summary>
-        /// <param name="primaryKeyValue">Search the primary key column for this value</param>
-        /// <param name="returnColName">Name of the column to return</param>
+        /// <param name="primaryKey">Search the primary key column for this value</param>
+        /// <param name="returnColumn">Name of the column to return</param>
         /// <returns>If successful, return the object. Otherwise return null.</returns>
-        object GetValue(object primaryKeyValue, string returnColName);
+        object GetValue(object primaryKey, string returnColumn);
 
-        /// <returns>If successful, return the <see langword="bool"/> value. <see cref="DBNull"/> converts to <see langword="null"/>.</returns>
-        /// <inheritdoc cref="GetValue"/>
-        bool? GetValueAsBool(object primaryKeyValue, string returnColName);
-
-        /// <returns>If successful, return the <see cref="string"/> value. <see cref="DBNull"/> converts to <see langword="null"/>.</returns>
-        /// <inheritdoc cref="GetValue"/>
-        string GetValueAsString(object primaryKeyValue, string returnColName);
-
-        /// <returns>If successful, return the <see cref="int"/> value. <see cref="DBNull"/> converts to <see langword="null"/>.</returns>
-        /// <inheritdoc cref="GetValue"/>
-        int? GetValueAsInt(object primaryKeyValue, string returnColName);
-
-        /// <returns>A task that <inheritdoc cref="GetValue(object, string)"/></returns>
-        /// <inheritdoc cref="GetValue"/>
-        Task<object> GetValueAsync(object primaryKeyValue, string returnColName);
-
-        /// <returns>A task that <inheritdoc cref="GetValueAsBool(object, string)"/></returns>
-        /// <inheritdoc cref="GetValueAsync"/>
-        Task<bool?> GetValueAsBoolAsync(object primaryKeyValue, string returnColName);
-
-        /// <returns>A task that <inheritdoc cref="GetValueAsString(object, string)"/></returns>
-        /// <inheritdoc cref="GetValueAsync"/>
-        Task<string> GetValueAsStringAsync(object primaryKeyValue, string returnColName);
-
-        /// <returns>A task that <inheritdoc cref="GetValueAsInt(object, string)"/></returns>
-        /// <inheritdoc cref="GetValueAsync"/>
-        Task<int?> GetValueAsIntAsync(object primaryKeyValue, string returnColName);
+        /// <inheritdoc cref="GetValue(object, string)"/>
+        /// <inheritdoc cref="DBOps.GetValueAsync(System.Data.Common.DbConnection, string, string, object, string, Compiler, CancellationToken)"/>
+        Task<object> GetValueAsync(object primaryKey, string returnColumn, CancellationToken cancellationToken = default);
 
         #endregion
 
         #region < GetDataTable >
 
         /// <summary>
-        /// Search the table's primary key column for the <paramref name="primaryKeyValue"/>, then return the entire row.
+        /// Search the table's primary key column for the <paramref name="primaryKey"/>, then return the entire row.
         /// </summary>
         /// <returns>
         /// If a matching primary key is found, return the corresponding <see cref="DataRow"/>. Otherwise return null.
         /// </returns>
         /// <inheritdoc cref="GetValue(object, string)"/>
-        DataRow GetDataRow(object primaryKeyValue);
+        DataRow GetDataRow(object primaryKey);
 
         /// <inheritdoc cref="GetDataRow(object)"/>
-        Task<DataRow> GetDataRowAsync(object primaryKeyValue);
+        /// <inheritdoc cref="IDatabase.GetDataRowAsync(Query, CancellationToken)"/>
+        Task<DataRow> GetDataRowAsync(object primaryKey, CancellationToken cancellationToken = default);
 
         #endregion
 
@@ -206,22 +216,23 @@ namespace RFBCodeWorks.DataBaseObjects
         Dictionary<X, Y> GetDictionary<X, Y>(Func<DataTable, Dictionary<X, Y>> dictionaryBuilder, params string[] valueColumns);
 
         #endregion
+
     }
 
     /// <summary>
     /// DataBase table that has a compound / composite key consisting of 2 or more columns
     /// </summary>
-    public interface ICompoundKeyDataBaseTable : IDataBaseTable
+    public interface ICompositeKeyTable : IDataBaseTable
     {
         /// <summary>
         /// The array of column names that make up the compound key
         /// </summary>
-        string[] CompoundKeyColumns { get; }
+        string[] CompositeKeyColumns { get; }
 
         /// <summary>
         /// The number of columns that make up the compound key
         /// </summary>
-        int CompoundKeyColumnCount { get; }
+        int CompositeColumnCount { get; }
 
         #region < GetDataRow >
 
@@ -235,7 +246,7 @@ namespace RFBCodeWorks.DataBaseObjects
         DataRow GetDataRow(object[] CompoundKeyValues);
 
         /// <inheritdoc cref="GetDataRow(object[])"/>
-        Task<DataRow> GetDataRowAsync(object[] CompoundKeyValues);
+        Task<DataRow> GetDataRowAsync(object[] CompoundKeyValues, CancellationToken cancellationToken = default);
 
         #endregion
     }

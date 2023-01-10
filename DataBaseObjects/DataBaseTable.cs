@@ -1,10 +1,13 @@
-﻿using SqlKata;
+﻿using RFBCodeWorks.SqlKata.Extensions;
+using SqlKata.Compilers;
+using SqlKata;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RFBCodeWorks.DataBaseObjects
@@ -35,7 +38,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <summary>
         /// Gets the connection string from the <see cref="Parent"/>
         /// </summary>
-        protected virtual IDbConnection GetDatabaseConnection() => Parent.GetDatabaseConnection();
+        protected virtual DbConnection GetDatabaseConnection() => Parent.GetConnection();
 
         #region < Generate SQL Statements >
 
@@ -71,7 +74,7 @@ namespace RFBCodeWorks.DataBaseObjects
 
         #endregion
 
-        #region < GetDataTable >
+        #region < Get Data >
 
         /// <inheritdoc/>
         public virtual DataTable GetDataTable(params string[] columns)
@@ -79,95 +82,126 @@ namespace RFBCodeWorks.DataBaseObjects
             return Parent.GetDataTable(this.Select(columns));
         }
 
-        /// <inheritdoc/>
-        public virtual DataTable GetDataTable(string[] columns, string WhereString)
+        /// <summary>
+        /// Request a set of columns as a DataTable using a 'WhereRaw' statement
+        /// </summary>
+        /// <param name="columns">The columns to request from the table</param>
+        /// <param name="whereRaw">
+        /// The raw 'WHERE' statement. 
+        /// <br/> - Any column names specified should be properly wrapped for this database type
+        /// <br/> - Each <paramref name="bindings"/> should be indiciated by a single '?' within the string.
+        /// <para/>
+        /// Examples:
+        /// <br/>"[Id] = ?"   --> The '?' will be replaced by the first object within <paramref name="bindings"/>
+        /// <br/>"? = ?"   --> A binding array of { "Id", 0 } would result to sql of:  'Id' = 0, which may be invalid.
+        /// <br/>"?? = ?"   --> A binding array of { "Id", 0 } will throw an exception since 3 <paramref name="bindings"/> were expected.
+        /// </param>
+        /// <param name="bindings">
+        /// An array of values to apply to the raw 'Where' statement. They will be applied in the order they appear, replacing each '?' as it arrives within the string.
+        /// </param>
+        /// <returns>A datatable that is the result of the query</returns>
+        /// <remarks>
+        /// Uses the following queries to build the statement:
+        /// <br/> - <inheritdoc cref="GetDataTable(string[])"/>
+        /// <br/> - <inheritdoc cref="BaseQuery{Q}.WhereRaw(string, object[])"/>
+        /// </remarks>
+        public virtual DataTable GetDataTable(string[] columns, string whereRaw, params object[] bindings)
         {
-            return Parent.GetDataTable(this.Select(columns).WhereRaw(WhereString));
+            return Parent.GetDataTable(this.Select(columns).WhereRaw(whereRaw, bindings));
         }
 
         /// <inheritdoc/>
-        public virtual DataTable GetDataTable(string[] columns, string WhereString, params object[] bindings)
+        public virtual Task<DataTable> GetDataTableAsync(CancellationToken cancellationToken = default, params string[] columns)
         {
-            return Parent.GetDataTable(this.Select(columns).WhereRaw(WhereString, bindings));
-        }
-
-        /// <inheritdoc/>
-        public virtual Task<DataTable> GetDataTableAsync(params string[] columns)
-        {
-            return Task.Run(() => GetDataTable(columns));
-        }
-
-        /// <inheritdoc/>
-        public virtual Task<DataTable> GetDataTableAsync(string[] columns, string WhereString)
-        {
-            return Task.Run(() => GetDataTable(columns, WhereString));
+            return Parent.GetDataTableAsync(this.Select(columns), cancellationToken);
         }
 
         /// <inheritdoc cref="GetDataTable(string[], string, object[])"/>
-        public virtual Task<DataTable> GetDataTableAsync(string[] columns, string WhereString, params object[] bindings)
+        public virtual Task<DataTable> GetDataTableAsync(string[] columns, string whereRaw, object[] bindings, CancellationToken cancellationToken = default)
         {
-            return Task.Run(() => GetDataTable(columns, WhereString, bindings));
+            return Parent.GetDataTableAsync(this.Select(columns).WhereRaw(whereRaw, bindings), cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public virtual object GetValue(string lookupColName, object lookupVal, string returnColName)
+        {
+            return Parent.GetValue(TableName, lookupColName, lookupVal, returnColName);
+        }
+
+        /// <inheritdoc/>
+        public virtual Task<object> GetValueAsync(string lookupColName, object lookupVal, string returnColName, CancellationToken cancellationToken = default)
+        {
+            return Parent.GetValueAsync(this.TableName, lookupColName, lookupVal, returnColName, cancellationToken);
         }
 
         #endregion
 
-        #region < Insert / Update >
+        #region < Insert >
 
         /// <inheritdoc/>
-        public virtual int Insert(IEnumerable<string> ColNames, IEnumerable<object> ColValues)
+        public virtual int Insert(IEnumerable<KeyValuePair<string, object>> values)
         {
-            using (IDbConnection conn = GetDatabaseConnection())
+            return Parent.RunAction(new Query(TableName).AsInsert(values));
+        }
+
+        /// <inheritdoc/>
+        public virtual int Insert(IEnumerable<string> columns, IEnumerable<object> values)
+        {
+            return Insert(columns.CreateKeyValuePairs(values));
+        }
+
+        /// <inheritdoc/>
+        public virtual Task<int> InsertAsync(IEnumerable<KeyValuePair<string, object>> values, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Parent.RunActionAsync(new Query(TableName).AsInsert(values), cancellationToken);            
+        }
+
+        /// <inheritdoc/>
+        public virtual Task<int> InsertAsync(IEnumerable<string> columns, IEnumerable<object> values, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return InsertAsync(columns.CreateKeyValuePairs(values, cancellationToken), cancellationToken);
+        }
+
+        #endregion
+
+        #region < Update >
+
+        /// <inheritdoc/>
+        public virtual int Update(IEnumerable<KeyValuePair<string, object>> values, params IWhereCondition[] whereStatements)
+        {
+            Query query = new Query(TableName, "Update_Query").AsUpdate(values);
+            foreach (IWhereCondition where in whereStatements)
             {
-                using (var cmd = conn.CreateCommand())
-                {
-                    Query query = new Query(TableName).AsInsert(Extensions.ConvertToKeyValuePairArray(ColNames, ColValues));
-                    cmd.CommandText = Parent.Compiler.Compile(query).ToString();
-                    conn.Open();
-                    int i = cmd.ExecuteNonQuery();
-                    conn.Close();
-                    return i;                    
-                }
+                where?.ApplyToQuery(query);
             }
+            return Parent.RunAction(query);
         }
 
-        /// <summary>
-        /// Run the Upsert commands
-        /// </summary>
-        /// <inheritdoc cref="Upsert(string, object, IEnumerable{string}, IEnumerable{object}, bool)"/>
-        protected virtual int RunUpsert(string SearchCol, object SearchValue, IEnumerable<KeyValuePair<string,object>> UpdatePairs, bool InsertOnly = false)
+        /// <inheritdoc/>
+        public int Update(IEnumerable<string> columns, IEnumerable<object> values, params IWhereCondition[] whereStatements)
         {
-            using (IDbConnection conn = GetDatabaseConnection())
+            return Update(columns.CreateKeyValuePairs(values), whereStatements);
+        }
+
+        /// <inheritdoc/>
+        public virtual Task<int> UpdateAsync(IEnumerable<KeyValuePair<string, object>> values, CancellationToken cancellationToken = default, params IWhereCondition[] whereStatements)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Query query = new Query(TableName, "Update_Query").AsUpdate(values);
+            foreach (IWhereCondition where in whereStatements)
             {
-                using (var cmd = conn.CreateCommand())
-                {
-                    Query selectQry = new Query(TableName).Select().Where(SearchCol, SearchValue);
-                    cmd.CommandText = Parent.Compiler.Compile(selectQry).ToString();
-                    conn.Open();
-                    object value = cmd.ExecuteScalar();
-                    bool isnull = value is null || value is DBNull;
-
-                    if (InsertOnly && !isnull) return 0; //Exit if value is not null and insertOnly = true
-
-                    Query query = isnull ?
-                        new Query(TableName).AsInsert(UpdatePairs.Concat(new KeyValuePair<string, object>[] { new KeyValuePair<string, object>(SearchCol, SearchValue)})) :    // Produce INSERT query
-                        new Query(TableName).AsUpdate(UpdatePairs).Where(SearchCol, SearchValue);     // Produce UPDATE query
-
-                    cmd.CommandText = Parent.Compiler.Compile(query).ToString();
-                    return cmd.ExecuteNonQuery();
-                }
+                cancellationToken.ThrowIfCancellationRequested();
+                where?.ApplyToQuery(query);
             }
+            return Parent.RunActionAsync(query, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public int Upsert(string SearchCol, object SearchValue, string UpdateColName, object UpdateColValue, bool InsertOnly = false)
+        public Task<int> UpdateAsync(IEnumerable<string> columns, IEnumerable<object> values, CancellationToken cancellationToken = default, params IWhereCondition[] whereStatements)
         {
-            return RunUpsert(SearchCol, SearchValue, Extensions.ConvertToKeyValuePairArray(UpdateColName, UpdateColValue), InsertOnly);
-        }
-
-        /// <inheritdoc/>
-        public int Upsert(string SearchCol, object SearchValue, IEnumerable<string> UpdateColNames, IEnumerable<object> UpdateColValues, bool InsertOnly = false)
-        {
-            return RunUpsert(SearchCol, SearchValue, Extensions.ConvertToKeyValuePairArray(UpdateColNames, UpdateColValues), InsertOnly);
+            return UpdateAsync(columns.CreateKeyValuePairs(values, cancellationToken), cancellationToken, whereStatements);
         }
 
         #endregion
@@ -182,16 +216,20 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <returns>The number of rows deleted</returns>
         public virtual int DeleteRows(string searchCol, object searchValue)
         {
-            using (var conn = GetDatabaseConnection())
-            {
-                using (var cmd = conn.CreateCommand())
-                {
-                    Query deleteQuery = new Query(TableName, "This will delete data from the table!").Where(searchCol, searchValue).AsDelete();
-                    cmd.CommandText = Parent.Compiler.Compile(deleteQuery).ToString();
-                    conn.Open();
-                    return cmd.ExecuteNonQuery();
-                }
-            }
+            return Parent.RunAction(new Query(TableName, "This will delete data from the table!").Where(searchCol, searchValue).AsDelete());
+        }
+
+        /// <summary>
+        /// Delete all rows where the <paramref name="searchCol"/> value matches the <paramref name="searchValue"/>
+        /// </summary>
+        /// <param name="searchCol">The column name to search</param>
+        /// <param name="searchValue">The value of the column to search for exactly</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>The number of rows deleted</returns>
+        /// <inheritdoc cref="DbCommand.ExecuteNonQueryAsync(CancellationToken)"/>
+        public virtual Task<int> DeleteRowsAsync(string searchCol, object searchValue, CancellationToken cancellationToken = default)
+        {
+            return Parent.RunActionAsync(new Query(TableName, "This will delete data from the table!").Where(searchCol, searchValue).AsDelete());
         }
 
         #endregion
