@@ -22,7 +22,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <typeparam name="K">The type of object found within the <paramref name="keyColumn"/></typeparam>
         /// <typeparam name="V">The type of object found within the <paramref name="valueColumn"/></typeparam>
         /// <returns>a new <see cref="Dictionary{K, V}"/> object</returns>
-        public static Dictionary<K, V> BuildDictionary<K, V>(DataTable table, Func<object, K> keySanitizer, Func<object, V> valueSanitizer, int valueColumn = 1, int keyColumn = 0)
+        public static Dictionary<K, V> BuildDictionary<K, V>(this DataTable table, Func<object, K> keySanitizer, Func<object, V> valueSanitizer, int valueColumn = 1, int keyColumn = 0)
         {
             if (table is null) throw new ArgumentNullException("Cannot construct Dictionary from a null DataTable Object");
             if (keySanitizer is null) throw new ArgumentNullException("keySanitizer parameter is null");
@@ -44,7 +44,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <br/> Example: A table with an integer ID column, and all other values are strings.
         /// </summary>
         /// <inheritdoc cref="BuildDictionary{K, V}(DataTable, Func{object, K}, Func{object, V}, int, int)"/>
-        public static Dictionary<K, V[]> BuildArrayDictionary<K, V>(DataTable table, Func<object, K> keySanitizer, Func<object, V> valueSanitizer)
+        public static Dictionary<K, V[]> BuildArrayDictionary<K, V>(this DataTable table, Func<object, K> keySanitizer, Func<object, V> valueSanitizer)
         {
             if (table is null) throw new ArgumentNullException("Cannot construct Dictionary from a null DataTable Object");
             if (keySanitizer is null) throw new ArgumentNullException("keySanitizer parameter is null");
