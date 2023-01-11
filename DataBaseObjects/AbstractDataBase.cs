@@ -56,13 +56,13 @@ namespace RFBCodeWorks.DataBaseObjects
         #region < Test Connection >
 
         /// <inheritdoc cref="DBOps.TestConnection(IDbConnection, out Exception)"/>
-        public bool TestDatabaseConnection(out Exception e) => DBOps.TestConnection(this.GetConnection(), out e);
+        public bool TestConnection(out Exception e) => DBOps.TestConnection(this.GetConnection(), out e);
 
-        /// <inheritdoc cref="TestDatabaseConnection(out Exception)"/>
-        public bool TestDatabaseConnection() => DBOps.TestConnection(this.GetConnection());
+        /// <inheritdoc cref="TestConnection(out Exception)"/>
+        public bool TestConnection() => DBOps.TestConnection(this.GetConnection());
 
         /// <inheritdoc cref="DBOps.TestConnectionAsync(DbConnection, CancellationToken)"/>
-        public Task<(bool, Exception)> TestDatabaseConnectionAsync(CancellationToken cancellationToken = default) => DBOps.TestConnectionAsync(this.GetConnection(), cancellationToken);
+        public Task<(bool, Exception)> TestConnectionAsync(CancellationToken cancellationToken = default) => DBOps.TestConnectionAsync(this.GetConnection(), cancellationToken);
 
         #endregion
 

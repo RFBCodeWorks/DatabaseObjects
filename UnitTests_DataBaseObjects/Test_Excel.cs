@@ -54,7 +54,7 @@ namespace ExcelTests
         {
             //Test out the Select Statement Builder Here:
             var wk = new TestWorkbook();
-            Assert.IsTrue(wk.TestDatabaseConnection());
+            Assert.IsTrue(wk.TestConnection());
         }
 
         [TestMethod()]
