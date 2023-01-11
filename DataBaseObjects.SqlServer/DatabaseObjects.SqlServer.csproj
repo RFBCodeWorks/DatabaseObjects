@@ -20,7 +20,8 @@
       <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
       <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
       <PackageReadmeFile>Readme.md</PackageReadmeFile>
-      <Description>Adds the 'SqlServerDatabase' class to the RFBCodeWorks.DataBaseObjects.DataBaseTypes namespace</Description>
+      <Description>Adds the 'SqlServerDatabase' class to the RFBCodeWorks.DataBaseObjects.DataBaseTypes namespace.
+This class uses System.Data.Sqlclient's SqlConnection and SqlCommand to communicate with the db, and Sqlkata.Compilers.SqlServerCompiler to compile the queries.</Description>
         
     </PropertyGroup>
 

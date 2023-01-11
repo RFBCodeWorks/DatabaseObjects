@@ -21,13 +21,14 @@
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
 
-        <Description>Adds the 'SqlLiteDatBase' class to the RFBCodeWorks.DataBaseObjects.DataBaseTypes namespace</Description>
+        <Description>Adds the 'SqlLiteDatabase' class to the RFBCodeWorks.DataBaseObjects.DataBaseTypes namespace.
+This class uses System.Data.Sqlite.Core's SqliteConnection and SqliteCommand to communicate with the db, and Sqlkata.Compilers.SqliteCompiler to compile the queries.</Description>
     </PropertyGroup>
 
 
     <ItemGroup>
         <!-- License File housed in top-level of repo -->
-        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
         <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
     <ItemGroup>

@@ -21,7 +21,7 @@
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
         <PackageTags>SqlKata, Access, Excel, Sql</PackageTags>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
-        <Description>Providers SqlKata Sql compilers for Microsoft Access and Excel Workbooks</Description>
+        <Description>Provides SqlKata compilers for Microsoft Access and Excel Workbooks</Description>
     </PropertyGroup>
     
     <ItemGroup>
