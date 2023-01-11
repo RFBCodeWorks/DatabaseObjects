@@ -58,6 +58,12 @@ namespace RFBCodeWorks.MsAccessDao
             return GetProperty(db, propertyIndex)?.Value;
         }
 
+        /// <inheritdoc cref="InitializeProperty{T}(Dao.Database, string, T, DataTypeEnum)"/>
+        public static T InitializeProperty<T>(this Dao.Database db, string propertyName, T defaultValue)
+        {
+            return InitializeProperty(db, propertyName, defaultValue, GetDataTypeEnum<T>());
+        }
+
         /// <summary>
         /// Reads the value of a property by its name. 
         /// <br/>If the property does not exist, attempt to set it to the <paramref name="defaultValue"/>
@@ -66,18 +72,19 @@ namespace RFBCodeWorks.MsAccessDao
         /// <returns>The value of the property read from the <paramref name="db"/></returns>
         /// <inheritdoc cref="GetDataTypeEnum{T}"/>
         /// <inheritdoc cref="GetPropertyValue(Dao.Database, string)"/>
-        /// <param name="db"/><param name="propertyName"/>
-        public static T InitializeProperty<T>(this Dao.Database db, string propertyName, T defaultValue)
+        /// <inheritdoc cref="SetProperty{T}(Dao.Database, string, DataTypeEnum, T, bool)"/>
+        /// <param name="db"/><param name="propertyName"/><param name="dataType"/>
+        public static T InitializeProperty<T>(this Dao.Database db, string propertyName, T defaultValue, Dao.DataTypeEnum dataType)
         {
             if (db is null) throw new ArgumentNullException(nameof(db));
-            if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentException("PropertyName cannot be empty!", nameof(propertyName));
+            if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentException($"{nameof(propertyName)} cannot be empty!", nameof(propertyName));
             try
             {
                 return (T)GetPropertyValue(db, propertyName);
             }
             catch (NullReferenceException)
             {
-                return db.SetProperty(propertyName, defaultValue);
+                return db.SetProperty(propertyName, dataType, defaultValue);
             }
         }
 
@@ -87,16 +94,16 @@ namespace RFBCodeWorks.MsAccessDao
             => SetProperty(db, propertyName, GetDataTypeEnum<T>(), value, true);
 
         /// <summary>
-        /// Opens the <paramref name="db"/>, and attempts to update the property. Update or Create the property in the Assigned Database 
+        /// Opens the <paramref name="db"/> then sets the <paramref name="value"/> of the property <paramref name="propertyName"/>.
         /// </summary>
         /// <typeparam name="T">The type of value to set</typeparam>
         /// <param name="propertyName">The name of the property</param>
         /// <param name="value">the value of the property</param>
-        /// <param name="dataType">The datatype of the property - should match the type of property</param>
+        /// <param name="dataType">The enum value representing how the data is stored in the Access database</param>
         /// <param name="db"></param>
         /// <param name="createIfMissing">
         /// If set <see langword="false"/>, will only apply the property if it already exists. <br/>
-        /// If <see langword="true"/>, tries to create the property</param>
+        /// If <see langword="true"/> (default), tries to create the property</param>
         /// <returns>
         /// The current value of the assigned property, if it exists. 
         /// <br/> If it does not exist (or cannot be created), then an exception will be thrown.
@@ -107,7 +114,7 @@ namespace RFBCodeWorks.MsAccessDao
         public static T SetProperty<T>(this Dao.Database db, string propertyName, Dao.DataTypeEnum dataType, T value, bool createIfMissing = true)
         {
             if (db is null) throw new ArgumentNullException(nameof(db));
-            if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentException("PropertyName cannot be empty!", nameof(propertyName));
+            if (string.IsNullOrWhiteSpace(propertyName)) throw new ArgumentException($"{nameof(propertyName)} cannot be empty!", nameof(propertyName));
 
             T ret;
             try
@@ -147,20 +154,25 @@ namespace RFBCodeWorks.MsAccessDao
         /// Retreives the enum translation of the provided type
         /// </summary>
         /// <typeparam name="T">One of the following types: 
-        /// <br/> - <see cref="string"/>
+        /// <br/>  <see cref="DataTypeEnum.dbText"/>
+        /// <br/> - <see cref="string"/> 
         /// <br/> - <see cref="char"/>
+        /// <br/>  <see cref="DataTypeEnum.dbByte"/>
         /// <br/> - <see cref="sbyte"/>
         /// <br/> - <see cref="byte"/>
+        /// <br/>  <see cref="DataTypeEnum.dbInteger"/>
         /// <br/> - <see cref="int"/>
         /// <br/> - <see cref="short"/>
-        /// <br/> - <see cref="long"/>
+        /// <br/>  <see cref="DataTypeEnum.dbSingle"/>
         /// <br/> - <see cref="float"/>
-        /// <br/> - <see cref="Single"/>
-        /// <br/> - <see cref="double"/>
-        /// <br/> - <see cref="Guid"/>
-        /// <br/> - <see cref="decimal"/>
-        /// <br/> - <see cref="bool"/>
-        /// <br/> - <see cref="DateTime"/>
+        /// <br/> - <see cref="Single"/>  
+        /// <br/> OTHER:
+        /// <br/> - <see cref="long"/> (<see cref="DataTypeEnum.dbLong"/>)
+        /// <br/> - <see cref="double"/> (<see cref="DataTypeEnum.dbDouble"/>)
+        /// <br/> - <see cref="Guid"/> (<see cref="DataTypeEnum.dbGUID"/>)
+        /// <br/> - <see cref="decimal"/> (<see cref="DataTypeEnum.dbDecimal"/>)
+        /// <br/> - <see cref="bool"/> (<see cref="DataTypeEnum.dbBoolean"/>)
+        /// <br/> - <see cref="DateTime"/> (<see cref="DataTypeEnum.dbDate"/>)
         /// </typeparam>
         /// <returns>The approrpiate <see cref="Dao.DataTypeEnum"/> for the supplied type </returns>
         public static Dao.DataTypeEnum GetDataTypeEnum<T>()
