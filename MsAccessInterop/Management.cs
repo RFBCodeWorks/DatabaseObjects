@@ -166,9 +166,13 @@ namespace RFBCodeWorks.MsAccessDao
 
         /// <summary>
         /// Gets the string that represents the 'General Language ID' and CountryCode USA
+        /// <br/> Optionall append a password to the string.
         /// </summary>
         /// <param name="password"></param>
-        /// <returns></returns>
+        /// <returns>
+        /// without password: <see cref="Dao.LanguageConstants.dbLangGeneral"/>
+        /// <br/>with <paramref name="password"/>: string.concat( <see cref="Dao.LanguageConstants.dbLangGeneral"/>, ";PWD=", <paramref name="password"/>)
+        /// </returns>
         public static string DbLangGeneral(string password = "")
         {
             if (string.IsNullOrWhiteSpace(password))
