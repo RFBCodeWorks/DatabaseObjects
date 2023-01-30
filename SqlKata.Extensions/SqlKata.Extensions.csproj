@@ -21,7 +21,7 @@
     <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
       <PackageReadmeFile>Readme.md</PackageReadmeFile>
 
-      <PackageTags>SqlKata, DataBase</PackageTags>
+      <PackageTags>SqlKata, Database</PackageTags>
     <Description>
           Contains several Extension Methods for the SqlKata library. Including but not limited to:
           - ToDbCommand() -- Create a System.Data.Common.DbCommand of a specified type from a Query object

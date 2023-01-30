@@ -152,7 +152,7 @@ namespace RFBCodeWorks.DataBaseObjects
     }
 
     /// <summary>
-    /// DataBase table that has a single column as a primary key
+    /// Database table that has a single column as a primary key
     /// </summary>
     public interface IPrimaryKeyTable : IDataBaseTable
     {
@@ -220,7 +220,7 @@ namespace RFBCodeWorks.DataBaseObjects
     }
 
     /// <summary>
-    /// DataBase table that has a compound / composite key consisting of 2 or more columns
+    /// Database table that has a compound / composite key consisting of 2 or more columns
     /// </summary>
     public interface ICompositeKeyTable : IDataBaseTable
     {

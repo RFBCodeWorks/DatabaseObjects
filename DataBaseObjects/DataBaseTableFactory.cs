@@ -5,7 +5,7 @@ using System.Text;
 namespace RFBCodeWorks.DataBaseObjects
 {
     /// <summary>
-    /// Factory to create DataBase Tables specific to the a database
+    /// Factory to create Database Tables specific to the a database
     /// </summary>
     public class DataBaseTableFactory
     {

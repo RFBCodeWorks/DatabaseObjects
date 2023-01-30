@@ -25,16 +25,16 @@
         <PackageReleaseNotes></PackageReleaseNotes>
 
         <Description>
-            A library that is meant to extend the SqlKata Query Builder with objects that represent DataBase and DataBase Tables. This allows a 'Database' object with its own tables to be constructed, then queried more easily via methods that help build (or run) the query.
+            A library that is meant to extend the SqlKata Query Builder with objects that represent Database and Database Tables. This allows a 'Database' object with its own tables to be constructed, then queried more easily via methods that help build (or run) the query.
 
             This differs from Dapper and SqlKata.Execution (which uses Dapper) in that it models the concept of the database, but it also returns raw values and DataTables. SqlKata is just being used behind the scenes to generate the SQL commands.
 
             Example:
             The 'DataBaseTable.Select(params string[] columns)' method will return a query that requests the specified columns from the DataBaseTable object. The TableName is descibed as a property of the DataBaseTable object.
 
-            The 'DataBaseTable.GetDataTable(params string[] columns)' will use the method described above to create the query, then will run the query against the parent DataBase object, and finally return a System.Data.DataTable.
+            The 'DataBaseTable.GetDataTable(params string[] columns)' will use the method described above to create the query, then will run the query against the parent Database object, and finally return a System.Data.DataTable.
         </Description>
-        <PackageTags>SqlKata, DataBase</PackageTags>
+        <PackageTags>SqlKata, Database</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
