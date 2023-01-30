@@ -14,7 +14,7 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// <summary>
         /// Represents an Excel Worksheet that does not specify a primary key
         /// </summary>
-        public class WorkSheet : RFBCodeWorks.DatabaseObjects.DataBaseTable
+        public class WorkSheet : RFBCodeWorks.DatabaseObjects.DatabaseTable
         {
             /// <summary>
             /// Create a new Worksheet object

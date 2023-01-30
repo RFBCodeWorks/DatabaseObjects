@@ -23,11 +23,11 @@ namespace RFBCodeWorks.DatabaseObjects
         /// </summary>
         public IDatabase DataBaseReference { get; }
 
-        /// <inheritdoc cref="DataBaseTable.DataBaseTable"/>
-        public virtual DataBaseTable CreateTable(string tableName)
+        /// <inheritdoc cref="DatabaseTable.DatabaseTable"/>
+        public virtual DatabaseTable CreateTable(string tableName)
         {
             if (string.IsNullOrWhiteSpace(tableName)) throw new ArgumentException(nameof(tableName));
-            return new DataBaseTable(DataBaseReference, tableName);
+            return new DatabaseTable(DataBaseReference, tableName);
         }
 
         /// <inheritdoc cref="PrimaryKeyTable.PrimaryKeyTable"/>
