@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using RFBCodeWorks.DataBaseObjects;
+using RFBCodeWorks.DatabaseObjects;
 using SqlKata;
 using System.Runtime.CompilerServices;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// Contains various extension methods 

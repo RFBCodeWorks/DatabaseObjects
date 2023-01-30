@@ -10,19 +10,19 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// Abstract base class for a Table within a database
     /// </summary>
-    public class DataBaseTable : IDataBaseTable
+    public class DatabaseTable : IDatabaseTable
     { 
         /// <summary>
-        /// Create a new <see cref="DataBaseTable"/>
+        /// Create a new <see cref="DatabaseTable"/>
         /// </summary>
         /// <param name="parent">parent <see cref="IDatabase"/> object this table belongs to</param>
         /// <param name="tableName"><inheritdoc cref="TableName" path="*"/></param>
-        public DataBaseTable(IDatabase parent, string tableName)
+        public DatabaseTable(IDatabase parent, string tableName)
         {
             Parent = parent ?? throw new ArgumentNullException(nameof(parent));
             if (string.IsNullOrWhiteSpace(tableName)) throw new ArgumentException("tableName parameter is null or empty!");

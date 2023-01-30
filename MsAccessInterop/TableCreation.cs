@@ -14,6 +14,9 @@ namespace RFBCodeWorks.MsAccessDao
         /// <inheritdoc cref="DatabaseProperties.GetDataTypeEnum{T}"/>
         public static Dao.DataTypeEnum GetDataTypeEnum<T>() => DatabaseProperties.GetDataTypeEnum<T>();
 
+        /// <inheritdoc cref="DatabaseProperties.GetDataTypeEnum(Type)"/>
+        public static Dao.DataTypeEnum GetDataTypeEnum(Type type) => DatabaseProperties.GetDataTypeEnum(type);
+
         /// <summary>
         /// Provide a Connection String to use as for a Linked-Table that uses another access database as the source.
         /// </summary>
@@ -47,7 +50,7 @@ namespace RFBCodeWorks.MsAccessDao
 
         /// <summary>
         /// Create a new <see cref="Dao.TableDef"/> within the specified <paramref name="db"/>. 
-        /// <br/> Note: The table def will be added to the database via <see cref="Dao.TableDefs.Append(object)"/> prior to being returned from the method
+        /// <br/> Note: After defining the table fields, you will need to append the table to the db. <see cref="Dao.TableDefs.Append(object)"/>
         /// </summary>
         /// <param name="db">The owner database</param>
         /// <param name="name">The name of the table definition.</param>
@@ -88,8 +91,7 @@ namespace RFBCodeWorks.MsAccessDao
                 throw new ArgumentException("A connection string and source table name was provided, but the attributes do not mark the table as 'attached'", nameof(attributes));
             }
 
-            var tb = db.CreateTableDef(name, attributes, sourceTableName, connect);
-            db.TableDefs.Append(tb);
+            Dao.TableDef tb = db.CreateTableDef(name, attributes, sourceTableName ?? "", connect ?? "");
             return tb;
         }
 
@@ -113,6 +115,15 @@ namespace RFBCodeWorks.MsAccessDao
             => CreateTableDef(db, name, attributes,
                 sourceTableName ?? throw new ArgumentException("Expected Source Table Name", nameof(sourceTableName)),
                 connect ?? throw new ArgumentException("Expected connection string", nameof(connect)));
+
+
+        /// <inheritdoc cref="CreateField(Dao.TableDef, string, DataTypeEnum, bool, bool, object, bool, bool, int)"/>
+        public static Dao.Field CreateField(this Dao.TableDef tblDef, string name, Type dataType)
+            => CreateField(tblDef, name, GetDataTypeEnum(dataType));
+
+        /// <inheritdoc cref="CreateField(Dao.TableDef, string, DataTypeEnum, bool, bool, object, bool, bool, int)"/>
+        public static Dao.Field CreateField(this Dao.TableDef tblDef, string name, Type dataType, bool Required, bool AllowZeroLength = false)
+            => CreateField(tblDef, name, GetDataTypeEnum(dataType), Required, AllowZeroLength);
 
         /// <summary>
         /// Creates a new 'field' column and appends it to the <paramref name="tblDef"/>

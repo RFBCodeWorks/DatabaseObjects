@@ -5,18 +5,18 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// <inheritdoc cref="ICompositeKeyTable"/>
     /// </summary>
-    public class CompositeKeyTable : DataBaseTable, ICompositeKeyTable
+    public class CompositeKeyTable : DatabaseTable, ICompositeKeyTable
     {
         /// <summary>
         /// Create a new <see cref="CompositeKeyTable"/>
         /// </summary>
         /// <param name="compoundKeyColumns"><inheritdoc cref="CompositeKeyColumns" path="*"/> </param>
-        /// <inheritdoc cref="DataBaseTable.DataBaseTable(IDatabase, string)"/>
+        /// <inheritdoc cref="DatabaseTable.DatabaseTable(IDatabase, string)"/>
         /// <param name="parent"/><param name="tableName"/>
         public CompositeKeyTable(IDatabase parent, string tableName, params string[] compoundKeyColumns) : base(parent, tableName)
         {

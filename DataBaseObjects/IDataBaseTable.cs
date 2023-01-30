@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 using RFBCodeWorks.SqlKata.Extensions;
 using SqlKata.Compilers;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// Represents the functions a database table should provide
     /// </summary>
-    public interface IDataBaseTable
+    public interface IDatabaseTable
     {
         /// <summary>
         /// The reference to the parent database
@@ -152,9 +152,9 @@ namespace RFBCodeWorks.DataBaseObjects
     }
 
     /// <summary>
-    /// DataBase table that has a single column as a primary key
+    /// Database table that has a single column as a primary key
     /// </summary>
-    public interface IPrimaryKeyTable : IDataBaseTable
+    public interface IPrimaryKeyTable : IDatabaseTable
     {
         /// <summary>
         /// Name of the PrimaryKey Column
@@ -210,7 +210,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <typeparam name="Y">Dictionary Value Type</typeparam>
         /// <param name="dictionaryBuilder">Function that loops through a DataTable and produces a new Dictionary. </param>
         /// <param name="valueColumns">
-        /// <inheritdoc cref="IDataBaseTable.GetDataTable(string[])" path="/param[@name='columns']" />
+        /// <inheritdoc cref="IDatabaseTable.GetDataTable(string[])" path="/param[@name='columns']" />
         /// </param>
         /// <returns>The result of <paramref name="dictionaryBuilder"/></returns>
         Dictionary<X, Y> GetDictionary<X, Y>(Func<DataTable, Dictionary<X, Y>> dictionaryBuilder, params string[] valueColumns);
@@ -220,9 +220,9 @@ namespace RFBCodeWorks.DataBaseObjects
     }
 
     /// <summary>
-    /// DataBase table that has a compound / composite key consisting of 2 or more columns
+    /// Database table that has a compound / composite key consisting of 2 or more columns
     /// </summary>
-    public interface ICompositeKeyTable : IDataBaseTable
+    public interface ICompositeKeyTable : IDatabaseTable
     {
         /// <summary>
         /// The array of column names that make up the compound key

@@ -12,12 +12,12 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
 {
     /// <summary>
     /// Represents a data connection to an excel workbook
     /// </summary>
-    public partial class ExcelWorkBook : AbstractDataBase<OleDbConnection, OleDbCommand>
+    public partial class ExcelWorkBook : OleDBDatabase
     {
         /// <summary>
         /// Create an object that represents an <see cref="OleDbConnection"/> to some Excel Workbook

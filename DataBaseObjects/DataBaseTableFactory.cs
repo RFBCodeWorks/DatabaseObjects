@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
-    /// Factory to create DataBase Tables specific to the a database
+    /// Factory to create Database Tables specific to the a database
     /// </summary>
-    public class DataBaseTableFactory
+    public class DatabaseTableFactory
     {
         /// <summary>
         /// Instantiate the factory object
         /// </summary>
         /// <param name="database"><inheritdoc cref="DataBaseReference" path="*"/></param>
-        public DataBaseTableFactory(IDatabase database)
+        public DatabaseTableFactory(IDatabase database)
         {
             DataBaseReference = database ?? throw new ArgumentNullException(nameof(database));
         }
@@ -23,11 +23,11 @@ namespace RFBCodeWorks.DataBaseObjects
         /// </summary>
         public IDatabase DataBaseReference { get; }
 
-        /// <inheritdoc cref="DataBaseTable.DataBaseTable"/>
-        public virtual DataBaseTable CreateTable(string tableName)
+        /// <inheritdoc cref="DatabaseTable.DatabaseTable"/>
+        public virtual DatabaseTable CreateTable(string tableName)
         {
             if (string.IsNullOrWhiteSpace(tableName)) throw new ArgumentException(nameof(tableName));
-            return new DataBaseTable(DataBaseReference, tableName);
+            return new DatabaseTable(DataBaseReference, tableName);
         }
 
         /// <inheritdoc cref="PrimaryKeyTable.PrimaryKeyTable"/>

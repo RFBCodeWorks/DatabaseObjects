@@ -1,12 +1,12 @@
 ﻿using SqlKata.Compilers;
 using Microsoft.Data.Sqlite;
 
-namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
 {
     /// <summary>
     /// Base Database class for a SqlLite Database
     /// </summary>
-    public class SqliteDataBase : AbstractDataBase<SqliteConnection, SqliteCommand>
+    public class SqliteDataBase : AbstractDatabase<SqliteConnection, SqliteCommand>
     {
         private static readonly Compiler DefaultCompiler = new CorrectedCompiler();
 

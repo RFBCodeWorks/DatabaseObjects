@@ -8,18 +8,18 @@ using System.Threading;
 using System.Data.Common;
 using SqlKata;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// <inheritdoc cref="IPrimaryKeyTable"/>
     /// </summary>
-    public class PrimaryKeyTable : DataBaseTable, IPrimaryKeyTable
+    public class PrimaryKeyTable : DatabaseTable, IPrimaryKeyTable
     {
         /// <summary>
         /// Create a new <see cref="PrimaryKeyTable"/>
         /// </summary>
         /// <param name="primaryKey"><inheritdoc cref="PrimaryKey" path="*"/> </param>
-        /// <inheritdoc cref="DataBaseTable.DataBaseTable(IDatabase, string)"/>
+        /// <inheritdoc cref="DatabaseTable.DatabaseTable(IDatabase, string)"/>
         /// <param name="parent"/><param name="tableName"/>
         public PrimaryKeyTable(IDatabase parent, string tableName, string primaryKey) : base(parent, tableName)
         {
@@ -32,7 +32,7 @@ namespace RFBCodeWorks.DataBaseObjects
 
         #region < GetValue >
 
-        /// <remarks> All DataReturn routines that exist within <see cref="DataBaseTable"/> utilize this method, so error logging the database request can have one central location </remarks>
+        /// <remarks> All DataReturn routines that exist within <see cref="DatabaseTable"/> utilize this method, so error logging the database request can have one central location </remarks>
         /// <inheritdoc/>
         public virtual object GetValue(object primaryKeyValue, string returnColName) => GetValue(PrimaryKey, primaryKeyValue, returnColName);
 
@@ -90,7 +90,7 @@ namespace RFBCodeWorks.DataBaseObjects
         #region < Update >
 
         /// <param name="primaryKey">The value to search for within the PrimaryKey column</param>
-        /// <inheritdoc cref="DataBaseTable.Update(IEnumerable{KeyValuePair{string, object}}, SqlKata.Extensions.IWhereCondition[])"/>
+        /// <inheritdoc cref="DatabaseTable.Update(IEnumerable{KeyValuePair{string, object}}, SqlKata.Extensions.IWhereCondition[])"/>
         /// <inheritdoc cref="Update(object, KeyValuePair{string, object}[])"/>
         /// <param name="values"/>
         public virtual int Update(object primaryKey, params KeyValuePair<string, object>[] values)
@@ -98,7 +98,7 @@ namespace RFBCodeWorks.DataBaseObjects
             return Update(values, new RFBCodeWorks.SqlKata.Extensions.WhereColumnValue(PrimaryKey, primaryKey));
         }
 
-        /// <inheritdoc cref="DataBaseTable.UpdateAsync(IEnumerable{KeyValuePair{string, object}}, CancellationToken, SqlKata.Extensions.IWhereCondition[])"/>
+        /// <inheritdoc cref="DatabaseTable.UpdateAsync(IEnumerable{KeyValuePair{string, object}}, CancellationToken, SqlKata.Extensions.IWhereCondition[])"/>
         /// <inheritdoc cref="Update(object, KeyValuePair{string, object}[])"/>
         public virtual Task<int> UpdateAsync(object primaryKey, CancellationToken cancellationToken = default, params KeyValuePair<string, object>[] values)
         {

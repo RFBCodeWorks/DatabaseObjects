@@ -5,12 +5,12 @@ using System.Data.Common;
 using System.Data.OleDb;
 using System.Text;
 
-namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
 {
     /// <summary>
     /// Create a new Database Object that represents an MS Access Database, and utilizes the <see cref="RFBCodeWorks.SqlKata.MsOfficeCompilers.MSAccessCompiler"/>
     /// </summary>
-    public class MSAccessDataBase : AbstractDataBase<OleDbConnection, OleDbCommand>
+    public class MSAccessDataBase : OleDBDatabase
     {
         /// <summary>
         /// Create an <see cref="MSAccessDataBase"/> connection from the specified <paramref name="connectionString"/>
@@ -25,17 +25,12 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// <inheritdoc cref="GenerateACEConnectionString(string, string)"/>
         public MSAccessDataBase(string path, string password) : base(GenerateACEConnectionString(path, password)) { }
 
+
         /// <inheritdoc/>
         public override Compiler Compiler => RFBCodeWorks.SqlKata.MsOfficeCompilers.MSAccessCompiler.AccessCompiler;
 
 
         #region < Connection Strings >
-
-        /// <inheritdoc/>
-        public override OleDbConnection GetConnection()
-        {
-            return new OleDbConnection(ConnectionString);
-        }
 
         /// <summary>
         /// Generate a new OLEDB.JET database connection string
@@ -68,7 +63,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
             if (!System.IO.Path.IsPathRooted(path)) throw new ArgumentException("Path is not rooted!");
             if (!System.IO.Path.HasExtension(path)) throw new ArgumentException("Path does not have an extension!");
 
-            string Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source= {path} ; Persist Security Info = false ;";
+            string Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path}; OLE DB Services=-1;Persist Security Info=False;";
             if (!string.IsNullOrWhiteSpace(dbPassword)) Conn += $" Jet OLEDB:Database Password={dbPassword};";
             return Conn;
         }
@@ -92,7 +87,5 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         }
 
         #endregion
-
-
     }
 }

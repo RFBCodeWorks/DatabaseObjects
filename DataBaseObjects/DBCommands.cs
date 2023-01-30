@@ -5,8 +5,9 @@ using System.Data;
 using System.Data.Common;
 using SqlKata.Compilers;
 using SqlKata;
+using System.Linq;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// Class that contains methods for producing <see cref="System.Data.Common.DbCommand"/> objects that contain simple prebuilt  SQL statements
@@ -31,7 +32,7 @@ namespace RFBCodeWorks.DataBaseObjects
         #region < CreateCommand >
 
         /// <summary>
-        /// Add a new parameter for the to the <paramref name="command"/>
+        /// Add a new parameter for the to the <paramref name="command"/> - Effectively same as 'AddWithValue'
         /// </summary>
         /// <param name="command">The <see cref="DbCommand"/> to add the parameter to</param>
         /// <param name="name">Sets the <see cref="DbParameter.ParameterName"/></param>
@@ -47,11 +48,11 @@ namespace RFBCodeWorks.DataBaseObjects
         }
 
         /// <summary>
-        /// Create a new <see cref="DbCommand"/> with the provided <paramref name="query"/> and <paramref name="parameters"/>
+        /// Create a new <see cref="DbCommand"/> with the provided <paramref name="query"/> and <paramref name="keyValuePairs"/>
         /// </summary>
         /// <param name="connection">The connection object - will only be used for <see cref="DbConnection.CreateCommand"/></param>
         /// <param name="query">The query string</param>
-        /// <param name="parameters">
+        /// <param name="keyValuePairs">
         /// The parameters to apply to the new <see cref="DbCommand"/>
         /// <br/> - The Key string should be the name of the parameter as it appears within the <paramref name="query"/> string. 
         /// <br/> - The Value object should be the value of the parameter.
@@ -62,17 +63,33 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <br/> ("@SearchTerm", 129001) // column is an <see cref="int"/> column, so no wrapping needed
         /// </param>
         /// <returns>A new <see cref="DbCommand"/></returns>
-        public static DbCommand CreateCommand(this DbConnection connection, string query, params KeyValuePair<string, object>[] parameters)
+        public static DbCommand CreateCommand(this DbConnection connection, string query, IEnumerable<KeyValuePair<string, object>> keyValuePairs)
         {
 
             var cmd = connection.CreateCommand();
             cmd.CommandText = query;
-            foreach (var p in parameters)
-            {
-                _ = cmd.AddParameter(p.Key, p.Value);   //Extension method from DBCommands
-            }
+            //if (cmd.GetType().Name == "OleDbCommand") // System.Data.OleDbCommand does not accept named parameters, and must use '?' instead.
+            //{
+            //    foreach (var p in parameters)
+            //    {
+            
+            //    }
+            //}
+            //else
+            //{
+                foreach (var p in keyValuePairs)
+                {
+                    _ = cmd.AddParameter(p.Key, p.Value);
+                }
+            //}
             return cmd;
         }
+
+        /// <inheritdoc cref="CreateCommand(DbConnection, string, IEnumerable{KeyValuePair{string, object}})"/>
+        /// <param name="connection"/><param name="query"/>
+        /// <param name="parameters"> <inheritdoc cref="CreateCommand(DbConnection, string, IEnumerable{KeyValuePair{string, object}})" path="/param[@name='keyValuePairs']" /> </param>
+        public static DbCommand CreateCommand(this DbConnection connection, string query, params KeyValuePair<string, object>[] parameters) 
+            => CreateCommand(connection, query, keyValuePairs: parameters);
 
         /// <summary>
         /// Create a new <see cref="DbCommand"/> associated with the <paramref name="connection"/>, whose CommandText and parameters are acquired from the <paramref name="query"/>
@@ -82,6 +99,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <param name="compiler">The compiler that will compile the query</param>
         /// <returns>A new <see cref="DbCommand"/></returns>
         /// <exception cref="ArgumentNullException"/>
+        
         public static DbCommand CreateCommand(this DbConnection connection, Query query, Compiler compiler)
         {
             if (connection is null) throw new ArgumentNullException(nameof(connection));
@@ -89,15 +107,29 @@ namespace RFBCodeWorks.DataBaseObjects
             var result = compiler.Compile(query ?? throw new ArgumentNullException(nameof(query)));
             var cmd = connection.CreateCommand();
             cmd.CommandText = result.Sql;
-            foreach (var p in result.NamedBindings)
-            {
-                _ = cmd.AddParameter(p.Key, p.Value);
-            }
+
+            //if (cmd.GetType().Name == "OleDbCommand") // System.Data.OleDbCommand does not accept named parameters, and must use '?' instead.
+            //{
+            //    foreach (var p in result.NamedBindings)
+            //    {
+            //        cmd.CommandText = cmd.CommandText.Replace(p.Key, "?");
+            //        _ = cmd.AddParameter("?", p.Value);
+            //    }
+            //}
+            //else
+            //{
+                foreach (var p in result.NamedBindings)
+                {
+                    _ = cmd.AddParameter(p.Key, p.Value);
+                }
+            //}
             return cmd;
         }
 
+        /// <summary>Create a new <typeparamref name="T"/></summary>
+        /// <returns>A new DbCommand of type: <typeparamref name="T"/></returns>
         /// <inheritdoc cref="CreateCommand(DbConnection, string, KeyValuePair{string, object}[])"/>
-        public static T CreateCommand<T>(string query, params KeyValuePair<string, object>[] parameters)
+        public static T CreateCommand<T>(string query, IEnumerable<KeyValuePair<string, object>> keyValuePairs) 
             where T : DbCommand, new()
         {
 
@@ -105,12 +137,27 @@ namespace RFBCodeWorks.DataBaseObjects
             {
                 CommandText = query
             };
-            foreach (var p in parameters)
-            {
-                _ = cmd.AddParameter(p.Key, p.Value);   //Extension method from DBCommands
-            }
+            //if (cmd.GetType().Name == "OleDbCommand") // System.Data.OleDbCommand does not accept named parameters, and must use '?' instead.
+            //{
+            //    foreach (var p in keyValuePairs)
+            //    {
+            //        cmd.CommandText = cmd.CommandText.Replace(p.Key, "?");
+            //        _ = cmd.AddParameter("?", p.Value);
+            //    }
+            //}
+            //else
+            //{
+            foreach (var p in keyValuePairs)
+                {
+                    _ = cmd.AddParameter(p.Key, p.Value);
+                }
+            //}
             return cmd;
         }
+
+        /// <inheritdoc cref="CreateCommand{T}(string, IEnumerable{KeyValuePair{string, object}})"/>
+        public static T CreateCommand<T>(string query, params KeyValuePair<string, object>[] parameters) where T : DbCommand, new() 
+            => CreateCommand<T>(query, keyValuePairs: parameters);
 
         #endregion
 

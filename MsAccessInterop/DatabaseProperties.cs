@@ -150,6 +150,9 @@ namespace RFBCodeWorks.MsAccessDao
             return ret;
         }
 
+        /// <inheritdoc cref="GetDataTypeEnum(Type)"/>
+        public static Dao.DataTypeEnum GetDataTypeEnum<T>() => GetDataTypeEnum(typeof(T));
+
         /// <summary>
         /// Retreives the enum translation of the provided type
         /// </summary>
@@ -175,9 +178,8 @@ namespace RFBCodeWorks.MsAccessDao
         /// <br/> - <see cref="DateTime"/> (<see cref="DataTypeEnum.dbDate"/>)
         /// </typeparam>
         /// <returns>The approrpiate <see cref="Dao.DataTypeEnum"/> for the supplied type </returns>
-        public static Dao.DataTypeEnum GetDataTypeEnum<T>()
+        public static Dao.DataTypeEnum GetDataTypeEnum(Type type)
         {
-            Type type = typeof(T);
             switch (true)
             {
                 case true when type == typeof(char):
@@ -217,7 +219,7 @@ namespace RFBCodeWorks.MsAccessDao
                 default:
                     var e = new NotImplementedException("This translation method does not have the provided type defined. \n" +
                         "Expected types include: char, string, sbyte, byte, int, short, long, float, single, double, Guid, decimal, DateTime, and bool");
-                    e.Data.Add("Type", typeof(T));
+                    e.Data.Add("Type", type.FullName);
                     throw e;
             }
         }

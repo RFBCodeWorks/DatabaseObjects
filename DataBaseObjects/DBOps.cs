@@ -8,7 +8,7 @@ using System.Data.Common;
 using System.Threading;
 using System.Linq;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// Extension Methods for interacting with databases
@@ -227,7 +227,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <summary>
         /// Fill up a datatable with the results of a database Call
         /// </summary>
-        /// <param name="connection">DataBase Connection object</param>
+        /// <param name="connection">Database Connection object</param>
         /// <param name="command">The command that will return the <see cref="DataTable"/></param>
         /// <returns></returns>
         public static DataTable GetDataTable(DbConnection connection, DbCommand command)
@@ -268,7 +268,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <summary>
         /// Fill up a datatable with the results of a database Call
         /// </summary>
-        /// <param name="connection">DataBase Connection object</param>
+        /// <param name="connection">Database Connection object</param>
         /// <param name="command">The command that will return the <see cref="DataTable"/></param>
         /// <param name="cancellationToken">The cancellationToken to use. If not specified, uses <see cref="CancellationToken.None"/></param>
         /// <returns></returns>
