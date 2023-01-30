@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RFBCodeWorks.SqlKata.Extensions;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
 {
     /// <summary>
     /// Abstract base class for database structures
