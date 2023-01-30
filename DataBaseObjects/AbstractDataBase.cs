@@ -17,7 +17,7 @@ namespace RFBCodeWorks.DataBaseObjects
     /// <typeparam name="TConnectionType">The type of <see cref="DbConnection"/> this database utilizes</typeparam>
     /// <typeparam name="TCommandType">The type of <see cref="DbCommand"/> that can be used with this <typeparamref name="TConnectionType"/></typeparam>
     public abstract class AbstractDataBase<TConnectionType, TCommandType> : IDatabase 
-        where TConnectionType : DbConnection 
+        where TConnectionType : DbConnection, new()
         where TCommandType: DbCommand, new()
     {
         /// <summary>
@@ -48,7 +48,13 @@ namespace RFBCodeWorks.DataBaseObjects
         /// Create a new <see cref="DbConnection"/>
         /// </summary>
         /// <returns>new object whose type is derived from <see cref="DbConnection"/></returns>
-        public abstract TConnectionType GetConnection();
+        public virtual TConnectionType GetConnection()
+        {
+            return new TConnectionType()
+            {
+                ConnectionString = this.ConnectionString
+            };
+        }
 
         DbConnection IDatabase.GetConnection() => GetConnection();
 
@@ -63,16 +69,36 @@ namespace RFBCodeWorks.DataBaseObjects
             return cmd;
         }
 
+        /// <inheritdoc cref="GetCommand()"/>
+        /// <inheritdoc cref="DBCommands.CreateCommand(DbConnection, string, IEnumerable{KeyValuePair{string, object}})"/>
+        public virtual TCommandType GetCommand(string query, IEnumerable<KeyValuePair<string, object>> keyValuePairs)
+        {
+            var cmd = DBCommands.CreateCommand<TCommandType>(query, keyValuePairs);
+            cmd.Connection = this.GetConnection();
+            return cmd;
+        }
+
+        /// <inheritdoc cref="GetCommand(string, IEnumerable{KeyValuePair{string, object}})"/>
+        /// <inheritdoc cref="DBCommands.CreateCommand{T}(string, KeyValuePair{string, object}[])"/>
+        public virtual TCommandType GetCommand(string query, params KeyValuePair<string, object>[] parameters)
+            => GetCommand(query, keyValuePairs: parameters);
+
+        /// <inheritdoc cref="DBCommands.CreateCommand(DbConnection, Query, Compiler)"/>
+        public virtual TCommandType GetCommand(Query query)
+        {
+            return (TCommandType)this.GetConnection().CreateCommand(query, this.Compiler);
+        }
+
         #region < Test Connection >
 
         /// <inheritdoc cref="DBOps.TestConnection(IDbConnection, out Exception)"/>
-        public bool TestConnection(out Exception e) => DBOps.TestConnection(this.GetConnection(), out e);
+        public virtual bool TestConnection(out Exception e) => DBOps.TestConnection(this.GetConnection(), out e);
 
         /// <inheritdoc cref="TestConnection(out Exception)"/>
-        public bool TestConnection() => DBOps.TestConnection(this.GetConnection());
+        public virtual bool TestConnection() => DBOps.TestConnection(this.GetConnection());
 
         /// <inheritdoc cref="DBOps.TestConnectionAsync(DbConnection, CancellationToken)"/>
-        public Task<(bool, Exception)> TestConnectionAsync(CancellationToken cancellationToken = default) => DBOps.TestConnectionAsync(this.GetConnection(), cancellationToken);
+        public virtual Task<(bool, Exception)> TestConnectionAsync(CancellationToken cancellationToken = default) => DBOps.TestConnectionAsync(this.GetConnection(), cancellationToken);
 
         #endregion
 
@@ -108,42 +134,35 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <inheritdoc/>
         public virtual DataTable GetDataTable(Query query)
         {
-            using (var conn = this.GetConnection())
-            {
-                using (var cmd = conn.CreateCommand(query, this.Compiler))
-                    return DBOps.GetDataTable(conn, cmd);
-            }
+            using (var cmd = GetCommand(query)) // Ensures command gets disposesd
+            using (cmd.Connection) // Ensures connection gets disposed
+                return DBOps.GetDataTable(cmd.Connection, cmd);
         }
 
         /// <inheritdoc/>
         public virtual DataTable GetDataTable(string query, params KeyValuePair<string, object>[] parameters)
         {
-            using (var conn = this.GetConnection())
-                return DBOps.GetDataTable(conn, query, parameters);
+            using (var cmd = GetCommand(query, parameters)) // Ensures command gets disposesd
+            using (cmd.Connection) // Ensures connection gets disposed
+                return DBOps.GetDataTable(cmd.Connection, cmd);
         }
 
         /// <inheritdoc/>
         public virtual Task<DataTable> GetDataTableAsync(Query query, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            using (var conn = this.GetConnection())
-            {
-                using (var cmd = conn.CreateCommand(query, this.Compiler))
-                    return DBOps.GetDataTableAsync(conn, cmd, cancellationToken);
-            }
+            using (var cmd = GetCommand(query)) // Ensures command gets disposesd
+            using (cmd.Connection) // Ensures connection gets disposed
+                return DBOps.GetDataTableAsync(cmd.Connection, cmd, cancellationToken);
         }
 
         /// <inheritdoc/>
         public virtual Task<DataTable> GetDataTableAsync(string query, CancellationToken cancellationToken = default, params KeyValuePair<string, object>[] parameters)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            using (var conn = GetConnection())
-            {
-                using (var cmd = conn.CreateCommand(query, parameters))
-                {
-                    return DBOps.GetDataTableAsync(conn, cmd, cancellationToken);
-                }
-            }
+            using (var cmd = GetCommand(query, parameters)) // Ensures command gets disposesd
+            using (cmd.Connection)
+                return DBOps.GetDataTableAsync(cmd.Connection, cmd, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -166,8 +185,13 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <inheritdoc/>
         public virtual object GetValue(Query query)
         {
-            using (var conn = this.GetConnection())
-                return DBOps.GetValue(conn, query, Compiler);
+            using (var cmd = GetCommand(query))
+            using (var conn = cmd.Connection)
+            {
+                conn.Open();
+                return cmd.ExecuteScalar();
+            }
+                
         }
 
         /// <inheritdoc/>
@@ -177,10 +201,17 @@ namespace RFBCodeWorks.DataBaseObjects
         }
 
         /// <inheritdoc/>
-        public virtual Task<object> GetValueAsync(Query query, CancellationToken cancellationToken = default)
+        public virtual async Task<object> GetValueAsync(Query query, CancellationToken cancellationToken = default)
         {
-            using (var conn = this.GetConnection())
-                return DBOps.GetValueAsync(conn, query, this.Compiler, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            object ret = null;
+            using (var cmd = GetCommand(query))
+            using (var conn = cmd.Connection)
+            {
+                await conn.OpenAsync(cancellationToken);
+                ret = await cmd.ExecuteScalarAsync(cancellationToken);
+            }
+            return ret;
         }
 
         /// <inheritdoc/>
@@ -219,7 +250,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// </remarks>
         public int RunAction(Query query)
         {
-            return RunAction(query.ToDbCommand<TCommandType>(Compiler));
+            return RunAction(GetCommand(query));
         }
 
         /// <inheritdoc/>
@@ -228,7 +259,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// </remarks>
         public int RunAction(string query, params KeyValuePair<string, object>[] parameters)
         {
-            return RunAction(DBCommands.CreateCommand<TCommandType>(query, parameters));
+            return RunAction(GetCommand(query, parameters));
         }
 
         /// <inheritdoc/>
@@ -249,13 +280,13 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <inheritdoc/>
         public Task<int> RunActionAsync(Query query, CancellationToken cancellationToken = default)
         {
-            return RunActionAsync(query.ToDbCommand<TCommandType>(Compiler), cancellationToken);
+            return RunActionAsync(GetCommand(query), cancellationToken);
         }
 
         /// <inheritdoc/>
         public Task<int> RunActionAsync(string query, CancellationToken cancellationToken = default, params KeyValuePair<string, object>[] parameters)
         {
-            return RunActionAsync(DBCommands.CreateCommand<TCommandType>(query, parameters), cancellationToken);
+            return RunActionAsync(GetCommand(query, parameters), cancellationToken);
         }
 
         #endregion
