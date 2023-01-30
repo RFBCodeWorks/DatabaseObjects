@@ -67,9 +67,20 @@ namespace RFBCodeWorks.DataBaseObjects
 
             var cmd = connection.CreateCommand();
             cmd.CommandText = query;
-            foreach (var p in parameters)
+            if (cmd.GetType().Name == "OleDbCommand") // System.Data.OleDbCommand does not accept named parameters, and must use '?' instead.
             {
-                _ = cmd.AddParameter(p.Key, p.Value);   //Extension method from DBCommands
+                foreach (var p in parameters)
+                {
+                    cmd.CommandText = cmd.CommandText.Replace(p.Key, "?");
+                    _ = cmd.AddParameter("?", p.Value);
+                }
+            }
+            else
+            {
+                foreach (var p in parameters)
+                {
+                    _ = cmd.AddParameter(p.Key, p.Value);
+                }
             }
             return cmd;
         }
@@ -89,9 +100,21 @@ namespace RFBCodeWorks.DataBaseObjects
             var result = compiler.Compile(query ?? throw new ArgumentNullException(nameof(query)));
             var cmd = connection.CreateCommand();
             cmd.CommandText = result.Sql;
-            foreach (var p in result.NamedBindings)
+
+            if (cmd.GetType().Name == "OleDbCommand") // System.Data.OleDbCommand does not accept named parameters, and must use '?' instead.
             {
-                _ = cmd.AddParameter(p.Key, p.Value);
+                foreach (var p in result.NamedBindings)
+                {
+                    cmd.CommandText = cmd.CommandText.Replace(p.Key, "?");
+                    _ = cmd.AddParameter("?", p.Value);
+                }
+            }
+            else
+            {
+                foreach (var p in result.NamedBindings)
+                {
+                    _ = cmd.AddParameter(p.Key, p.Value);
+                }
             }
             return cmd;
         }
@@ -105,9 +128,20 @@ namespace RFBCodeWorks.DataBaseObjects
             {
                 CommandText = query
             };
-            foreach (var p in parameters)
+            if (cmd.GetType().Name == "OleDbCommand") // System.Data.OleDbCommand does not accept named parameters, and must use '?' instead.
             {
-                _ = cmd.AddParameter(p.Key, p.Value);   //Extension method from DBCommands
+                foreach (var p in parameters)
+                {
+                    cmd.CommandText = cmd.CommandText.Replace(p.Key, "?");
+                    _ = cmd.AddParameter("?", p.Value);
+                }
+            }
+            else
+            {
+                foreach (var p in parameters)
+                {
+                    _ = cmd.AddParameter(p.Key, p.Value);
+                }
             }
             return cmd;
         }

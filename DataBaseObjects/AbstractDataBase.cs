@@ -52,6 +52,16 @@ namespace RFBCodeWorks.DataBaseObjects
 
         DbConnection IDatabase.GetConnection() => GetConnection();
 
+        /// <summary>
+        /// Create a new <typeparamref name="TCommandType"/> object associated with this database's ConnectionString.
+        /// </summary>
+        /// <returns>A new <typeparamref name="TCommandType"/> object</returns>
+        public TCommandType GetCommand()
+        {
+            var cmd = new TCommandType();
+            cmd.Connection = this.GetConnection();
+            return cmd;
+        }
 
         #region < Test Connection >
 
@@ -187,13 +197,20 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <inheritdoc/>
         public virtual int RunAction(TCommandType command)
         {
+            //int i = 0;
             using (command)
-            using (var conn = this.GetConnection())
             {
-                command.Connection = conn;
-                conn.Open();
-                return command.ExecuteNonQuery();
+                using (var conn = this.GetConnection())
+                {
+                    command.Connection = conn;
+                    conn.Open();
+                    return command.ExecuteNonQuery();
+                    //conn.Close();
+                    //conn.Dispose();
+                }
             }
+            //command.Dispose();
+            //return i; 
         }
 
         /// <inheritdoc/>

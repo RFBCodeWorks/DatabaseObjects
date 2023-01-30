@@ -25,6 +25,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// <inheritdoc cref="GenerateACEConnectionString(string, string)"/>
         public MSAccessDataBase(string path, string password) : base(GenerateACEConnectionString(path, password)) { }
 
+
         /// <inheritdoc/>
         public override Compiler Compiler => RFBCodeWorks.SqlKata.MsOfficeCompilers.MSAccessCompiler.AccessCompiler;
 
@@ -68,7 +69,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
             if (!System.IO.Path.IsPathRooted(path)) throw new ArgumentException("Path is not rooted!");
             if (!System.IO.Path.HasExtension(path)) throw new ArgumentException("Path does not have an extension!");
 
-            string Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source= {path} ; Persist Security Info = false ;";
+            string Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path}; OLE DB Services=-1;Persist Security Info=False;";
             if (!string.IsNullOrWhiteSpace(dbPassword)) Conn += $" Jet OLEDB:Database Password={dbPassword};";
             return Conn;
         }
@@ -92,7 +93,5 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         }
 
         #endregion
-
-
     }
 }
