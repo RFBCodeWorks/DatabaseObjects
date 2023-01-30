@@ -10,7 +10,7 @@ using RDao = RFBCodeWorks.MsAccessDao;
 namespace AccessTests
 {
     [TestClass]
-    public class Test_Dao
+    public class Test_AccessDAO
     {
         public static string DBPath { get; } = Path.Combine(
             Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
@@ -66,5 +66,6 @@ namespace AccessTests
             Assert.IsTrue(File.Exists(DBPath));
             File.Delete(DBPath);
         }
+
     }
 }

@@ -19,13 +19,13 @@
         <Authors>Robert Brenckman</Authors>
         <Company />
         <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.2</Version>
+        <Version>1.0.0.4</Version>
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
         
         <Description>
-            Extends RFBCodeWorks.DatabaseObjects to provides objects that represent an MSAccess database, as well as an MS EXcel workbook.
+            Extends RFBCodeWorks.DataBaseObjects to provides objects that represent an MSAccess database, as well as an MS EXcel workbook.
 
             Using SQL to query an excel workbook also requires some special syntax, so the ExcelWorkSheet object is also provided to ease that translation.
             The OLEDBConnection string will also be generated depending on the file extension (.xls vs .xslx/.xlsm), since each file format requires a different connection adapater.
@@ -34,7 +34,7 @@
 
             Note: Due to requiring the OLEDB driver, this package is compiled for x86/x64 only.
         </Description>
-        <PackageTags>SqlKata, DataBase</PackageTags>
+        <PackageTags>SqlKata, Database</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>

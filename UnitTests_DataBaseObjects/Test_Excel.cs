@@ -79,6 +79,9 @@ namespace ExcelTests
             var wk = new TestWorkbook();
             void func() => wk.DataSheet.GetValue(1, "InvalidColumnName");
             Assert.ThrowsException<System.Data.OleDb.OleDbException>(func);
+
+            Task func2() => wk.DataSheet.GetValueAsync(1, "InvalidColumnName", default);
+            await Assert.ThrowsExceptionAsync<System.Data.OleDb.OleDbException>(func2);
         }
 
         [TestMethod()]

@@ -17,7 +17,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
     /// <summary>
     /// Represents a data connection to an excel workbook
     /// </summary>
-    public partial class ExcelWorkBook : AbstractDataBase<OleDbConnection, OleDbCommand>
+    public partial class ExcelWorkBook : OleDBDatabase
     {
         /// <summary>
         /// Create an object that represents an <see cref="OleDbConnection"/> to some Excel Workbook

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace AccessTests
 {
     [TestClass]
-    public class Test_Access
+    public class Test_MSAccess
     {
         // First condition is the is the ANSI-89 which needs to convert to ANSI-92, second condition is the equivalent ANSI-92 search term
         [DataRow("Search*Term[*]", "Search%Term*")]
@@ -40,7 +40,7 @@ namespace AccessTests
             // This is due to the way this was written it enforces the file to not exist.
 
 
-            System.IO.File.Delete(Test_Dao.DBPath);
+            System.IO.File.Delete(Test_AccessDAO.DBPath);
             var db = TableInit(true);
 
             //Check database table is empty
@@ -175,16 +175,71 @@ namespace AccessTests
             Assert.AreEqual(1, tbl.DeleteRows("ID", iD));
         }
 
+        [TestMethod]
+        public void GetCommandTest_1()
+        {
+            var db = TableInit(false);
+            Assert.IsInstanceOfType<System.Data.OleDb.OleDbCommand>(db.GetCommand());
+        }
+
+        [TestMethod]
+        public void GetCommandTest_2()
+        {
+            var db = TableInit(false);
+            using (var cmd = db.GetCommand("Select * from Students Where [LastName] = @LastName AND [FirstName] = @FirstName",
+                new KeyValuePair<string, object>("@LastName", "Bob"),
+                new KeyValuePair<string, object>("@FirstName", "Will"))
+                )
+            {
+                Assert.IsInstanceOfType<System.Data.OleDb.OleDbCommand>(cmd);
+                cmd.Connection.Open();
+                using (var rdr = cmd.ExecuteReader())
+                    Assert.IsNotNull(rdr);
+            }
+        }
+
+        [TestMethod]
+        public void GetCommandTest_3()
+        {
+            var db = TableInit(false);
+            var dic = new Dictionary<string, object>();
+            dic.Add("@LastName", "Bob");
+            dic.Add("@FirstName", "Will");
+            using (var cmd = db.GetCommand("Select * from Students Where [LastName] = @LastName AND [FirstName] = @FirstName", dic))
+            {
+                Assert.IsInstanceOfType<System.Data.OleDb.OleDbCommand>(cmd);
+                using (cmd.Connection)
+                {
+                    cmd.Connection.Open();
+                    using (var rdr = cmd.ExecuteReader())
+                        Assert.IsNotNull(rdr);
+                }
+
+            }
+        }
+
+        [TestMethod]
+        public void GetCommandTest_4()
+        {
+            var db = TableInit(false);
+            using (var cmd = db.GetCommand(db.Students.Select("FirstName").Where("LastName", "Bob").Where("FirstName", "Will")))
+            {
+                Assert.IsInstanceOfType<System.Data.OleDb.OleDbCommand>(cmd);
+                cmd.Connection.Open();
+                using (var rdr = cmd.ExecuteReader())
+                    Assert.IsNotNull(rdr);
+            }
+        }
 
         private class AccessDB : RFBCodeWorks.DataBaseObjects.DataBaseTypes.MSAccessDataBase
         {
-            public AccessDB() : base(Test_Dao.DBPath, "")
+            public AccessDB() : base(Test_AccessDAO.DBPath, "")
             {
                 Students = new PrimaryKeyTable(this, nameof(Students), "ID");
-                if (!System.IO.File.Exists(Test_Dao.DBPath))
+                if (!System.IO.File.Exists(Test_AccessDAO.DBPath))
                 {
-                    Test_Dao.GetDatabase().Close(); // Creates the database if it does not exist
-                    new Test_Dao().CreateAll();
+                    Test_AccessDAO.GetDatabase().Close(); // Creates the database if it does not exist
+                    new Test_AccessDAO().CreateAll();
                 }
             }
 

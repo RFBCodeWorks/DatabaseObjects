@@ -10,7 +10,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
     /// <summary>
     /// Create a new Database Object that represents an MS Access Database, and utilizes the <see cref="RFBCodeWorks.SqlKata.MsOfficeCompilers.MSAccessCompiler"/>
     /// </summary>
-    public class MSAccessDataBase : AbstractDataBase<OleDbConnection, OleDbCommand>
+    public class MSAccessDataBase : OleDBDatabase
     {
         /// <summary>
         /// Create an <see cref="MSAccessDataBase"/> connection from the specified <paramref name="connectionString"/>
@@ -31,12 +31,6 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
 
 
         #region < Connection Strings >
-
-        /// <inheritdoc/>
-        public override OleDbConnection GetConnection()
-        {
-            return new OleDbConnection(ConnectionString);
-        }
 
         /// <summary>
         /// Generate a new OLEDB.JET database connection string
