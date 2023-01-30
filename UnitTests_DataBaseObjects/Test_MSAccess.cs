@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using RFBCodeWorks.SqlKata.MsOfficeCompilers;
-using RFBCodeWorks.DataBaseObjects;
+using RFBCodeWorks.DatabaseObjects;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -231,7 +231,7 @@ namespace AccessTests
             }
         }
 
-        private class AccessDB : RFBCodeWorks.DataBaseObjects.DataBaseTypes.MSAccessDataBase
+        private class AccessDB : RFBCodeWorks.DatabaseObjects.DatabaseTypes.MSAccessDataBase
         {
             public AccessDB() : base(Test_AccessDAO.DBPath, "")
             {

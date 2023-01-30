@@ -8,7 +8,7 @@ using System.Data.Common;
 using System.Threading;
 using System.Linq;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// Extension Methods for interacting with databases

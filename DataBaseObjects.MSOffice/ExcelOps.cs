@@ -6,7 +6,7 @@ using System.Data.OleDb;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// Functions specific to Excel Workbooks
@@ -31,9 +31,9 @@ namespace RFBCodeWorks.DataBaseObjects
             return DBOps.TestConnection(GetConnection(workbookPath));
         }
 
-        /// <inheritdoc cref="RFBCodeWorks.DataBaseObjects.DataBaseTypes.ExcelWorkBook.GetConnection(string, bool?)"/>
+        /// <inheritdoc cref="RFBCodeWorks.DatabaseObjects.DatabaseTypes.ExcelWorkBook.GetConnection(string, bool?)"/>
         public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = null) 
-            => RFBCodeWorks.DataBaseObjects.DataBaseTypes.ExcelWorkBook.GetConnection(workbookPath, hasHeaders);
+            => RFBCodeWorks.DatabaseObjects.DatabaseTypes.ExcelWorkBook.GetConnection(workbookPath, hasHeaders);
 
         /// <summary>
         /// Opens an <see cref="OleDbCommand"/> to the specified workbook and retrieves a <see cref="DataTable"/> representation of the <paramref name="SheetName"/>
@@ -95,7 +95,7 @@ namespace RFBCodeWorks.DataBaseObjects
         /// <param name="lookupVal"/><param name="lookupColName"/><param name="returnColName"/>
         public static object GetValue(string ExcelWorkBookPath, string SheetName, string lookupColName, string lookupVal, string returnColName)
         {
-            return new RFBCodeWorks.DataBaseObjects.DataBaseTypes.ExcelWorkBook(ExcelWorkBookPath).GetValue(SheetName, lookupColName, lookupVal, returnColName);
+            return new RFBCodeWorks.DatabaseObjects.DatabaseTypes.ExcelWorkBook(ExcelWorkBookPath).GetValue(SheetName, lookupColName, lookupVal, returnColName);
         }
 
         /// <returns><inheritdoc cref="ObjectSanitizing.SanitizeToBool(object)"/></returns>

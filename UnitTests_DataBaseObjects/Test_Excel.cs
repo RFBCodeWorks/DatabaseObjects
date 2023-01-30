@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using RFBCodeWorks.SqlKata.MsOfficeCompilers;
 using RFBCodeWorks.SqlKata.Extensions;
-using Excel = RFBCodeWorks.DataBaseObjects.DataBaseTypes.ExcelWorkBook;
+using Excel = RFBCodeWorks.DatabaseObjects.DatabaseTypes.ExcelWorkBook;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -95,45 +95,45 @@ namespace ExcelTests
 
             //DataTable
             Action func = () => wk.MissingSheet.GetDataTable();
-            Assert.ThrowsException<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
+            Assert.ThrowsException<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
             func = () => wk.MissingSheet.GetDataTable(new string[] { }, whereRaw: "[ID] = ?", 1 );
-            Assert.ThrowsException<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
+            Assert.ThrowsException<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
             func = () => wk.GetDataTable($"Select * FROM [{wk.MissingSheet.TableName}$]");
-            Assert.ThrowsException<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
+            Assert.ThrowsException<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
 
             //Async DataTable
             Func<Task> taskFunc = () => wk.MissingSheet.GetDataTableAsync();
-            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
+            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
             taskFunc = () => wk.MissingSheet.GetDataTableAsync(new string[] { }, whereRaw: "[ID] = ?", new object[] { 1 });
-            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
+            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
             taskFunc = () => wk.GetDataTableAsync($"Select * FROM [{wk.MissingSheet.TableName}$]");
-            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
+            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
 
             //GetValue
             func = () => wk.MissingSheet.GetValue("ID", 1, "ID");
-            Assert.ThrowsException<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
+            Assert.ThrowsException<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
             func = () => wk.GetValue(wk.MissingSheet.TableName, "ID", 1, "ID");
-            Assert.ThrowsException<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
+            Assert.ThrowsException<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
             
             //GetValueAsync
             taskFunc = () => wk.MissingSheet.GetValueAsync("ID", 1, "ID");
-            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
+            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
             taskFunc = () => wk.GetValueAsync(wk.MissingSheet.TableName,"ID", 1, "ID");
-            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
+            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
 
             //GetDataRow
             func = () => wk.GetDataRow(wk.MissingSheet.SelectWhere(new string[] { }, "ID", 1));
-            Assert.ThrowsException<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
+            Assert.ThrowsException<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(func, incorrectExTxt);
 
             //GetDataRowAsync
             taskFunc = () => wk.GetDataRowAsync(wk.MissingSheet.SelectWhere(new string[] { }, "ID", 1));
-            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DataBaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
+            await Assert.ThrowsExceptionAsync<RFBCodeWorks.DatabaseObjects.ExcelTableNotFoundException>(taskFunc, incorrectExTxt);
 
             Console.WriteLine("All Tests threw 'ExcelTableNotFound' as expected");
         }
 
 
-        private class TestWorkbook : RFBCodeWorks.DataBaseObjects.DataBaseTypes.ExcelWorkBook
+        private class TestWorkbook : RFBCodeWorks.DatabaseObjects.DatabaseTypes.ExcelWorkBook
         {
             public TestWorkbook() : base(GetWorkbookLocation())
             {

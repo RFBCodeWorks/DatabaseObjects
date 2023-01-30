@@ -9,14 +9,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using RFBCodeWorks.SqlKata.Extensions;
 
-namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
 {
     /// <summary>
     /// Abstract base class for database structures
     /// </summary>
     /// <typeparam name="TConnectionType">The type of <see cref="DbConnection"/> this database utilizes</typeparam>
     /// <typeparam name="TCommandType">The type of <see cref="DbCommand"/> that can be used with this <typeparamref name="TConnectionType"/></typeparam>
-    public abstract class AbstractDataBase<TConnectionType, TCommandType> : IDatabase 
+    public abstract class AbstractDatabase<TConnectionType, TCommandType> : IDatabase 
         where TConnectionType : DbConnection, new()
         where TCommandType: DbCommand, new()
     {
@@ -26,13 +26,13 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// <remarks>
         /// <see cref="ConnectionString"/> must be set by derived class!
         /// </remarks>
-        protected AbstractDataBase() { }
+        protected AbstractDatabase() { }
 
         /// <summary>
         /// Create a new Database object with the supplied connection string or database name
         /// </summary>
         /// <param name="connectionString">The connection string to the database</param>
-        protected AbstractDataBase(string connectionString) { ConnectionString = connectionString; }
+        protected AbstractDatabase(string connectionString) { ConnectionString = connectionString; }
 
         /// <summary>
         /// Specify the compiler to use with this database object

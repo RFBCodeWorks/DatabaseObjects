@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
 {
     public partial class ExcelWorkBook
     {
@@ -14,7 +14,7 @@ namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
         /// <summary>
         /// Represents an Excel Worksheet that does not specify a primary key
         /// </summary>
-        public class WorkSheet : RFBCodeWorks.DataBaseObjects.DataBaseTable
+        public class WorkSheet : RFBCodeWorks.DatabaseObjects.DataBaseTable
         {
             /// <summary>
             /// Create a new Worksheet object

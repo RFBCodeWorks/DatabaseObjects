@@ -4,12 +4,12 @@ using System.Text;
 using System.Data.OleDb;
 using SqlKata;
 
-namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
 {
     /// <summary>
     /// Abstract base class for Databases that utilize <see cref="OleDbConnection"/> and <see cref="OleDbCommand"/> objects
     /// </summary>
-    public abstract class OleDBDatabase : AbstractDataBase<OleDbConnection, OleDbCommand>
+    public abstract class OleDBDatabase : AbstractDatabase<OleDbConnection, OleDbCommand>
     {
         /// <inheritdoc/>
         protected OleDBDatabase() : base() { }

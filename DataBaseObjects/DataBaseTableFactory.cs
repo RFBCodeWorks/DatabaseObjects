@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// Factory to create Database Tables specific to the a database
     /// </summary>
-    public class DataBaseTableFactory
+    public class DatabaseTableFactory
     {
         /// <summary>
         /// Instantiate the factory object
         /// </summary>
         /// <param name="database"><inheritdoc cref="DataBaseReference" path="*"/></param>
-        public DataBaseTableFactory(IDatabase database)
+        public DatabaseTableFactory(IDatabase database)
         {
             DataBaseReference = database ?? throw new ArgumentNullException(nameof(database));
         }

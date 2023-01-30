@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using RFBCodeWorks.SqlKata.Extensions;
 using SqlKata.Compilers;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// Represents the functions a database table should provide

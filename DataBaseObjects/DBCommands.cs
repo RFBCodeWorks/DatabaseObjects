@@ -7,7 +7,7 @@ using SqlKata.Compilers;
 using SqlKata;
 using System.Linq;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// Class that contains methods for producing <see cref="System.Data.Common.DbCommand"/> objects that contain simple prebuilt  SQL statements

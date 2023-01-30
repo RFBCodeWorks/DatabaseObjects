@@ -1,13 +1,13 @@
 ﻿using Microsoft.Data.SqlClient;
 using SqlKata.Compilers;
 
-namespace RFBCodeWorks.DataBaseObjects.DataBaseTypes
+namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
 {
     /// <summary>
     /// Base Database class for a Sql Server Database
     /// <br/> Utilizes <see cref="Microsoft.Data.SqlClient.SqlConnection" />
     /// </summary>
-    public class SqlServerDataBase : AbstractDataBase<SqlConnection, SqlCommand>
+    public class SqlServerDataBase : AbstractDatabase<SqlConnection, SqlCommand>
     {
         private static readonly Compiler DefaultCompiler = new SqlServerCompiler();
 

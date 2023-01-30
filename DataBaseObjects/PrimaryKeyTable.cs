@@ -8,7 +8,7 @@ using System.Threading;
 using System.Data.Common;
 using SqlKata;
 
-namespace RFBCodeWorks.DataBaseObjects
+namespace RFBCodeWorks.DatabaseObjects
 {
     /// <summary>
     /// <inheritdoc cref="IPrimaryKeyTable"/>

@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using RFBCodeWorks.DataBaseObjects;
+using RFBCodeWorks.DatabaseObjects;
 using SqlKata.Compilers;
 using System;
 using System.Collections.Generic;
@@ -98,7 +98,7 @@ namespace SqlLiteTests
             Console.WriteLine("Delete Test OK");
         }
 
-        private class MySqlLiteDB : RFBCodeWorks.DataBaseObjects.DataBaseTypes.SqliteDataBase
+        private class MySqlLiteDB : RFBCodeWorks.DatabaseObjects.DatabaseTypes.SqliteDataBase
         {
             public MySqlLiteDB() : base()
             {
@@ -120,7 +120,7 @@ namespace SqlLiteTests
 
         private static string GetDatabaseLocation() => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestDatabase.sqlite");
 
-        private class StudentTable : RFBCodeWorks.DataBaseObjects.PrimaryKeyTable
+        private class StudentTable : RFBCodeWorks.DatabaseObjects.PrimaryKeyTable
         {
             public StudentTable(MySqlLiteDB db) : base(db, "Students", "ID")
             {
