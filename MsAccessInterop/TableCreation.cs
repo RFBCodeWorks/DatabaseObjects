@@ -17,6 +17,7 @@ namespace RFBCodeWorks.MsAccessDao
         /// <inheritdoc cref="DatabaseProperties.GetDataTypeEnum(Type)"/>
         public static Dao.DataTypeEnum GetDataTypeEnum(Type type) => DatabaseProperties.GetDataTypeEnum(type);
 
+
         /// <summary>
         /// Provide a Connection String to use as for a Linked-Table that uses another access database as the source.
         /// </summary>
@@ -33,6 +34,8 @@ namespace RFBCodeWorks.MsAccessDao
             return string.Concat("MS Access", Conn);
         }
 
+        #region < Table Defs >
+
         /// <summary>
         /// Search a given Dao Database for a table def with the given <paramref name="name"/>
         /// </summary>
@@ -46,6 +49,15 @@ namespace RFBCodeWorks.MsAccessDao
             foreach (Dao.TableDef def in db.TableDefs)
                 if (def.Name == name) { return def; }
             return null;
+        }
+
+        /// <inheritdoc cref="CreateTableDef(Dao.Database, string, string, string, Dao.TableDefAttributeEnum)"/>
+        public static Dao.TableDef CreateTableDef(this Dao.Database db, string name, Dao.TableDefAttributeEnum attributes = Dao.TableDefAttributeEnum.dbSystemObject)
+        {
+            if (db is null) throw new ArgumentNullException(nameof(db));
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("TableName can not be empty!", nameof(name));
+            Dao.TableDef tb = db.CreateTableDef(name, attributes, "", "");
+            return tb;
         }
 
         /// <summary>
@@ -64,7 +76,7 @@ namespace RFBCodeWorks.MsAccessDao
         /// <br/> - Attributes: <see href="https://learn.microsoft.com/en-us/office/troubleshoot/access/tabledef-attributes-usage"/>
         /// <br/> - Connect: <see href="https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/tabledef-connect-property-dao"/>
         /// </remarks>
-        public static Dao.TableDef CreateTableDef(this Dao.Database db, string name, Dao.TableDefAttributeEnum attributes = Dao.TableDefAttributeEnum.dbSystemObject, string sourceTableName = default, string connect = default)
+        public static Dao.TableDef CreateTableDef(this Dao.Database db, string name, string sourceTableName, string connect, Dao.TableDefAttributeEnum attributes = Dao.TableDefAttributeEnum.dbSystemObject | Dao.TableDefAttributeEnum.dbAttachedTable)
         {
             if (db is null) throw new ArgumentNullException(nameof(db));
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("TableName can not be empty!", nameof(name));
@@ -95,6 +107,10 @@ namespace RFBCodeWorks.MsAccessDao
             return tb;
         }
 
+        #endregion
+
+        #region < Create Fields >
+
         /// <summary>
         /// Create a new Linked Table within the specified <paramref name="db"/>. 
         /// <br/> - A linked table holds no data; All queries are passed to the upstream database the table is linked to.
@@ -108,22 +124,23 @@ namespace RFBCodeWorks.MsAccessDao
         /// <br/> - <see cref="Dao.TableDefAttributeEnum.dbAttachSavePWD"/>
         /// <br/> - <see cref="Dao.TableDefAttributeEnum.dbHiddenObject"/> (instead of <see cref="Dao.TableDefAttributeEnum.dbSystemObject"/>)
         /// </param>
-        /// <inheritdoc cref="CreateTableDef(Dao.Database, string, Dao.TableDefAttributeEnum, string, string)"/>
+        /// <inheritdoc cref="CreateTableDef(Dao.Database, string, string, string, Dao.TableDefAttributeEnum)"/>
         /// <param name="connect"/><param name="db"/><param name="sourceTableName"/><param name="name"/>
         public static Dao.TableDef CreateLinkedTable(this Dao.Database db, string name, string sourceTableName, string connect,
             Dao.TableDefAttributeEnum attributes = Dao.TableDefAttributeEnum.dbSystemObject | Dao.TableDefAttributeEnum.dbAttachedTable)
-            => CreateTableDef(db, name, attributes,
+            => CreateTableDef(db, name,
                 sourceTableName ?? throw new ArgumentException("Expected Source Table Name", nameof(sourceTableName)),
-                connect ?? throw new ArgumentException("Expected connection string", nameof(connect)));
+                connect ?? throw new ArgumentException("Expected connection string", nameof(connect)),
+                attributes);
 
 
-        /// <inheritdoc cref="CreateField(Dao.TableDef, string, DataTypeEnum, bool, bool, object, bool, bool, int)"/>
-        public static Dao.Field CreateField(this Dao.TableDef tblDef, string name, Type dataType)
-            => CreateField(tblDef, name, GetDataTypeEnum(dataType));
+        /// <inheritdoc cref="AppendField(Dao.TableDef, string, DataTypeEnum, bool, bool, object, bool, bool, int)"/>
+        public static Dao.Field AppendField(this Dao.TableDef tblDef, string name, Type dataType)
+            => AppendField(tblDef, name, GetDataTypeEnum(dataType));
 
-        /// <inheritdoc cref="CreateField(Dao.TableDef, string, DataTypeEnum, bool, bool, object, bool, bool, int)"/>
-        public static Dao.Field CreateField(this Dao.TableDef tblDef, string name, Type dataType, bool Required, bool AllowZeroLength = false)
-            => CreateField(tblDef, name, GetDataTypeEnum(dataType), Required, AllowZeroLength);
+        /// <inheritdoc cref="AppendField(Dao.TableDef, string, DataTypeEnum, bool, bool, object, bool, bool, int)"/>
+        public static Dao.Field AppendField(this Dao.TableDef tblDef, string name, Type dataType, bool Required, bool AllowZeroLength = false)
+            => AppendField(tblDef, name, GetDataTypeEnum(dataType), Required, AllowZeroLength);
 
         /// <summary>
         /// Creates a new 'field' column and appends it to the <paramref name="tblDef"/>
@@ -138,7 +155,7 @@ namespace RFBCodeWorks.MsAccessDao
         /// <param name="IsIndex">set TRUE if this column will be used an an indexer reference for the table.</param>
         /// <param name="size">An Integer that indicates the maximum size, in bytes, of a Field object that contains text. See the Size property for valid size values. This argument is ignored for numeric and fixed-width fields.</param>
         /// <returns>The created field</returns>
-        public static Dao.Field CreateField(this Dao.TableDef tblDef, string name, DataTypeEnum fieldType, bool Required = false, bool AllowZeroLength = false, object DefaultValue = null, bool IsPrimaryKey = false, bool IsIndex = false, int size = 0)
+        public static Dao.Field AppendField(this Dao.TableDef tblDef, string name, DataTypeEnum fieldType, bool Required = false, bool AllowZeroLength = false, object DefaultValue = null, bool IsPrimaryKey = false, bool IsIndex = false, int size = 0)
         {
             if (tblDef is null) throw new ArgumentNullException(nameof(tblDef));
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Column Name cannot be null or empty!", nameof(name));
@@ -195,11 +212,13 @@ namespace RFBCodeWorks.MsAccessDao
         /// <param name="tblDef">The table to add the field to.</param>
         /// <param name="name">The name of the field. Default name is 'ID'</param>
         /// <returns>The new <see cref="Dao.Field"/></returns>
-        public static Dao.Field CreateAutoIncrementField(this Dao.TableDef tblDef, string name = "ID")
+        public static Dao.Field AppendAutoIncrementField(this Dao.TableDef tblDef, string name = "ID")
         {
-            var f = CreateField(tblDef, name, DataTypeEnum.dbLong, IsPrimaryKey: true, Required: true);
+            var f = AppendField(tblDef, name, DataTypeEnum.dbLong, IsPrimaryKey: true, Required: true);
             f.Attributes = (int)Dao.FieldAttributeEnum.dbAutoIncrField;
             return f;
         }
+
+        #endregion
     }
 }

@@ -36,9 +36,9 @@ namespace AccessTests
             if (tbl != null) db.TableDefs.Delete(tblName);
             //Create the table
             tbl = RDao.TableCreation.CreateTableDef(db, tblName);
-            tbl.CreateAutoIncrementField();
-            RDao.TableCreation.CreateField(tbl, "FirstName", TableCreation.GetDataTypeEnum<string>()); //Explicit call
-            tbl.CreateField("LastName", dataType: typeof(string)); // as Extension
+            tbl.AppendAutoIncrementField();
+            RDao.TableCreation.AppendField(tbl, "FirstName", TableCreation.GetDataTypeEnum<string>()); //Explicit call
+            tbl.AppendField("LastName", dataType: typeof(string)); // as Extension
             db.TableDefs.Append(tbl);
             Assert.IsNotNull(db.SelectTableDef(tblName));
             db.Close();
