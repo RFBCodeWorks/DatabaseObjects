@@ -136,6 +136,50 @@ namespace AccessTests
             Assert.AreEqual(1, tbl.Parent.GetDataTable(tbl.Select().Where("ID", iD)).Rows.Count);
         }
 
+        [DataRow(2)]
+        [DataRow(1)]
+        [TestMethod]
+        public void SqlSelectTop(int recordCount)
+        {
+            var tbl = TableInit(false).Students;
+            Assert.IsTrue(tbl.Parent.GetDataTable(tbl.Select()).Rows.Count >= 1, $"\nNot enough rows in the table to perform the test! Must have alteast 1 row(s)"); // check some amount of rows exist - expects 2 rows
+
+            string raw = $"Select TOP {recordCount} * from {tbl.TableName}";
+            Console.Write("Raw SQL test");
+            Assert.AreEqual(recordCount, tbl.Parent.GetDataTable(raw).Rows.Count, $"\nFailed to retrieve TOP {recordCount} rows");
+            Console.WriteLine(" -- SUCCESS");
+
+
+            var qry = tbl.Select().Limit(recordCount);
+            PrintQuery(qry);
+            Assert.AreEqual(recordCount, tbl.Parent.GetDataTable(qry).Rows.Count, $"\nFailed to retrieve TOP {recordCount} rows");
+
+            raw = $"Select TOP {recordCount} * from {tbl.TableName} ORDER BY [{tbl.PrimaryKey}] DESC";
+            Console.Write("\n\nRaw SQL test");
+            Assert.AreEqual(recordCount, tbl.Parent.GetDataTable(raw).Rows.Count, $"\nFailed to retrieve TOP {recordCount} rows");
+            Console.WriteLine(" -- SUCCESS");
+
+            qry = tbl.Select().Limit(recordCount).OrderByDesc(tbl.PrimaryKey);
+            PrintQuery(qry);
+            Assert.AreEqual(recordCount, tbl.Parent.GetDataTable(qry).Rows.Count, $"\nFailed to perform OrderByDescending");
+        }
+
+        private void PrintQuery(SqlKata.Query qry)
+        {
+            var compiler = MSAccessCompiler.AccessCompiler;
+            var result = compiler.Compile(qry);
+            Console.WriteLine($"Raw SQL: " + result.RawSql);
+            Console.WriteLine($"Parameters: ");
+            if (!result.NamedBindings.Any())
+                Console.WriteLine(" - None");
+            else
+            {
+                foreach (var bnd in result.NamedBindings)
+                    Console.WriteLine(string.Format("  - {0} | {1}", bnd.Key, bnd.Value));
+            }
+            Console.WriteLine($"Compiled SQL: " + result.ToString());
+        }
+
         [DataRow("FirstName", "Frankie", "Munez")]
         [DataRow("ID", "?", "Froglodyte")]
         [TestMethod]
@@ -163,6 +207,7 @@ namespace AccessTests
                 Assert.AreEqual(1, tbl.Update(dic2, new RFBCodeWorks.SqlKata.Extensions.WhereColumnValue(searchCol, searchVal)), "WhereColumnValue object failed");
             }
         }
+
 
         [TestMethod]
         public void SqlRemove()

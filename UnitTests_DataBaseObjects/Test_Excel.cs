@@ -10,6 +10,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using SqlKata;
+using System.Linq;
 
 namespace ExcelTests
 {
@@ -73,7 +74,40 @@ namespace ExcelTests
             //Assert.AreEqual(3, tbl.Rows.Count);
         }
 
-       [TestMethod()]
+        [DataRow(2)]
+        [DataRow(1)]
+        [TestMethod]
+        public void SqlSelectTop(int recordCount)
+        {
+            var tbl = new TestWorkbook().DataSheet;
+            Assert.IsTrue(tbl.Parent.GetDataTable(tbl.Select()).Rows.Count >= 1, $"\nNot enough rows in the table to perform the test! Must have alteast 1 row(s)"); // check some amount of rows exist - expects 2 rows
+
+            var qry = tbl.Select().Limit(recordCount);
+            PrintQuery(qry);
+            Assert.AreEqual(recordCount, tbl.Parent.GetDataTable(qry).Rows.Count, $"\nFailed to retrieve TOP {recordCount} rows");
+
+            qry = tbl.Select().Limit(recordCount).OrderByDesc(tbl.PrimaryKey);
+            PrintQuery(qry);
+            Assert.AreEqual(recordCount, tbl.Parent.GetDataTable(qry).Rows.Count, $"\nFailed to perform OrderByDescending");
+        }
+
+        private void PrintQuery(SqlKata.Query qry)
+        {
+            var compiler = ExcelWorkbookCompiler.ExcelCompiler;
+            var result = compiler.Compile(qry);
+            Console.WriteLine($"Raw SQL: " + result.RawSql);
+            Console.WriteLine($"Parameters: ");
+            if (!result.NamedBindings.Any())
+                Console.WriteLine(" - None");
+            else
+            {
+                foreach (var bnd in result.NamedBindings)
+                    Console.WriteLine(string.Format("  - {0} | {1}", bnd.Key, bnd.Value));
+            }
+            Console.WriteLine($"Compiled SQL: " + result.ToString());
+        }
+
+        [TestMethod()]
         public async Task TestColumnMissing()
         {
             var wk = new TestWorkbook();

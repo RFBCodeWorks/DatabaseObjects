@@ -189,26 +189,21 @@ namespace RFBCodeWorks.SqlKata.MsOfficeCompilers
 
             var compiled = base.CompileColumns(ctx);
 
-            // If there is a limit on the query, but not an offset, we will add the top
-            // clause to the query, which serves as a "limit" type clause within the
-            // SQL Server system similar to the limit keywords available in MySQL.
+            // If there is a limit on the query, but not an offset, we will add the top clause to the query, which serves as a "limit" type clause within MS Access
+            // Access does not support a parameter at this location, so we have to insert it as a raw string, and remove the binding.
             var limit = ctx.Query.GetLimit(this);
             var offset = ctx.Query.GetOffset(this);
 
             if (limit > 0 && offset == 0)
             {
-                // top bindings should be inserted first
-                ctx.Bindings.Insert(0, limit);
-
                 ctx.Query.ClearComponent("limit");
 
                 // handle distinct
                 if (compiled.IndexOf("SELECT DISTINCT") == 0)
                 {
-                    return "SELECT DISTINCT TOP ?" + compiled.Substring(15);
+                    return $"SELECT DISTINCT TOP {limit}" + compiled.Substring(15);
                 }
-
-                return "SELECT TOP ?" + compiled.Substring(6);
+                return $"SELECT TOP {limit}" + compiled.Substring(6);
             }
 
             return compiled;

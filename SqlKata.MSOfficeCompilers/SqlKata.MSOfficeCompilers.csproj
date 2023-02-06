@@ -16,17 +16,18 @@
         <Authors>Robert Brenckman</Authors>
         <Company />
         <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.0</Version>
+        <Version>1.0.0.1</Version>
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
         <PackageTags>SqlKata, Access, Excel, Sql</PackageTags>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
         <Description>Provides SqlKata compilers for Microsoft Access and Excel Workbooks</Description>
+        <PackageReleaseNotes>Fixes for 'SELECT TOP #' not compiling in a compatible fashion.</PackageReleaseNotes>
     </PropertyGroup>
     
     <ItemGroup>
         <!-- License File housed in top-level of repo -->
-        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
+        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
         <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
     <ItemGroup>
