@@ -7,12 +7,16 @@ using RFBCodeWorks.SqlKata.MsOfficeCompilers;
 using RFBCodeWorks.DatabaseObjects;
 using System.Linq;
 using System.Threading.Tasks;
+using SqlKata;
 
 namespace AccessTests
 {
     [TestClass]
     public class Test_MSAccess
     {
+        [TestCleanup]
+        public void DelayBetweenTests() { Task.WaitAll(Task.Delay(100)); }
+
         // First condition is the is the ANSI-89 which needs to convert to ANSI-92, second condition is the equivalent ANSI-92 search term
         [DataRow("Search*Term[*]", "Search%Term*")]
         [DataRow("Search*Term%", "Search%Term[%]")]
@@ -274,6 +278,15 @@ namespace AccessTests
                 using (var rdr = cmd.ExecuteReader())
                     Assert.IsNotNull(rdr);
             }
+        }
+
+        [TestMethod]
+        public void GitIssue3()
+        {
+            // Test Github Issue #3 - issue introduced on SqlKata 2.4.0, worked ok on 2.3.9 per OP.
+            var compiler = new MSAccessCompiler();
+            var query = new SqlKata.Query("MainTable").Where("ID", 1);
+            SqlResult result = compiler.Compile(query);
         }
 
         private class AccessDB : RFBCodeWorks.DatabaseObjects.DatabaseTypes.MSAccessDataBase
