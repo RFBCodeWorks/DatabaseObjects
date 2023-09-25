@@ -39,7 +39,7 @@
         <None Include="MsExcelSqlResult.cs" />
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="SqlKata" Version="2.3.2" />
+      <PackageReference Include="SqlKata" Version="2.4.0" />
     </ItemGroup>
 
 </Project>
