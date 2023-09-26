@@ -19,7 +19,7 @@
         <Authors>Robert Brenckman</Authors>
         <Company />
         <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.4</Version>
+        <Version>1.0.0.6</Version>
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
@@ -35,6 +35,7 @@
             Note: Due to requiring the OLEDB driver, this package is compiled for x86/x64 only.
         </Description>
         <PackageTags>SqlKata, Database</PackageTags>
+        <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>

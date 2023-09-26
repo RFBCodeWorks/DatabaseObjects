@@ -16,13 +16,15 @@
         <Authors>Robert Brenckman</Authors>
         <Company />
         <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.4</Version>
+        <Version>1.0.0.6</Version>
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
 
         <Description>Adds the 'SqlLiteDatabase' class to the RFBCodeWorks.DataBaseObjects.DataBaseTypes namespace.
 This class uses System.Data.Sqlite.Core's SqliteConnection and SqliteCommand to communicate with the db, and Sqlkata.Compilers.SqliteCompiler to compile the queries.</Description>
+
+        <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
     </PropertyGroup>
 
 

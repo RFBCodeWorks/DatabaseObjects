@@ -16,7 +16,7 @@
     <Authors>Robert Brenckman</Authors>
     <Company />
       <Copyright>Copyright 2023</Copyright>
-      <Version>1.0.0.0</Version>
+      <Version>1.0.0.6</Version>
     <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
     <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
       <PackageReadmeFile>Readme.md</PackageReadmeFile>
@@ -32,6 +32,7 @@
           - The 'SelectStatementBuilder' will compile into a SqlKata Query.
           - The 'IWhereCondition' interface objects will apply their conditions to that Query.
       </Description>
+    <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
   </PropertyGroup>
 
     <ItemGroup>
@@ -39,7 +40,7 @@
         <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="SqlKata" Version="2.3.2" />
+    <PackageReference Include="SqlKata" Version="2.4.0" />
   </ItemGroup>
 
 </Project>
