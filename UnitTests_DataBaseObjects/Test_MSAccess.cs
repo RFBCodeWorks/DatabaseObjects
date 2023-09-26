@@ -30,7 +30,7 @@ namespace AccessTests
             Assert.AreEqual(expected, MSAccessCompiler.SanitizeWildCards(value));
         }
 
-        private AccessDB TableInit(bool delete = false)
+        private static AccessDB TableInit(bool delete = false)
         {
             var db = new AccessDB();
             if (delete) db.RunAction(new SqlKata.Query(db.Students.TableName).AsDelete());  // Delete all rows within the table
@@ -50,7 +50,7 @@ namespace AccessTests
             //Check database table is empty
             Assert.AreEqual(0, db.Students.GetDataTable().Rows.Count);
 
-            async Task WaitForDB() => await Task.Delay(500);
+            static async Task WaitForDB() => await Task.Delay(500);
 
             //Raw statement - First row in table with ID that AutoIncrements will have ID of 1
             using (var cmd = db.GetCommand())
@@ -113,9 +113,11 @@ namespace AccessTests
         public void SqlInsert(string first, string last)
         {
             var db = TableInit();
-            var dic = new Dictionary<string, object>();
-            dic.Add("FirstName", first);
-            dic.Add("LastName", last);
+            var dic = new Dictionary<string, object>
+            {
+                { "FirstName", first },
+                { "LastName", last }
+            };
             Assert.AreEqual(1, db.Students.Insert(dic));
         }
 
@@ -168,7 +170,7 @@ namespace AccessTests
             Assert.AreEqual(recordCount, tbl.Parent.GetDataTable(qry).Rows.Count, $"\nFailed to perform OrderByDescending");
         }
 
-        private void PrintQuery(SqlKata.Query qry)
+        private static void PrintQuery(Query qry)
         {
             var compiler = MSAccessCompiler.AccessCompiler;
             var result = compiler.Compile(qry);
@@ -195,10 +197,14 @@ namespace AccessTests
             SqlInsert("Frankie", "Frog"); //ID2
             var iD = tbl.Parent.GetValue(tbl.Select("ID").Where("FirstName", "Frankie"));
 
-            var dic = new Dictionary<string, object>();
-            dic.Add("LastName", newLastName);
-            var dic2 = new Dictionary<string, object>();
-            dic2.Add("LastName", newLastName + "2");
+            var dic = new Dictionary<string, object>
+            {
+                { "LastName", newLastName }
+            };
+            var dic2 = new Dictionary<string, object>
+            {
+                { "LastName", newLastName + "2" }
+            };
 
             if (searchCol == "ID")
             {
@@ -235,35 +241,31 @@ namespace AccessTests
         public void GetCommandTest_2()
         {
             var db = TableInit(false);
-            using (var cmd = db.GetCommand("Select * from Students Where [LastName] = @LastName AND [FirstName] = @FirstName",
+            using var cmd = db.GetCommand("Select * from Students Where [LastName] = @LastName AND [FirstName] = @FirstName",
                 new KeyValuePair<string, object>("@LastName", "Bob"),
-                new KeyValuePair<string, object>("@FirstName", "Will"))
-                )
-            {
-                Assert.IsInstanceOfType<System.Data.OleDb.OleDbCommand>(cmd);
-                cmd.Connection.Open();
-                using (var rdr = cmd.ExecuteReader())
-                    Assert.IsNotNull(rdr);
-            }
+                new KeyValuePair<string, object>("@FirstName", "Will"));
+            Assert.IsInstanceOfType<System.Data.OleDb.OleDbCommand>(cmd);
+            cmd.Connection.Open();
+            using var rdr = cmd.ExecuteReader();
+            Assert.IsNotNull(rdr);
         }
 
         [TestMethod]
         public void GetCommandTest_3()
         {
             var db = TableInit(false);
-            var dic = new Dictionary<string, object>();
-            dic.Add("@LastName", "Bob");
-            dic.Add("@FirstName", "Will");
-            using (var cmd = db.GetCommand("Select * from Students Where [LastName] = @LastName AND [FirstName] = @FirstName", dic))
+            var dic = new Dictionary<string, object>
             {
-                Assert.IsInstanceOfType<System.Data.OleDb.OleDbCommand>(cmd);
-                using (cmd.Connection)
-                {
-                    cmd.Connection.Open();
-                    using (var rdr = cmd.ExecuteReader())
-                        Assert.IsNotNull(rdr);
-                }
-
+                { "@LastName", "Bob" },
+                { "@FirstName", "Will" }
+            };
+            using var cmd = db.GetCommand("Select * from Students Where [LastName] = @LastName AND [FirstName] = @FirstName", dic);
+            Assert.IsInstanceOfType<System.Data.OleDb.OleDbCommand>(cmd);
+            using (cmd.Connection)
+            {
+                cmd.Connection.Open();
+                using var rdr = cmd.ExecuteReader();
+                Assert.IsNotNull(rdr);
             }
         }
 
@@ -271,13 +273,11 @@ namespace AccessTests
         public void GetCommandTest_4()
         {
             var db = TableInit(false);
-            using (var cmd = db.GetCommand(db.Students.Select("FirstName").Where("LastName", "Bob").Where("FirstName", "Will")))
-            {
-                Assert.IsInstanceOfType<System.Data.OleDb.OleDbCommand>(cmd);
-                cmd.Connection.Open();
-                using (var rdr = cmd.ExecuteReader())
-                    Assert.IsNotNull(rdr);
-            }
+            using var cmd = db.GetCommand(db.Students.Select("FirstName").Where("LastName", "Bob").Where("FirstName", "Will"));
+            Assert.IsInstanceOfType<System.Data.OleDb.OleDbCommand>(cmd);
+            cmd.Connection.Open();
+            using var rdr = cmd.ExecuteReader();
+            Assert.IsNotNull(rdr);
         }
 
         [TestMethod]
@@ -287,6 +287,7 @@ namespace AccessTests
             var compiler = new MSAccessCompiler();
             var query = new SqlKata.Query("MainTable").Where("ID", 1);
             SqlResult result = compiler.Compile(query);
+            Console.WriteLine(result);
         }
 
         private class AccessDB : RFBCodeWorks.DatabaseObjects.DatabaseTypes.MSAccessDataBase
