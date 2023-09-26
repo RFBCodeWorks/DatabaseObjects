@@ -16,13 +16,13 @@
         <Authors>Robert Brenckman</Authors>
         <Company />
         <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.1</Version>
+        <Version>1.0.0.6</Version>
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
         <PackageTags>SqlKata, Access, Excel, Sql</PackageTags>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
         <Description>Provides SqlKata compilers for Microsoft Access and Excel Workbooks</Description>
-        <PackageReleaseNotes>Fixes for 'SELECT TOP #' not compiling in a compatible fashion.</PackageReleaseNotes>
+        <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
     </PropertyGroup>
     
     <ItemGroup>
@@ -39,7 +39,7 @@
         <None Include="MsExcelSqlResult.cs" />
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="SqlKata" Version="2.3.2" />
+      <PackageReference Include="SqlKata" Version="2.4.0" />
     </ItemGroup>
 
 </Project>
