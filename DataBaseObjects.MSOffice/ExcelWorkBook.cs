@@ -19,17 +19,25 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
     /// </summary>
     public partial class ExcelWorkBook : OleDBDatabase
     {
+        /// <inheritdoc cref="ExcelWorkBook.ExcelWorkBook(string, bool?, MSOfficeConnectionProvider)"/>
+        public ExcelWorkBook(string path) : this(path, null, default) { }
+
+        /// <inheritdoc cref="ExcelWorkBook.ExcelWorkBook(string, bool?, MSOfficeConnectionProvider)"/>
+        public ExcelWorkBook(string path, bool? hasHeaders) : this(path, hasHeaders, default) { }
+
         /// <summary>
         /// Create an object that represents an <see cref="OleDbConnection"/> to some Excel Workbook
         /// </summary>
-        /// <param name="path">The path to the excel workbook</param>
-        /// <param name="hasHeaders"><inheritdoc cref="HasHeaders" path="*"/></param>
-       public ExcelWorkBook(string path, bool? hasHeaders = true) : base(GetConnection(path, hasHeaders).ConnectionString)
+        /// <param name="path">Path to the workbook - must be fully qualified</param>
+        /// <inheritdoc cref="ExcelWorkBook.GetConnection(string, bool?, MSOfficeConnectionProvider)"/>
+        /// <param name="hasHeaders"/><param name="provider"/>
+        public ExcelWorkBook(string path, bool? hasHeaders, MSOfficeConnectionProvider provider) : base(GetConnectionString(path, hasHeaders, provider))
         {
             this.hasHeaders = hasHeaders;
             workbookPath = path;
+            Provider = provider;
         }
-        
+
         private string workbookPath;
         private bool? hasHeaders;
 
@@ -68,89 +76,98 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// <inheritdoc/>
         public override Compiler Compiler => RFBCodeWorks.SqlKata.MsOfficeCompilers.ExcelWorkbookCompiler.ExcelCompiler;
 
+        /// <summary>
+        /// The Connection Provider to use when generating a new connection string
+        /// </summary>
+        public MSOfficeConnectionProvider Provider { get; set; }
+
 
         #region < Get Database Connection >
 
         /// <inheritdoc/>
         public override OleDbConnection GetConnection()
         {
-           return GetConnection(WorkbookPath, HasHeaders);
+           return GetConnection(WorkbookPath, HasHeaders, Provider);
         }
 
         /// <param name="hasHeaders"><inheritdoc cref="HasHeaders" path="*"/></param>
         /// <inheritdoc cref="GetConnection()"/>
         public OleDbConnection GetDatabaseConnection(bool? hasHeaders)
         {
-            return GetConnection(WorkbookPath, hasHeaders);
+            return GetConnection(WorkbookPath, hasHeaders, Provider);
         }
 
+        #endregion
 
-        /// <exception cref="ArgumentException"/>
-        ///// <exception cref="System.IO.FileNotFoundException"/>
-        private static void ValidateWorkbookPath(string workbookPath)
-        {
-            if (string.IsNullOrWhiteSpace(workbookPath)) throw new ArgumentException("WorkBookPath has no value");
-            if (!System.IO.Path.IsPathRooted(workbookPath)) throw new ArgumentException("WorkBookPath is not rooted!");
-            if (!System.IO.Path.HasExtension(workbookPath)) throw new ArgumentException("WorkBookPath does not have an extension!");
-            //if (!System.IO.File.Exists(workbookPath)) throw new System.IO.FileNotFoundException($"Workbook does not exist at specified location! - Path: \n {workbookPath}");
-        }
+        #region < Connection Strings >
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+        [Obsolete("Use ExcelWorkbook.GetConnection() instead.", true)]
+        public static OleDbConnection GetACEConnection(string workbookPath, bool? hasHeaders = null) => throw new NotImplementedException("Deprecated");
+        [Obsolete("Use ExcelWorkbook.GetConnection() instead.", true)]
+        public static OleDbConnection GetJETConnection(string workbookPath, bool? hasHeaders = null) => throw new NotImplementedException("Deprecated");
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         /// <summary>
         /// Generate the <see cref="OleDbConnection"/> to the specified <paramref name="workbookPath"/>
+        /// Generate a Connection string via <see cref="GetConnectionString(string, bool?, MSOfficeConnectionProvider)"/>, and transform it into a new OleDBConnection
         /// </summary>
-        /// <param name="workbookPath">Path to the workbook</param>
-        /// <param name="hasHeaders"><inheritdoc cref="HasHeaders" path="*"/></param>
-        /// <returns></returns>
-        /// <inheritdoc cref="ValidateWorkbookPath(string)"/>
-        public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = null)
+        /// <returns>A new <see cref="OleDbConnection"/> object</returns>
+        /// <inheritdoc cref="GetConnectionString(string, bool?, MSOfficeConnectionProvider)"/>
+        public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = true, MSOfficeConnectionProvider provider = default)
         {
-            //ValidateWorkbookPath(workbookPath);
-            if (System.IO.Path.GetExtension(workbookPath) == ".xlsx" || System.IO.Path.GetExtension(workbookPath) == ".xlsm")
-                return GetACEConnection(workbookPath, hasHeaders);
-            else
-                return GetJETConnection(workbookPath, hasHeaders);
-        }
-
-        /// <inheritdoc cref="GetConnection(string, bool?)" />
-        public static OleDbConnection GetACEConnection(string workbookPath, bool? hasHeaders = null)
-        {
-            ValidateWorkbookPath(workbookPath);
-            string HDR = hasHeaders is null ? string.Empty : (bool)hasHeaders ? ";HDR=Yes" : ";HDR=No";
-            return new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + workbookPath + ";Extended Properties=\"Excel 12.0" + HDR + ";IMEX=0\"");
-        }
-
-        /// <inheritdoc cref="GetConnection(string, bool?)" />
-        public static OleDbConnection GetJETConnection(string workbookPath, bool? hasHeaders = null)
-        {
-            ValidateWorkbookPath(workbookPath);
-            string HDR = hasHeaders is null ? string.Empty : (bool)hasHeaders ? ";HDR=Yes" : ";HDR=No";
-            return new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + workbookPath + ";Extended Properties=\"Excel 8.0" + HDR + ";IMEX=0\"");
+            return new OleDbConnection(GetConnectionString(workbookPath, hasHeaders, provider));
         }
 
         /// <summary>
-        /// Provide a Connection String for a MS Access DB linked table from an excel file 
+        /// Generate a new OLEDB connection string
         /// </summary>
-        /// <param name="FilePath"></param>
-        /// <param name="Headers"></param>
-        /// <returns></returns>
-        private static string ConnStr_excel(string FilePath, bool Headers = true)
+        /// <param name="workbookPath">Path to the workbook - must be fully qualified</param>
+        /// <param name="hasHeaders"><inheritdoc cref="HasHeaders" path="*"/></param>
+        /// <param name="provider">The selected Connection provider </param>
+        /// <returns>A generated connection string</returns>
+        /// <exception cref="ArgumentException"/>
+        public static string GetConnectionString(string workbookPath, bool? hasHeaders = true, MSOfficeConnectionProvider provider = default)
         {
-            string Conn = "";
-            string Hdr = (Headers) ? "YES" : "NO";
-            switch (true)
+            if (string.IsNullOrWhiteSpace(workbookPath)) throw new ArgumentException("Path has no value");
+            if (!System.IO.Path.IsPathRooted(workbookPath)) throw new ArgumentException("Path is not rooted!");
+            if (!System.IO.Path.HasExtension(workbookPath)) throw new ArgumentException("Path does not have an extension!");
+            
+            string ext = Path.GetExtension(workbookPath).ToLowerInvariant();
+            StringBuilder connectionBuilder = new();
+
+
+#if _WIN32
+            // If set to Default and is 32-bit, evaluate the file extension
+            provider = provider != MSOfficeConnectionProvider.Default ? provider : ext == ".xls" ? MSOfficeConnectionProvider.Jet4 : MSOfficeConnectionProvider.Ace12;
+#endif
+            connectionBuilder.Append(provider switch {
+#if _WIN32
+                MSOfficeConnectionProvider.Jet4 => "Provider=Microsoft.Jet.OLEDB.4.0;", // 32-bit only provider
+#else
+                (MSOfficeConnectionProvider)1 => throw new InvalidOperationException("Jet4.0 is not compatible with 64-Bit assemblies."),
+
+#endif
+                MSOfficeConnectionProvider.Default or
+                MSOfficeConnectionProvider.Ace12 => "Provider=Microsoft.ACE.OLEDB.12.0;",
+                MSOfficeConnectionProvider.Ace16 => "Provider=Microsoft.ACE.OLEDB.16.0;",
+                _ => throw new NotImplementedException($"Provider {provider} not implemented")
+            });
+
+            connectionBuilder.Append($"Data Source={workbookPath};");
+
+            // Extended properties
+            string hdr = !hasHeaders.HasValue ? string.Empty : hasHeaders.Value ? "HDR=YES;" : "HDR=NO;";
+            connectionBuilder.Append(true switch
             {
-                case true when Path.GetExtension(FilePath) == ".xlsm":
-                    Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={FilePath};Excel 12.0 Macro;HDR={Hdr};IMEX=1;";
-                    break;
-                case true when Path.GetExtension(FilePath) == ".xlsx":
-                    Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={FilePath};Excel 12.0 Xml;HDR={Hdr};IMEX=1;";
-                    break;
-                case true when Path.GetExtension(FilePath) == ".xls":
-                    //Only available on 32-bit version! 64-bit driver does not include support for JET
-                    Conn = $"Provider=Microsoft.Jet.OLEDB.4.0;Data Source={FilePath};Excel 8.0;HDR={Hdr};IMEX=1;";
-                    break;
-            }
-            return Conn;
+                true when ext == ".xls" => $"Extended Properties=\"Excel 8.0;{hdr}IMEX=1\"",
+                true when ext == ".xlsb" => $"Extended Properties=\"Excel 12.0;{hdr}IMEX=1\"",
+                true when ext == ".xlsx" => $"Extended Properties=\"Excel 12.0 Xml;{hdr}IMEX=1\"",
+                true when ext == ".xlsm" => $"Extended Properties=\"Excel 12.0 Macro;{hdr}IMEX=1\"",
+                _ => throw new NotImplementedException($"Unexpected file extension : {ext}")
+            });
+
+            return connectionBuilder.ToString();
         }
 
         #endregion
