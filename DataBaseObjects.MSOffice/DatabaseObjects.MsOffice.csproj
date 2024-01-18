@@ -37,6 +37,14 @@
         <PackageTags>SqlKata, Database</PackageTags>
         <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
     </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(Platform)'=='x86'">
+      <DefineConstants>TRACE;_WIN32</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Platform)'=='x64'">
+      <DefineConstants>TRACE;_WIN64</DefineConstants>
+    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="System.Data.OleDb" Version="5.0.0" />
