@@ -5,8 +5,8 @@
         <LangVersion>9.0</LangVersion>
         <!-- This cannot as AnyCPU due to requiring the OLEDB driver, Must select either x86 or x64 -->
         <Platforms>x86;x64</Platforms>
-        <AssemblyName>RFBCodeWorks.DataBaseObjects.MsOffice</AssemblyName>
-        <RootNamespace>RFBCodeWorks.DataBaseObjects.DataBaseTypes</RootNamespace>
+        <AssemblyName>RFBCodeWorks.DatabaseObjects.MsOffice</AssemblyName>
+        <RootNamespace>RFBCodeWorks.DatabaseObjects.DatabaseTypes</RootNamespace>
         
         <!-- Nuget Stuff -->
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -25,7 +25,7 @@
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
         
         <Description>
-            Extends RFBCodeWorks.DataBaseObjects to provides objects that represent an MSAccess database, as well as an MS EXcel workbook.
+            Extends RFBCodeWorks.DatabaseObjects to provides objects that represent an MSAccess database, as well as an MS EXcel workbook.
 
             Using SQL to query an excel workbook also requires some special syntax, so the ExcelWorkSheet object is also provided to ease that translation.
             The OLEDBConnection string will also be generated depending on the file extension (.xls vs .xslx/.xlsm), since each file format requires a different connection adapater.
@@ -43,7 +43,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
+        <ProjectReference Include="..\DatabaseObjects\DatabaseObjects.csproj" />
         <ProjectReference Include="..\SqlKata.MSOfficeCompilers\SqlKata.MSOfficeCompilers.csproj" />
     </ItemGroup>
     <ItemGroup>

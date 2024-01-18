@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <Platforms>x86;x64;</Platforms>
         <AssemblyName>RFBCodeWorks.SqlKata.MsOfficeCompilers</AssemblyName>
         <RootNamespace>RFBCodeWorks.SqlKata.MsOfficeCompilers</RootNamespace>
 
@@ -23,6 +24,14 @@
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
         <Description>Provides SqlKata compilers for Microsoft Access and Excel Workbooks</Description>
         <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Platform)'=='x86'">
+        <DefineConstants>TRACE;_WIN32</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Platform)'=='x64'">
+        <DefineConstants>TRACE;_WIN64</DefineConstants>
     </PropertyGroup>
     
     <ItemGroup>

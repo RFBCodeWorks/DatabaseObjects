@@ -2,8 +2,9 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <Platforms>x86;x64;AnyCPU</Platforms>
         <AssemblyName>RFBCodeWorks.DatabaseObjects.SqLite</AssemblyName>
-        <RootNamespace>RFBCodeWorks.DataBaseObjects.DataBaseTypes</RootNamespace>
+        <RootNamespace>RFBCodeWorks.DatabaseObjects.DatabaseTypes</RootNamespace>
         
         <!-- Nuget Stuff -->
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -21,7 +22,7 @@
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
 
-        <Description>Adds the 'SqlLiteDatabase' class to the RFBCodeWorks.DataBaseObjects.DataBaseTypes namespace.
+        <Description>Adds the 'SqlLiteDatabase' class to the RFBCodeWorks.DatabaseObjects.DatabaseTypes namespace.
 This class uses System.Data.Sqlite.Core's SqliteConnection and SqliteCommand to communicate with the db, and Sqlkata.Compilers.SqliteCompiler to compile the queries.</Description>
 
         <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
@@ -37,7 +38,7 @@ This class uses System.Data.Sqlite.Core's SqliteConnection and SqliteCommand to 
         <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.1" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
+        <ProjectReference Include="..\DatabaseObjects\DatabaseObjects.csproj" />
     </ItemGroup>
 
 </Project>
