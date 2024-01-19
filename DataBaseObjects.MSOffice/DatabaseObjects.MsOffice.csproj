@@ -15,11 +15,11 @@
         <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
         <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
         <PackageLicenseExpression></PackageLicenseExpression>
-        <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
+        <DocumentationFile>$(ProjectDir)bin\$(Platform)\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
         <Authors>Robert Brenckman</Authors>
         <Company />
         <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.6</Version>
+        <Version>1.0.0.7</Version>
         <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
         <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
         <PackageReadmeFile>Readme.md</PackageReadmeFile>
@@ -35,15 +35,32 @@
             Note: Due to requiring the OLEDB driver, this package is compiled for x86/x64 only.
         </Description>
         <PackageTags>SqlKata, Database</PackageTags>
-        <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
+        <PackageReleaseNotes>Fixes for Connection Strings and proper 32-bit / 64-bit support. 
+        JET now reports as obsolete when using 64-bit assemblies.</PackageReleaseNotes>
     </PropertyGroup>
-    
+
     <PropertyGroup Condition="'$(Platform)'=='x86'">
       <DefineConstants>TRACE;_WIN32</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Platform)'=='x64'">
       <DefineConstants>TRACE;_WIN64</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+      <OutputPath>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+      <OutputPath>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      <OutputPath>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      <OutputPath>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>

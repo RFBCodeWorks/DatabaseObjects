@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>RFBCodeWorks.DatabaseObjects.MsOffice</id>
+    <version>1.0.0.7</version>
+    <authors>Robert Brenckman</authors>
+    <license type="file">LICENSE.txt</license>
+    <licenseUrl>https://aka.ms/deprecateLicenseUrl</licenseUrl>
+    <projectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</projectUrl>
+    <description>Extends RFBCodeWorks.DatabaseObjects to provides objects that represent an MSAccess database, as well as an MS EXcel workbook.
+
+            Using SQL to query an excel workbook also requires some special syntax, so the ExcelWorkSheet object is also provided to ease that translation.
+            The OLEDBConnection string will also be generated depending on the file extension (.xls vs .xslx/.xlsm), since each file format requires a different connection adapater.
+
+            The AccessDatabase object is a concrete class to use the MSAccess Compiler provided by RFBCodeWorks.SqlKata.MSOfficeCompilers (required nuget pkg)
+
+            Note: Due to requiring the OLEDB driver, this package is compiled for x86/x64 only.</description>
+    <releaseNotes>Fixes for Connection Strings and proper 32-bit / 64-bit support. 
+        JET now reports as obsolete when using 64-bit assemblies.</releaseNotes>
+    <copyright>Copyright 2023</copyright>
+    <tags>SqlKata, Database</tags>
+    <readme>Readme.md</readme>
+    <repository url="https://github.com/RFBCodeWorks/DatabaseObjects" />
+  </metadata>
+    <files>
+        <file src="bin\*\Release\*\*MsOffice.dll"/>
+    </files>
+</package>

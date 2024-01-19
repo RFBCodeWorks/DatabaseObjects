@@ -89,18 +89,16 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         [Obsolete("Please use MSAccessDatabase.GetConnection(string, MSOfficeConnectionProvider, string) instead.", true)]
         public static OleDbConnection GetACEConnection(string path, string dbPassword = default) => GetConnection(path, dbPassword, MSOfficeConnectionProvider.Ace12);
 
-#if _WIN32
-        /// <inheritdoc cref="GenerateConnectionString(string, MSOfficeConnectionProvider, string)"/>
+        /// <inheritdoc cref="GetConnectionString"/>
         [Obsolete("Please use MSAccessDatabase.GenerateConnectionString() instead.", true)]
-        public static string GenerateJetConnectionString(string path, string dbPassword = default) => GenerateConnectionString(path, dbPassword, MSOfficeConnectionProvider.Jet4);
+        public static string GenerateJetConnectionString(string path, string dbPassword = default) => GetConnectionString(path, dbPassword, MSOfficeConnectionProvider.Jet4);
 
         /// <summary>
         /// Generate a new OLEDB.ACE database connection
         /// </summary>
-        /// <inheritdoc cref="GetConnection(string, MSOfficeConnectionProvider, string)"/>
+        /// <inheritdoc cref="GetConnection"/>
         [Obsolete("Please use MSAccessDatabase.GetConnection(string, MSOfficeConnectionProvider, string) instead.", true)]
         public static OleDbConnection GetJetConnection(string path, string dbPassword = default) => GetConnection(path, dbPassword, MSOfficeConnectionProvider.Jet4);
-#endif
 
         #endregion
     }
