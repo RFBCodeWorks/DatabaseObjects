@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFrameworks>netstandard2.0;net6.0-windows;net8.0-windows</TargetFrameworks>
         <LangVersion>9.0</LangVersion>
         <!-- This cannot as AnyCPU due to requiring the OLEDB driver, Must select either x86 or x64 -->
         <Platforms>x86;x64;AnyCPU</Platforms>
@@ -18,14 +18,20 @@
       <DefineConstants>TRACE;_WIN64</DefineConstants>
     </PropertyGroup>
 
+	<!-- Project References -->
+	<ItemGroup>
+		<ProjectReference Include="..\DatabaseObjects\DatabaseObjects.csproj" />
+		<ProjectReference Include="..\SqlKata.MSOfficeCompilers\SqlKata.MSOfficeCompilers.csproj" />
+	</ItemGroup>
+	
+	<!-- Package References for compatibility -->
     <ItemGroup>
-        <PackageReference Include="System.Data.OleDb" Version="8.0.0" />
+		<!-- netStandard should continue targeting 4.6.0 as minimum to support legacy projects. If required, consumers can upgrade their own package in their project. -->
+        <PackageReference Include="System.Data.OleDb" Version="4.6.0" Condition=" '$(TargetFramework)' == 'netstandard2.0' " />
+		<PackageReference Include="System.Data.OleDb" Version="6.0.0" Condition=" '$(TargetFramework)' == 'net6.0-windows' " />
+		<PackageReference Include="System.Data.OleDb" Version="8.0.0" Condition=" '$(TargetFramework)' == 'net8.0-windows' " />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\DatabaseObjects\DatabaseObjects.csproj" />
-        <ProjectReference Include="..\SqlKata.MSOfficeCompilers\SqlKata.MSOfficeCompilers.csproj" />
-    </ItemGroup>
 	<!-- Nuget Stuff -->
 	<PropertyGroup>
 		<!-- Nuget Stuff -->
@@ -56,7 +62,7 @@
 		</Description>
 		
 		<!-- Package Release Notes -->
-		<Version>1.0.0.8</Version>
+		<Version>1.0.0.9</Version>
 		<PackageReleaseNotes>
 			Fixes for Connection Strings and better 32-bit / 64-bit support.
 			JET now reports as obsolete when using 64-bit assemblies.
@@ -76,8 +82,8 @@
 		<!--AnyCPU-->
         <None Update="bin\Release\AnyCPU\*\$(AssemblyName).dll" Pack="true" PackagePath="lib\" />
         <!--x86-->
-		<None Include="bin\Release\x86\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x86\native\$(AssemblyName).dll" />
+		<None Include="bin\Release\x86\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x86\native\" />
 		<!--x64-->
-		<None Include="bin\Release\x64\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x64\native\$(AssemblyName).dll" />
+		<None Include="bin\Release\x64\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x64\native\" />
 	</ItemGroup>
 </Project>
