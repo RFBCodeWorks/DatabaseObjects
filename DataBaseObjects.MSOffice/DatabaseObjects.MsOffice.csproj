@@ -74,7 +74,7 @@
 		<!-- https://stackoverflow.com/questions/49162127/how-to-include-native-assets-in-nuget-on-multiple-platforms-only-64-bit -->
 		<!-- https://learn.microsoft.com/en-us/nuget/create-packages/supporting-multiple-target-frameworks -->
 		<!--AnyCPU-->
-        <None Include="bin\Release\AnyCPU\*\$(AssemblyName).dll" Pack="true" PackagePath="lib\" />
+        <None Update="bin\Release\AnyCPU\*\$(AssemblyName).dll" Pack="true" PackagePath="lib\" />
         <!--x86-->
 		<None Include="bin\Release\x86\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x86\native\$(AssemblyName).dll" />
 		<!--x64-->
