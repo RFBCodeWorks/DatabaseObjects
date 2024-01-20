@@ -32,13 +32,13 @@ This class uses System.Data.Sqlclient's SqlConnection and SqlCommand to communic
         https://devblogs.microsoft.com/dotnet/introducing-the-new-microsoftdatasqlclient/
         Microsoft.Data.SqlClient supercedes System.Data.SqlClient, and should be used going forward per the above blog
         -->
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
-      
-    </ItemGroup>
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.4" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<ProjectReference Include="..\DatabaseObjects\DatabaseObjects.csproj" />
+	</ItemGroup>
 
-    <ItemGroup>
-    <ProjectReference Include="..\DatabaseObjects\DatabaseObjects.csproj" />
-    </ItemGroup>
     <ItemGroup>
     <!-- License File housed in top-level of repo -->
     <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />

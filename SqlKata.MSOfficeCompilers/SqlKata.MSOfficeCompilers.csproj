@@ -30,15 +30,17 @@
         <DefineConstants>TRACE;_WIN32</DefineConstants>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Platform)'=='x64'">
-        <DefineConstants>TRACE;_WIN64</DefineConstants>
-    </PropertyGroup>
     
     <ItemGroup>
         <!-- License File housed in top-level of repo -->
         <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
         <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="SqlKata" Version="2.4.0" />
+	</ItemGroup>
+	
+	<!-- WIP Items - Not included in compiled library-->
     <ItemGroup>
       <Compile Remove="MsAccessSqlResult.cs" />
       <Compile Remove="MsExcelSqlResult.cs" />
@@ -46,9 +48,6 @@
     <ItemGroup>
         <None Include="MsAccessSqlResult.cs" />
         <None Include="MsExcelSqlResult.cs" />
-    </ItemGroup>
-    <ItemGroup>
-      <PackageReference Include="SqlKata" Version="2.4.0" />
     </ItemGroup>
 
 </Project>

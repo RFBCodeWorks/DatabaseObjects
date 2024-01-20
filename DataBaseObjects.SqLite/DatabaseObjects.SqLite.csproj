@@ -35,7 +35,7 @@ This class uses System.Data.Sqlite.Core's SqliteConnection and SqliteCommand to 
         <None Include="Readme.md" Pack="true" PackagePath="\" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="7.0.1" />
+        <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\DatabaseObjects\DatabaseObjects.csproj" />
