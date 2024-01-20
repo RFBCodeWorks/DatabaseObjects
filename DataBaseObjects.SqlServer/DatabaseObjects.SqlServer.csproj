@@ -43,7 +43,7 @@
 		</Description>
 
 		<!-- Package Release Notes -->
-		<Version>1.0.0.7</Version>
+		<Version>1.0.0.8</Version>
 		<PackageReleaseNotes>Updated NuGet Packages</PackageReleaseNotes>
 
 		<!-- Build Files -->

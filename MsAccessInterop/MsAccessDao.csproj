@@ -42,7 +42,7 @@
 		</Description>
 
 		<!-- Package Release Notes -->
-		<Version>1.0.0.7</Version>
+		<Version>1.0.0.8</Version>
 		<PackageReleaseNotes>Now properly includes the x86 and x64 runtime dlls.</PackageReleaseNotes>
 
 		<!-- Build Files -->
