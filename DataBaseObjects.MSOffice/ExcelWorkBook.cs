@@ -129,45 +129,7 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// <exception cref="ArgumentException"/>
         public static string GetConnectionString(string workbookPath, bool? hasHeaders = true, MSOfficeConnectionProvider provider = default)
         {
-            if (string.IsNullOrWhiteSpace(workbookPath)) throw new ArgumentException("Path has no value");
-            if (!System.IO.Path.IsPathRooted(workbookPath)) throw new ArgumentException("Path is not rooted!");
-            if (!System.IO.Path.HasExtension(workbookPath)) throw new ArgumentException("Path does not have an extension!");
-            
-            string ext = Path.GetExtension(workbookPath).ToLowerInvariant();
-            StringBuilder connectionBuilder = new();
-
-
-#if _WIN32
-            // If set to Default and is 32-bit, evaluate the file extension
-            provider = provider != MSOfficeConnectionProvider.Default ? provider : ext == ".xls" ? MSOfficeConnectionProvider.Jet4 : MSOfficeConnectionProvider.Ace12;
-#endif
-            connectionBuilder.Append(provider switch {
-#if _WIN32
-                MSOfficeConnectionProvider.Jet4 => "Provider=Microsoft.Jet.OLEDB.4.0;", // 32-bit only provider
-#else
-                (MSOfficeConnectionProvider)1 => throw new InvalidOperationException("Jet4.0 is not compatible with 64-Bit assemblies."),
-
-#endif
-                MSOfficeConnectionProvider.Default or
-                MSOfficeConnectionProvider.Ace12 => "Provider=Microsoft.ACE.OLEDB.12.0;",
-                MSOfficeConnectionProvider.Ace16 => "Provider=Microsoft.ACE.OLEDB.16.0;",
-                _ => throw new NotImplementedException($"Provider {provider} not implemented")
-            });
-
-            connectionBuilder.Append($"Data Source={workbookPath};");
-
-            // Extended properties
-            string hdr = !hasHeaders.HasValue ? string.Empty : hasHeaders.Value ? "HDR=YES;" : "HDR=NO;";
-            connectionBuilder.Append(true switch
-            {
-                true when ext == ".xls" => $"Extended Properties=\"Excel 8.0;{hdr}IMEX=1\"",
-                true when ext == ".xlsb" => $"Extended Properties=\"Excel 12.0;{hdr}IMEX=1\"",
-                true when ext == ".xlsx" => $"Extended Properties=\"Excel 12.0 Xml;{hdr}IMEX=1\"",
-                true when ext == ".xlsm" => $"Extended Properties=\"Excel 12.0 Macro;{hdr}IMEX=1\"",
-                _ => throw new NotImplementedException($"Unexpected file extension : {ext}")
-            });
-
-            return connectionBuilder.ToString();
+            return new ExcelConnectionStringBuilder() { Headers = hasHeaders, Provider = provider, WorkbookPath = workbookPath }.ToString();
         }
 
         #endregion

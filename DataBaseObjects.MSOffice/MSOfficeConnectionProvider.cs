@@ -25,7 +25,7 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
 #if _WIN32
         Jet4,
 #else
-        [Obsolete("Jet4.0 is not compatible with 64-Bit assemblies.", true)]
+        [Obsolete("Jet4.0 is not compatible with 64-Bit assemblies.", false)]
         Jet4,
 #endif
         /// <summary>

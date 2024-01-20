@@ -28,6 +28,12 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// <inheritdoc cref="GetConnectionString"/>
         public MSAccessDataBase(string path, string dbPassword, MSOfficeConnectionProvider provider) : base(GetConnectionString(path, dbPassword, provider)) { }
 
+        /// <summary>
+        /// Create a new MSAccessDatabase object using the connection string provided by the <paramref name="builder"/>
+        /// </summary>
+        /// <param name="builder">The object to build the connection string</param>
+        public MSAccessDataBase(MSAccessConnectionStringBuilder builder) : this(builder.ToString()) { }
+
         /// <inheritdoc/>
         public override Compiler Compiler => RFBCodeWorks.SqlKata.MsOfficeCompilers.MSAccessCompiler.AccessCompiler;
 
@@ -54,28 +60,12 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// <exception cref="ArgumentException"/>
         public static string GetConnectionString(string path, string dbPassword = default, MSOfficeConnectionProvider provider = default)
         {
-            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path has no value");
-            if (!System.IO.Path.IsPathRooted(path)) throw new ArgumentException("Path is not rooted!");
-            if (!System.IO.Path.HasExtension(path)) throw new ArgumentException("Path does not have an extension!");
-            
-            StringBuilder connection = new StringBuilder();
-            connection.Append(provider switch
+            return new MSAccessConnectionStringBuilder()
             {
-#if _WIN32
-                MSOfficeConnectionProvider.Jet4 => $"Provider=Microsoft.Jet.OLEDB.4.0;Data Source={path};Persist Security Info=false;",
-#else
-                (MSOfficeConnectionProvider)1 => throw new InvalidOperationException("Jet4.0 is not compatible with 64-Bit assemblies."),
-#endif
-                MSOfficeConnectionProvider.Default or
-                MSOfficeConnectionProvider.Ace12 => $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path}; OLE DB Services=-1;Persist Security Info=False;",
-                MSOfficeConnectionProvider.Ace16 => $"Provider=Microsoft.ACE.OLEDB.16.0;Data Source={path}; OLE DB Services=-1;Persist Security Info=False;",
-                _ => throw new NotImplementedException($"Enum Value {provider} has not been implemented yet")
-            });
-
-            if (!string.IsNullOrWhiteSpace(dbPassword)) 
-                connection.Append($" Jet OLEDB:Database Password={dbPassword};");
-            
-            return connection.ToString();
+                DataSource = path,
+                DBPassword = dbPassword,
+                Provider = provider
+            }.ToString();
         }
 
         /// <inheritdoc cref="GetConnectionString"/>
