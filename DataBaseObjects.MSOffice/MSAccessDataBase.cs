@@ -13,20 +13,22 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
     public class MSAccessDataBase : OleDBDatabase
     {
         /// <summary>
+        /// Set the Default Provider for the library to use when generating connection strings for Access Databases
+        /// </summary>
+        public static MSOfficeConnectionProvider DefaultProvider { get; set; } = MSOfficeConnectionProvider.Default;
+
+        /// <summary>
         /// Create an <see cref="MSAccessDataBase"/> connection from the specified <paramref name="connectionString"/>
         /// </summary>
         /// <param name="connectionString"></param>
         public MSAccessDataBase(string connectionString) : base(connectionString) { }
-
-        /// <inheritdoc cref="MSAccessDataBase.MSAccessDataBase(string, string, MSOfficeConnectionProvider)"/>
-        public MSAccessDataBase(string path, string dbPassword) : base(GetConnectionString(path, dbPassword, default)) { }
 
         /// <summary>
         /// Generate a connection string to the MS Access database at the specified <paramref name="path"/>
         /// </summary>
         /// <returns/>
         /// <inheritdoc cref="GetConnectionString"/>
-        public MSAccessDataBase(string path, string dbPassword, MSOfficeConnectionProvider provider) : base(GetConnectionString(path, dbPassword, provider)) { }
+        public MSAccessDataBase(string path, string dbPassword, MSOfficeConnectionProvider? provider = null) : base(GetConnectionString(path, dbPassword, provider ?? DefaultProvider)) { }
 
         /// <summary>
         /// Create a new MSAccessDatabase object using the connection string provided by the <paramref name="builder"/>
@@ -45,7 +47,7 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// </summary>
         /// <returns>A new <see cref="OleDbConnection"/> object</returns>
         /// <inheritdoc cref="GetConnectionString"/>
-        public static OleDbConnection GetConnection(string path, string dbPassword = default, MSOfficeConnectionProvider provider = default)
+        public static OleDbConnection GetConnection(string path, string dbPassword = default, MSOfficeConnectionProvider? provider = null)
         {
             return new OleDbConnection(GetConnectionString(path, dbPassword, provider));
         }
@@ -58,13 +60,13 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// <param name="provider">The selected Connection provider </param>
         /// <returns>new string</returns>
         /// <exception cref="ArgumentException"/>
-        public static string GetConnectionString(string path, string dbPassword = default, MSOfficeConnectionProvider provider = default)
+        public static string GetConnectionString(string path, string dbPassword = default, MSOfficeConnectionProvider? provider = null)
         {
             return new MSAccessConnectionStringBuilder()
             {
                 DataSource = path,
                 DBPassword = dbPassword,
-                Provider = provider
+                Provider = provider ?? DefaultProvider
             }.ToString();
         }
 

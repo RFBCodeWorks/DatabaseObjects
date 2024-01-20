@@ -17,7 +17,7 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         public string WorkbookPath { get; set; }
 
         /// <inheritdoc cref="ExcelWorkBook.Provider"/>
-        public MSOfficeConnectionProvider Provider { get; set; }
+        public MSOfficeConnectionProvider Provider { get; set; } = ExcelWorkBook.DefaultProvider;
         
         /// <inheritdoc cref="ExcelWorkBook.HasHeaders"/>
         public bool? Headers { get; set; }

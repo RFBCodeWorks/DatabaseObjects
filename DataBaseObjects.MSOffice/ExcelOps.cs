@@ -1,4 +1,5 @@
-﻿using SqlKata;
+﻿using RFBCodeWorks.DatabaseObjects.DatabaseTypes;
+using SqlKata;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -31,9 +32,9 @@ namespace RFBCodeWorks.DatabaseObjects
             return DBOps.TestConnection(GetConnection(workbookPath));
         }
 
-        /// <inheritdoc cref="DatabaseTypes.ExcelWorkBook.GetConnection(string, bool?, DatabaseTypes.MSOfficeConnectionProvider)"/>
-        public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = null) 
-            => DatabaseTypes.ExcelWorkBook.GetConnection(workbookPath, hasHeaders);
+        /// <inheritdoc cref="DatabaseTypes.ExcelWorkBook.GetConnection(string, bool?, MSOfficeConnectionProvider?)"/>
+        public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = null, MSOfficeConnectionProvider? provider = null) 
+            => DatabaseTypes.ExcelWorkBook.GetConnection(workbookPath, hasHeaders, provider ?? ExcelWorkBook.DefaultProvider);
 
         /// <summary>
         /// Opens an <see cref="OleDbCommand"/> to the specified workbook and retrieves a <see cref="DataTable"/> representation of the <paramref name="SheetName"/>

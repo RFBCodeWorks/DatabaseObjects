@@ -21,11 +21,11 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// 
         /// </summary>
         public bool PersistSecurityInfo { get; set; }
-        
+
         /// <summary>
         /// 
         /// </summary>
-        public MSOfficeConnectionProvider Provider { get; set; }
+        public MSOfficeConnectionProvider Provider { get; set; } = MSAccessDataBase.DefaultProvider;
         
         /// <summary>
         /// 

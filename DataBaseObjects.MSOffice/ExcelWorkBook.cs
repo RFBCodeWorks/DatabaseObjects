@@ -19,6 +19,11 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
     /// </summary>
     public partial class ExcelWorkBook : OleDBDatabase
     {
+        /// <summary>
+        /// Set the Default Provider for the library to use when generating connection strings for Excel workbooks
+        /// </summary>
+        public static MSOfficeConnectionProvider DefaultProvider { get; set; } = MSOfficeConnectionProvider.Default;
+
         /// <inheritdoc cref="ExcelWorkBook.ExcelWorkBook(string, bool?, MSOfficeConnectionProvider)"/>
         public ExcelWorkBook(string path) : this(path, null, default) { }
 
@@ -29,7 +34,7 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// Create an object that represents an <see cref="OleDbConnection"/> to some Excel Workbook
         /// </summary>
         /// <param name="path">Path to the workbook - must be fully qualified</param>
-        /// <inheritdoc cref="ExcelWorkBook.GetConnection(string, bool?, MSOfficeConnectionProvider)"/>
+        /// <inheritdoc cref="ExcelWorkBook.GetConnection(string, bool?, MSOfficeConnectionProvider?)"/>
         /// <param name="hasHeaders"/><param name="provider"/>
         public ExcelWorkBook(string path, bool? hasHeaders, MSOfficeConnectionProvider provider) : base(GetConnectionString(path, hasHeaders, provider))
         {
@@ -110,11 +115,11 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
 
         /// <summary>
         /// Generate the <see cref="OleDbConnection"/> to the specified <paramref name="workbookPath"/>
-        /// Generate a Connection string via <see cref="GetConnectionString(string, bool?, MSOfficeConnectionProvider)"/>, and transform it into a new OleDBConnection
+        /// Generate a Connection string via <see cref="GetConnectionString(string, bool?, MSOfficeConnectionProvider?)"/>, and transform it into a new OleDBConnection
         /// </summary>
         /// <returns>A new <see cref="OleDbConnection"/> object</returns>
-        /// <inheritdoc cref="GetConnectionString(string, bool?, MSOfficeConnectionProvider)"/>
-        public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = true, MSOfficeConnectionProvider provider = default)
+        /// <inheritdoc cref="GetConnectionString(string, bool?, MSOfficeConnectionProvider?)"/>
+        public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = true, MSOfficeConnectionProvider? provider = null)
         {
             return new OleDbConnection(GetConnectionString(workbookPath, hasHeaders, provider));
         }
@@ -127,9 +132,9 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// <param name="provider">The selected Connection provider </param>
         /// <returns>A generated connection string</returns>
         /// <exception cref="ArgumentException"/>
-        public static string GetConnectionString(string workbookPath, bool? hasHeaders = true, MSOfficeConnectionProvider provider = default)
+        public static string GetConnectionString(string workbookPath, bool? hasHeaders = true, MSOfficeConnectionProvider? provider = null)
         {
-            return new ExcelConnectionStringBuilder() { Headers = hasHeaders, Provider = provider, WorkbookPath = workbookPath }.ToString();
+            return new ExcelConnectionStringBuilder() { Headers = hasHeaders, Provider = provider ?? DefaultProvider, WorkbookPath = workbookPath }.ToString();
         }
 
         #endregion
