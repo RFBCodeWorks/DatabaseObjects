@@ -38,13 +38,13 @@ before_build:
 - cmd: nuget restore
 
 build_script:
-- msbuild  .\DataBaseObjects\*.csproj
-- msbuild  .\DataBaseObjects.MSOffice\*.csproj
-- msbuild  .\DataBaseObjects.SqLite\*.csproj
-- msbuild  .\DataBaseObjects.SqlServer\*.csproj
-- msbuild  .\MsAccessInterop\*.csproj
-- msbuild  .\SqlKata.Extensions\*.csproj
-- msbuild  .\SqlKata.MSOfficeCompilers\*.csproj
+- msbuild  .\DataBaseObjects\DataBaseObjects.csproj
+- msbuild  .\DataBaseObjects.MSOffice\DatabaseObjects.MsOffice.csproj
+- msbuild  .\DataBaseObjects.SqLite\DatabaseObjects.SqLite.csproj
+- msbuild  .\DataBaseObjects.SqlServer\DataBaseObjects.SqlServer.csproj
+- msbuild  .\MsAccessInterop\MsAccessDao.csproj
+- msbuild  .\SqlKata.Extensions\SqlKata.Extensions.csproj
+- msbuild  .\SqlKata.MSOfficeCompilers\SqlKata.MSOfficeCompilers.csproj
 
 artifacts: # Locate the Nuget Packages
 - path: .\_OutputPackages\RFBCodeWorks.DatabaseObjects.1*.nupkg
