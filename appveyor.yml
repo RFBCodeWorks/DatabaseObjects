@@ -1,0 +1,94 @@
+version: 1.0.{build}.{branch}
+
+#
+# https://www.appveyor.com/docs/appveyor-yml/
+#
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+image: Visual Studio 2022
+
+nuget:
+  disable_publish_on_pr: true  # disable publishing of .nupkg artifacts to account/project feeds for pull request builds
+
+  
+#---------------------------------#
+#       build configuration       #
+#---------------------------------#
+
+platform: 
+  - x86
+  - x64
+  - Any CPU
+
+configuration: Release # AppVeyor | Release
+
+branches:
+  only:
+  - master
+
+build:
+  project: RFBCodeWorks.Mvvm.sln
+  publish_nuget: true
+  verbosity: quiet          #quiet|minimal|normal|detailed
+
+before_build:
+- cmd: nuget restore
+
+build_script:
+- msbuild  .\DataBaseObjects\*.csproj
+- msbuild  .\DataBaseObjects.MSOffice\*.csproj
+- msbuild  .\DataBaseObjects.SqLite\*.csproj
+- msbuild  .\DataBaseObjects.SqlServer\*.csproj
+- msbuild  .\MsAccessInterop\*.csproj
+- msbuild  .\SqlKata.Extensions\*.csproj
+- msbuild  .\SqlKata.MSOfficeCompilers\*.csproj
+
+artifacts: # Locate the Nuget Packages
+- path: .\_OutputPackages\RFBCodeWorks.DatabaseObjects.1*.nupkg
+  name: DatabaseObjects
+
+- path: .\_OutputPackages\RFBCodeWorks.DatabaseObjects.MsOffice.1*.nupkg
+  name: DatabaseObjects.MSOffice
+
+- path: .\_OutputPackages\RFBCodeWorks.DatabaseObjects.SqLite.1*.nupkg
+  name: DatabaseObjects.SqLite
+
+- path: .\_OutputPackages\RFBCodeWorks.DatabaseObjects.SqlServer.1*.nupkg
+  name: DatabaseObjects.SqlServer
+
+- path: .\_OutputPackages\RFBCodeWorks.MsAccessDao.1*.nupkg
+  name: RFBCodeWorks.MsAccessDao
+
+- path: .\_OutputPackages\RFBCodeWorks.SqlKata.Extensions.1*.nupkg
+  name: SqlKata.Extensions
+
+- path: .\_OutputPackages\RFBCodeWorks.SqlKata.MsOfficeCompilers.1*.nupkg
+  name: SqlKata.MsOfficeCompilers
+
+  
+assembly_info:
+    patch: false
+
+cache:
+- packages -> **\packages.config      # preserve "packages" directory in the root of build folder but will reset it if packages.config is modified
+
+
+#---------------------------------#
+#     deployment configuration    #
+#---------------------------------#
+
+# providers: Local, FTP, WebDeploy, AzureCS, AzureBlob, S3, NuGet, Environment
+# provider names are case-sensitive!
+#deploy:
+#
+#    # Deploying to NuGet feed
+#  - provider: NuGet
+#    server: https://my.nuget.server/feed
+#    api_key:
+#      secure: FYWX6NfjZIVw==
+#    skip_symbols: false
+#    symbol_server: https://your.symbol.server/feed
+#    artifact: MyPackage.nupkg
