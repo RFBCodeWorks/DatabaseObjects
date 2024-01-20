@@ -1,34 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Platforms>x86;x64;AnyCPU</Platforms>
-    <AssemblyName>RFBCodeWorks.DatabaseObjects.SqlServer</AssemblyName>
-    <RootNamespace>RFBCodeWorks.DatabaseObjects.DatabaseTypes</RootNamespace>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Platforms>AnyCPU</Platforms>
+		<AssemblyName>RFBCodeWorks.DatabaseObjects.SqlServer</AssemblyName>
+		<RootNamespace>RFBCodeWorks.DatabaseObjects.DatabaseTypes</RootNamespace>
+	</PropertyGroup>
 
-      <!-- Nuget Stuff -->
-      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-      <PackageId>$(AssemblyName)</PackageId>
-      <Product>$(AssemblyName)</Product>
-      <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
-      <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-      <PackageLicenseExpression></PackageLicenseExpression>
-      <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
-      <Authors>Robert Brenckman</Authors>
-      <Company />
-      <Copyright>Copyright 2023</Copyright>
-      <Version>1.0.0.6</Version>
-      <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
-      <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
-      <PackageReadmeFile>Readme.md</PackageReadmeFile>
-      <Description>Adds the 'SqlServerDatabase' class to the RFBCodeWorks.DatabaseObjects.DatabaseTypes namespace.
-This class uses System.Data.Sqlclient's SqlConnection and SqlCommand to communicate with the db, and Sqlkata.Compilers.SqlServerCompiler to compile the queries.</Description>
-      <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
-        
-    </PropertyGroup>
-
-    <ItemGroup>
-        <!--
+	<ItemGroup>
+		<!--
         https://devblogs.microsoft.com/dotnet/introducing-the-new-microsoftdatasqlclient/
         Microsoft.Data.SqlClient supercedes System.Data.SqlClient, and should be used going forward per the above blog
         -->
@@ -38,10 +18,42 @@ This class uses System.Data.Sqlclient's SqlConnection and SqlCommand to communic
 	<ItemGroup>
 		<ProjectReference Include="..\DatabaseObjects\DatabaseObjects.csproj" />
 	</ItemGroup>
+	
+	<!-- Nuget Stuff -->
+	<PropertyGroup>
+		<!-- MetaData -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>$(AssemblyName)</PackageId>
+		<Product>$(AssemblyName)</Product>
+		<PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageLicenseExpression></PackageLicenseExpression>
+		<Authors>Robert Brenckman</Authors>
+		<Company />
+		<Copyright>Copyright 2024</Copyright>
+		<PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		
+		<!-- Description -->
+		<PackageTags>SqlKata, Database</PackageTags>
+		<Description>
+			Adds the 'SqlServerDatabase' class to the RFBCodeWorks.DatabaseObjects.DatabaseTypes namespace.
+			This class uses System.Data.Sqlclient's SqlConnection and SqlCommand to communicate with the db, and Sqlkata.Compilers.SqlServerCompiler to compile the queries.
+		</Description>
 
-    <ItemGroup>
-    <!-- License File housed in top-level of repo -->
-    <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
-        <None Include="Readme.md" Pack="true" PackagePath="\" />
-    </ItemGroup>
+		<!-- Package Release Notes -->
+		<Version>1.0.0.7</Version>
+		<PackageReleaseNotes>Updated NuGet Packages</PackageReleaseNotes>
+
+		<!-- Build Files -->
+		<DocumentationFile>bin\$(Configuration)\$(Platform)\$(AssemblyName).xml</DocumentationFile>
+		<OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+		<BaseOutputPath>bin\$(Configuration)\</BaseOutputPath>
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- Additional files to pack into the NuGet package-->
+		<None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+		<None Include="Readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 </Project>

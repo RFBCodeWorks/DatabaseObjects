@@ -4,39 +4,10 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>9.0</LangVersion>
         <!-- This cannot as AnyCPU due to requiring the OLEDB driver, Must select either x86 or x64 -->
-        <Platforms>x86;x64</Platforms>
-        <AssemblyName>RFBCodeWorks.DatabaseObjects.MsOffice</AssemblyName>
+        <Platforms>x86;x64;AnyCPU</Platforms>
+		<RuntimeIdentifiers>win-x64;win-x86;</RuntimeIdentifiers>
+		<AssemblyName>RFBCodeWorks.DatabaseObjects.MsOffice</AssemblyName>
         <RootNamespace>RFBCodeWorks.DatabaseObjects.DatabaseTypes</RootNamespace>
-        
-        <!-- Nuget Stuff -->
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageId>$(AssemblyName)</PackageId>
-        <Product>$(AssemblyName)</Product>
-        <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
-        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-        <PackageLicenseExpression></PackageLicenseExpression>
-        <DocumentationFile>$(ProjectDir)bin\$(Platform)\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
-        <Authors>Robert Brenckman</Authors>
-        <Company />
-        <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.7</Version>
-        <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
-        <PackageReadmeFile>Readme.md</PackageReadmeFile>
-        
-        <Description>
-            Extends RFBCodeWorks.DatabaseObjects to provides objects that represent an MSAccess database, as well as an MS EXcel workbook.
-
-            Using SQL to query an excel workbook also requires some special syntax, so the ExcelWorkSheet object is also provided to ease that translation.
-            The OLEDBConnection string will also be generated depending on the file extension (.xls vs .xslx/.xlsm), since each file format requires a different connection adapater.
-
-            The AccessDatabase object is a concrete class to use the MSAccess Compiler provided by RFBCodeWorks.SqlKata.MSOfficeCompilers (required nuget pkg)
-
-            Note: Due to requiring the OLEDB driver, this package is compiled for x86/x64 only.
-        </Description>
-        <PackageTags>SqlKata, Database</PackageTags>
-        <PackageReleaseNotes>Fixes for Connection Strings and proper 32-bit / 64-bit support. 
-        JET now reports as obsolete when using 64-bit assemblies.</PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Platform)'=='x86'">
@@ -47,22 +18,6 @@
       <DefineConstants>TRACE;_WIN64</DefineConstants>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-      <OutputPath>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutputPath>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-      <OutputPath>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutputPath>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      <OutputPath>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutputPath>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      <OutputPath>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutputPath>
-    </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="System.Data.OleDb" Version="8.0.0" />
     </ItemGroup>
@@ -71,10 +26,58 @@
         <ProjectReference Include="..\DatabaseObjects\DatabaseObjects.csproj" />
         <ProjectReference Include="..\SqlKata.MSOfficeCompilers\SqlKata.MSOfficeCompilers.csproj" />
     </ItemGroup>
+	<!-- Nuget Stuff -->
+	<PropertyGroup>
+		<!-- Nuget Stuff -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>$(AssemblyName)</PackageId>
+		<Product>$(AssemblyName)</Product>
+		<PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageLicenseExpression></PackageLicenseExpression>
+		<Authors>Robert Brenckman</Authors>
+		<Company />
+		<Copyright>Copyright 2024</Copyright>
+		<PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		
+		<!-- Description -->
+		<PackageTags>SqlKata, Database</PackageTags>
+		<Description>
+			Extends RFBCodeWorks.DatabaseObjects to provides objects that represent an MSAccess database, as well as an MS EXcel workbook.
+
+			Using SQL to query an excel workbook also requires some special syntax, so the ExcelWorkSheet object is also provided to ease that translation.
+			The OLEDBConnection string will also be generated depending on the file extension (.xls vs .xslx/.xlsm), since each file format requires a different connection adapater.
+
+			The AccessDatabase object is a concrete class to use the MSAccess Compiler provided by RFBCodeWorks.SqlKata.MSOfficeCompilers (required nuget pkg)
+
+			Note: Due to requiring the OLEDB driver, this package is compiled for x86/x64 only.
+		</Description>
+		
+		<!-- Package Release Notes -->
+		<Version>1.0.0.7</Version>
+		<PackageReleaseNotes>
+			Fixes for Connection Strings and better 32-bit / 64-bit support.
+			JET now reports as obsolete when using 64-bit assemblies.
+		</PackageReleaseNotes>
+
+		<!-- Build Files -->
+		<DocumentationFile>bin\$(Configuration)\$(Platform)\$(AssemblyName).xml</DocumentationFile>
+		<OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+		<BaseOutputPath>bin\$(Configuration)\</BaseOutputPath>
+	</PropertyGroup>
     <ItemGroup>
-        <!-- License File housed in top-level of repo -->
+        <!-- Additional files to pack into the NuGet package-->
         <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
         <None Include="Readme.md" Pack="true" PackagePath="\" />
-    </ItemGroup>
-
+		<!-- https://stackoverflow.com/questions/49162127/how-to-include-native-assets-in-nuget-on-multiple-platforms-only-64-bit -->
+		<!-- https://learn.microsoft.com/en-us/nuget/create-packages/supporting-multiple-target-frameworks -->
+		<!--AnyCPU-->
+        <None Include="bin\Release\AnyCPU\*\$(AssemblyName).dll" Pack="true" PackagePath="lib\" />
+        <!--x86-->
+		<None Include="bin\Release\x86\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x86\native\$(AssemblyName).dll" />
+		<!--x64-->
+		<None Include="bin\Release\x64\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x64\native\$(AssemblyName).dll" />
+	</ItemGroup>
 </Project>

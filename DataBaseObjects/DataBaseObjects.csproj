@@ -1,54 +1,65 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <!-- License File housed in top-level of repo -->
-
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Platforms>x86;x64;AnyCPU</Platforms>
         <AssemblyName>RFBCodeWorks.DatabaseObjects</AssemblyName>
-
-        <!-- Nuget Stuff -->
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageId>$(AssemblyName)</PackageId>
-        <Product>$(AssemblyName)</Product>
-        <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
-        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-        <PackageLicenseExpression></PackageLicenseExpression>
-        <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
-        <Authors>Robert Brenckman</Authors>
-        <Company />
-        <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.6</Version>
-        <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
-        <PackageReadmeFile>Readme.md</PackageReadmeFile>
-        <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
-
-        <Description>
-            A library that is meant to extend the SqlKata Query Builder with objects that represent Database and Database Tables. This allows a 'Database' object with its own tables to be constructed, then queried more easily via methods that help build (or run) the query.
-
-            This differs from Dapper and SqlKata.Execution (which uses Dapper) in that it models the concept of the database, but it also returns raw values and DataTables. SqlKata is just being used behind the scenes to generate the SQL commands.
-
-            Example:
-            The 'DataBaseTable.Select(params string[] columns)' method will return a query that requests the specified columns from the DataBaseTable object. The TableName is descibed as a property of the DataBaseTable object.
-
-            The 'DataBaseTable.GetDataTable(params string[] columns)' will use the method described above to create the query, then will run the query against the parent Database object, and finally return a System.Data.DataTable.
-        </Description>
-        <PackageTags>SqlKata, Database</PackageTags>
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
-        <None Include="Readme.md" Pack="true" PackagePath="\" />
-    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\SqlKata.Extensions\SqlKata.Extensions.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Update="Readme.md">
-        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
+	<!-- Nuget Stuff -->
+	<PropertyGroup>
+		<!-- MetaData -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>$(AssemblyName)</PackageId>
+		<Product>$(AssemblyName)</Product>
+		<PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageLicenseExpression></PackageLicenseExpression>
+		<Authors>Robert Brenckman</Authors>
+		<Company />
+		<Copyright>Copyright 2024</Copyright>
+		<PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		
+		<!-- Description -->
+		<PackageTags>SqlKata, Database</PackageTags>
+		<Description>
+			A library that is meant to extend the SqlKata Query Builder with objects that represent Database and Database Tables. This allows a 'Database' object with its own tables to be constructed, then queried more easily via methods that help build (or run) the query.
+
+			This differs from Dapper and SqlKata.Execution (which uses Dapper) in that it models the concept of the database, but it also returns raw values and DataTables. SqlKata is just being used behind the scenes to generate the SQL commands.
+
+			Example:
+			The 'DataBaseTable.Select(params string[] columns)' method will return a query that requests the specified columns from the DataBaseTable object. The TableName is descibed as a property of the DataBaseTable object.
+
+			The 'DataBaseTable.GetDataTable(params string[] columns)' will use the method described above to create the query, then will run the query against the parent Database object, and finally return a System.Data.DataTable.
+		</Description>
+		
+		<!-- Package Release Notes -->
+		<Version>1.0.0.7</Version>
+		<PackageReleaseNotes>Updated NuGet packages. Now properly includes the x86 and x64 runtimes.</PackageReleaseNotes>
+		
+		<!-- Build Files -->
+		<DocumentationFile>bin\$(Configuration)\$(Platform)\$(AssemblyName).xml</DocumentationFile>
+		<OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+		<BaseOutputPath>bin\$(Configuration)\</BaseOutputPath>
+
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- Additional files to pack into the NuGet package-->
+		<None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+		<None Include="Readme.md" Pack="true" PackagePath="\" />
+		<!-- https://stackoverflow.com/questions/49162127/how-to-include-native-assets-in-nuget-on-multiple-platforms-only-64-bit -->
+		<!-- https://learn.microsoft.com/en-us/nuget/create-packages/supporting-multiple-target-frameworks -->
+		<!--AnyCPU-->
+		<None Include="bin\Release\AnyCPU\*\$(AssemblyName).dll" Pack="true" PackagePath="lib\" />
+		<!--x86-->
+		<None Include="bin\Release\x86\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x86\native\$(AssemblyName).dll" />
+		<!--x64-->
+		<None Include="bin\Release\x64\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x64\native\$(AssemblyName).dll" />
+	</ItemGroup>
 </Project>
