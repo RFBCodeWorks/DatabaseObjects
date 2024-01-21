@@ -2,45 +2,57 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+      <Platforms>AnyCPU</Platforms>
     <AssemblyName>RFBCodeWorks.SqlKata.Extensions</AssemblyName>
     <RootNamespace>RFBCodeWorks.SqlKata.Extensions</RootNamespace>
-
-    <!-- Nuget Stuff -->
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>$(AssemblyName)</PackageId>
-    <Product>$(AssemblyName)</Product>
-    <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <PackageLicenseExpression></PackageLicenseExpression>
-    <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
-    <Authors>Robert Brenckman</Authors>
-    <Company />
-      <Copyright>Copyright 2023</Copyright>
-      <Version>1.0.0.6</Version>
-    <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
-      <PackageReadmeFile>Readme.md</PackageReadmeFile>
-
-      <PackageTags>SqlKata, Database</PackageTags>
-    <Description>
-          Contains several Extension Methods for the SqlKata library. Including but not limited to:
-          - ToDbCommand() -- Create a System.Data.Common.DbCommand of a specified type from a Query object
-          - AsInsert() -- Extension Overload that accepts a single Column+Value combination
-          - AsUpdate() -- Extension Overload that accepts a single Column+Value combination
-
-          Also contains helper objects that can assist with creating Select statements and WHERE clauses for evaluating single column conditions
-          - The 'SelectStatementBuilder' will compile into a SqlKata Query.
-          - The 'IWhereCondition' interface objects will apply their conditions to that Query.
-      </Description>
-    <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
   </PropertyGroup>
 
-    <ItemGroup>
-        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
-        <None Include="Readme.md" Pack="true" PackagePath="\" />
-    </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SqlKata" Version="2.4.0" />
   </ItemGroup>
+	
+	<!-- Nuget Stuff -->
+	<PropertyGroup>
+		<!-- MetaData -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>$(AssemblyName)</PackageId>
+		<Product>$(AssemblyName)</Product>
+		<PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageLicenseExpression></PackageLicenseExpression>
+		<Authors>Robert Brenckman</Authors>
+		<Company />
+		<Copyright>Copyright 2024</Copyright>
+		<PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		
+		<!-- Description -->
+		<PackageTags>SqlKata, Database</PackageTags>
+		<Description>
+			Contains several Extension Methods for the SqlKata library. Including but not limited to:
+			- ToDbCommand() -- Create a System.Data.Common.DbCommand of a specified type from a Query object
+			- AsInsert() -- Extension Overload that accepts a single Column+Value combination
+			- AsUpdate() -- Extension Overload that accepts a single Column+Value combination
 
+			Also contains helper objects that can assist with creating Select statements and WHERE clauses for evaluating single column conditions
+			- The 'SelectStatementBuilder' will compile into a SqlKata Query.
+			- The 'IWhereCondition' interface objects will apply their conditions to that Query.
+		</Description>
+
+		<!-- Package Release Notes -->
+		<Version>1.0.0.8</Version>
+		<PackageReleaseNotes>Updated NuGet packages</PackageReleaseNotes>
+
+		<!-- Build Files -->
+		<DocumentationFile>bin\$(Configuration)\$(Platform)\$(AssemblyName).xml</DocumentationFile>
+		<OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+		<BaseOutputPath>bin\$(Configuration)\</BaseOutputPath>
+
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- Additional files to pack into the NuGet package-->
+		<None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+		<None Include="Readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 </Project>

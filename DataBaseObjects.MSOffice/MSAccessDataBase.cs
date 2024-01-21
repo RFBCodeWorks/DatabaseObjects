@@ -13,18 +13,28 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
     public class MSAccessDataBase : OleDBDatabase
     {
         /// <summary>
+        /// Set the Default Provider for the library to use when generating connection strings for Access Databases
+        /// </summary>
+        public static MSOfficeConnectionProvider DefaultProvider { get; set; } = MSOfficeConnectionProvider.Default;
+
+        /// <summary>
         /// Create an <see cref="MSAccessDataBase"/> connection from the specified <paramref name="connectionString"/>
         /// </summary>
         /// <param name="connectionString"></param>
         public MSAccessDataBase(string connectionString) : base(connectionString) { }
 
         /// <summary>
-        /// Generate an ACE connection to the MS Access database at the specified <paramref name="path"/>
+        /// Generate a connection string to the MS Access database at the specified <paramref name="path"/>
         /// </summary>
         /// <returns/>
-        /// <inheritdoc cref="GenerateACEConnectionString(string, string)"/>
-        public MSAccessDataBase(string path, string password) : base(GenerateACEConnectionString(path, password)) { }
+        /// <inheritdoc cref="GetConnectionString"/>
+        public MSAccessDataBase(string path, string dbPassword, MSOfficeConnectionProvider? provider = null) : base(GetConnectionString(path, dbPassword, provider ?? DefaultProvider)) { }
 
+        /// <summary>
+        /// Create a new MSAccessDatabase object using the connection string provided by the <paramref name="builder"/>
+        /// </summary>
+        /// <param name="builder">The object to build the connection string</param>
+        public MSAccessDataBase(MSAccessConnectionStringBuilder builder) : this(builder.ToString()) { }
 
         /// <inheritdoc/>
         public override Compiler Compiler => RFBCodeWorks.SqlKata.MsOfficeCompilers.MSAccessCompiler.AccessCompiler;
@@ -33,58 +43,54 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         #region < Connection Strings >
 
         /// <summary>
-        /// Generate a new OLEDB.JET database connection string
+        /// Generate a Connection string via <see cref="GetConnectionString"/>, and transform it into a new OleDBConnection
         /// </summary>
-        /// <param name="path">path to the database</param>
-        /// <param name="dbPassword">Password to the database</param>
-        /// <returns>new <see cref="OleDbConnection"/></returns>
-        /// <exception cref="ArgumentException"/>
-        public static string GenerateJetConnectionString(string path, string dbPassword = default)
+        /// <returns>A new <see cref="OleDbConnection"/> object</returns>
+        /// <inheritdoc cref="GetConnectionString"/>
+        public static OleDbConnection GetConnection(string path, string dbPassword = default, MSOfficeConnectionProvider? provider = null)
         {
-            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path has no value");
-            if (!System.IO.Path.IsPathRooted(path)) throw new ArgumentException("Path is not rooted!");
-            if (!System.IO.Path.HasExtension(path)) throw new ArgumentException("Path does not have an extension!");
-
-            string Conn = $"Provider=Microsoft.Jet.OLEDB.4.0;Data Source= {path} ; Persist Security Info = false ;";
-            if (!string.IsNullOrWhiteSpace(dbPassword)) Conn += $" Jet OLEDB:Database Password={dbPassword};";
-            return Conn;
+            return new OleDbConnection(GetConnectionString(path, dbPassword, provider));
         }
 
         /// <summary>
-        /// Generate a new OLEDB.ACE database connection string
+        /// Generate a new OLEDB connection string
         /// </summary>
-        /// <param name="path">path to the database</param>
-        /// <param name="dbPassword">Password to the database</param>
-        /// <returns>new <see cref="OleDbConnection"/></returns>
+        /// <param name="path">File path to the database - must be fully qualified</param>
+        /// <param name="dbPassword">Password to the database - optional</param>
+        /// <param name="provider">The selected Connection provider </param>
+        /// <returns>new string</returns>
         /// <exception cref="ArgumentException"/>
-        public static string GenerateACEConnectionString(string path, string dbPassword = default)
+        public static string GetConnectionString(string path, string dbPassword = default, MSOfficeConnectionProvider? provider = null)
         {
-            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path has no value");
-            if (!System.IO.Path.IsPathRooted(path)) throw new ArgumentException("Path is not rooted!");
-            if (!System.IO.Path.HasExtension(path)) throw new ArgumentException("Path does not have an extension!");
-
-            string Conn = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path}; OLE DB Services=-1;Persist Security Info=False;";
-            if (!string.IsNullOrWhiteSpace(dbPassword)) Conn += $" Jet OLEDB:Database Password={dbPassword};";
-            return Conn;
+            return new MSAccessConnectionStringBuilder()
+            {
+                DataSource = path,
+                DBPassword = dbPassword,
+                Provider = provider ?? DefaultProvider
+            }.ToString();
         }
+
+        /// <inheritdoc cref="GetConnectionString"/>
+        [Obsolete("Please use MSAccessDatabase.GenerateConnectionString() instead.", true)]
+        public static string GenerateACEConnectionString(string path, string dbPassword = default) => GetConnectionString(path, dbPassword, MSOfficeConnectionProvider.Ace12);
 
         /// <summary>
         /// Generate a new OLEDB.ACE database connection
         /// </summary>
-        /// <inheritdoc cref="GenerateACEConnectionString"/>
-        public static OleDbConnection GetACEConnection(string path, string dbPassword = default)
-        {
-            return new OleDbConnection(GenerateACEConnectionString(path, dbPassword));
-        }
+        /// <inheritdoc cref="GetConnection"/>
+        [Obsolete("Please use MSAccessDatabase.GetConnection(string, MSOfficeConnectionProvider, string) instead.", true)]
+        public static OleDbConnection GetACEConnection(string path, string dbPassword = default) => GetConnection(path, dbPassword, MSOfficeConnectionProvider.Ace12);
+
+        /// <inheritdoc cref="GetConnectionString"/>
+        [Obsolete("Please use MSAccessDatabase.GenerateConnectionString() instead.", true)]
+        public static string GenerateJetConnectionString(string path, string dbPassword = default) => GetConnectionString(path, dbPassword, MSOfficeConnectionProvider.Jet4);
 
         /// <summary>
         /// Generate a new OLEDB.ACE database connection
         /// </summary>
-        /// <inheritdoc cref="GenerateJetConnectionString"/>
-        public static OleDbConnection GetJetConnection(string path, string dbPassword = default)
-        {
-            return new OleDbConnection(GenerateJetConnectionString(path, dbPassword));
-        }
+        /// <inheritdoc cref="GetConnection"/>
+        [Obsolete("Please use MSAccessDatabase.GetConnection(string, MSOfficeConnectionProvider, string) instead.", true)]
+        public static OleDbConnection GetJetConnection(string path, string dbPassword = default) => GetConnection(path, dbPassword, MSOfficeConnectionProvider.Jet4);
 
         #endregion
     }

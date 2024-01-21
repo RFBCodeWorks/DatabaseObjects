@@ -156,7 +156,7 @@ namespace RFBCodeWorks.MsAccessDao
         /// <summary>
         /// Retreives the enum translation of the provided type
         /// </summary>
-        /// <typeparam name="T">One of the following types: 
+        /// <param name="type">One of the following types: 
         /// <br/>  <see cref="DataTypeEnum.dbText"/>
         /// <br/> - <see cref="string"/> 
         /// <br/> - <see cref="char"/>
@@ -176,8 +176,8 @@ namespace RFBCodeWorks.MsAccessDao
         /// <br/> - <see cref="decimal"/> (<see cref="DataTypeEnum.dbDecimal"/>)
         /// <br/> - <see cref="bool"/> (<see cref="DataTypeEnum.dbBoolean"/>)
         /// <br/> - <see cref="DateTime"/> (<see cref="DataTypeEnum.dbDate"/>)
-        /// </typeparam>
-        /// <returns>The approrpiate <see cref="Dao.DataTypeEnum"/> for the supplied type </returns>
+        /// </param>
+        /// <returns>The appropriate <see cref="Dao.DataTypeEnum"/> for the supplied type </returns>
         public static Dao.DataTypeEnum GetDataTypeEnum(Type type)
         {
             switch (true)

@@ -10,19 +10,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.0.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.0.0" />
-    <PackageReference Include="coverlet.collector" Version="3.0.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
+    <PackageReference Include="coverlet.collector" Version="3.2.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataBaseObjects\DataBaseObjects.csproj" />
+    <ProjectReference Include="..\DatabaseObjects\DatabaseObjects.csproj" />
     <ProjectReference Include="..\MsAccessInterop\MsAccessDao.csproj" />
     
-    <ProjectReference Include="..\DataBaseObjects.MsOffice\DataBaseObjects.MsOffice.csproj" />
-    <ProjectReference Include="..\DataBaseObjects.SqLite\DataBaseObjects.SqLite.csproj" />
+    <ProjectReference Include="..\DatabaseObjects.MsOffice\DatabaseObjects.MsOffice.csproj" />
+    <ProjectReference Include="..\DatabaseObjects.SqLite\DatabaseObjects.SqLite.csproj" />
       <ProjectReference Include="..\SqlKata.MSOfficeCompilers\SqlKata.MSOfficeCompilers.csproj" />
       <ProjectReference Include="..\SqlKata.Extensions\SqlKata.Extensions.csproj" />
   </ItemGroup>

@@ -1,4 +1,5 @@
-﻿using SqlKata;
+﻿using RFBCodeWorks.DatabaseObjects.DatabaseTypes;
+using SqlKata;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -31,9 +32,9 @@ namespace RFBCodeWorks.DatabaseObjects
             return DBOps.TestConnection(GetConnection(workbookPath));
         }
 
-        /// <inheritdoc cref="RFBCodeWorks.DatabaseObjects.DatabaseTypes.ExcelWorkBook.GetConnection(string, bool?)"/>
-        public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = null) 
-            => RFBCodeWorks.DatabaseObjects.DatabaseTypes.ExcelWorkBook.GetConnection(workbookPath, hasHeaders);
+        /// <inheritdoc cref="DatabaseTypes.ExcelWorkBook.GetConnection(string, bool?, MSOfficeConnectionProvider?)"/>
+        public static OleDbConnection GetConnection(string workbookPath, bool? hasHeaders = null, MSOfficeConnectionProvider? provider = null) 
+            => DatabaseTypes.ExcelWorkBook.GetConnection(workbookPath, hasHeaders, provider ?? ExcelWorkBook.DefaultProvider);
 
         /// <summary>
         /// Opens an <see cref="OleDbCommand"/> to the specified workbook and retrieves a <see cref="DataTable"/> representation of the <paramref name="SheetName"/>
@@ -91,7 +92,7 @@ namespace RFBCodeWorks.DatabaseObjects
 
         /// <param name="ExcelWorkBookPath">Excel Workbook to look up</param>
         /// <param name="SheetName">Sheet Name to grab from the excel workbook</param>
-        /// <inheritdoc cref="AbstractDataBase{TConnectionType, TCommandType}.GetValue(string, string, object, string)"/>
+        /// <inheritdoc cref="DatabaseTypes.AbstractDatabase{TConnectionType, TCommandType}.GetValue(string, string, object, string)"/>
         /// <param name="lookupVal"/><param name="lookupColName"/><param name="returnColName"/>
         public static object GetValue(string ExcelWorkBookPath, string SheetName, string lookupColName, string lookupVal, string returnColName)
         {

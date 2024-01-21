@@ -2,34 +2,20 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <Platforms>x86;x64;AnyCPU</Platforms>
         <AssemblyName>RFBCodeWorks.SqlKata.MsOfficeCompilers</AssemblyName>
         <RootNamespace>RFBCodeWorks.SqlKata.MsOfficeCompilers</RootNamespace>
-
-        <!-- Nuget Stuff -->
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageId>$(AssemblyName)</PackageId>
-        <Product>$(AssemblyName)</Product>
-        <PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
-        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-        <PackageLicenseExpression></PackageLicenseExpression>
-        <DocumentationFile>bin\$(Configuration)\\$(AssemblyName).xml</DocumentationFile>
-        <Authors>Robert Brenckman</Authors>
-        <Company />
-        <Copyright>Copyright 2023</Copyright>
-        <Version>1.0.0.6</Version>
-        <PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
-        <PackageTags>SqlKata, Access, Excel, Sql</PackageTags>
-        <PackageReadmeFile>Readme.md</PackageReadmeFile>
-        <Description>Provides SqlKata compilers for Microsoft Access and Excel Workbooks</Description>
-        <PackageReleaseNotes>Updating packages to use SqlKata 2.4.0</PackageReleaseNotes>
     </PropertyGroup>
-    
-    <ItemGroup>
-        <!-- License File housed in top-level of repo -->
-        <None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
-        <None Include="Readme.md" Pack="true" PackagePath="\" />
-    </ItemGroup>
+
+    <PropertyGroup Condition="'$(Platform)'=='x86'">
+        <DefineConstants>TRACE;_WIN32</DefineConstants>
+    </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="SqlKata" Version="2.4.0" />
+	</ItemGroup>
+	
+	<!-- WIP Items - Not included in compiled library-->
     <ItemGroup>
       <Compile Remove="MsAccessSqlResult.cs" />
       <Compile Remove="MsExcelSqlResult.cs" />
@@ -38,8 +24,49 @@
         <None Include="MsAccessSqlResult.cs" />
         <None Include="MsExcelSqlResult.cs" />
     </ItemGroup>
-    <ItemGroup>
-      <PackageReference Include="SqlKata" Version="2.4.0" />
-    </ItemGroup>
+	
+	<!-- Nuget Stuff -->
+	<PropertyGroup>
+		<!-- MetaData -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>$(AssemblyName)</PackageId>
+		<Product>$(AssemblyName)</Product>
+		<PackageOutputPath>..\_OutputPackages\</PackageOutputPath>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageLicenseExpression></PackageLicenseExpression>
+		<Authors>Robert Brenckman</Authors>
+		<Company />
+		<Copyright>Copyright 2024</Copyright>
+		<PackageProjectUrl>https://github.com/RFBCodeWorks/DatabaseObjects</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/RFBCodeWorks/DatabaseObjects</RepositoryUrl>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<!-- Description -->
+		<PackageTags>SqlKata, Access, Excel, Sql</PackageTags>
+		<Description>
+			Provides SqlKata compilers for Microsoft Access and Excel Workbooks
+		</Description>
 
+		<!-- Package Release Notes -->
+		<Version>1.0.0.8</Version>
+		<PackageReleaseNotes>Updated NuGet packages. Now properly includes the x86 and x64 runtime dlls.</PackageReleaseNotes>
+
+		<!-- Build Files -->
+		<DocumentationFile>bin\$(Configuration)\$(Platform)\$(AssemblyName).xml</DocumentationFile>
+		<OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+		<BaseOutputPath>bin\$(Configuration)\</BaseOutputPath>
+
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- Additional files to pack into the NuGet package-->
+		<None Include="..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" />
+		<None Include="Readme.md" Pack="true" PackagePath="\" />
+		<!-- https://stackoverflow.com/questions/49162127/how-to-include-native-assets-in-nuget-on-multiple-platforms-only-64-bit -->
+		<!-- https://learn.microsoft.com/en-us/nuget/create-packages/supporting-multiple-target-frameworks -->
+		<!--AnyCPU-->
+		<None Update="bin\Release\AnyCPU\*\$(AssemblyName).dll" Pack="true" PackagePath="lib\" />
+		<!--x86-->
+		<None Include="bin\Release\x86\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x86\native\$(AssemblyName).dll" />
+		<!--x64-->
+		<None Include="bin\Release\x64\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x64\native\$(AssemblyName).dll" />
+	</ItemGroup>
 </Project>
