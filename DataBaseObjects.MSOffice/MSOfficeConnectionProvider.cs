@@ -21,11 +21,12 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// <remarks>
         /// - This is 32-bit support only, as its deprecated by Microsoft. 
         /// <br/> - Not compatible with .xlsx or .xlsm files.
+        /// <br/> - Microsoft Access 2010 Runtime
         /// </remarks>
 #if _WIN32
         Jet4,
 #else
-        [Obsolete("Jet4.0 is not compatible with 64-Bit assemblies.", false)]
+        [Obsolete("Jet4.0 is only compatible with 32-Bit assemblies.", false)]
         Jet4,
 #endif
         /// <summary>
@@ -40,7 +41,7 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
         /// Provider=Microsoft.ACE.OLEDB.16.0;
         /// </summary>
         /// <remarks>
-        /// - Microsoft Access 2010 Runtime
+        /// - Microsoft Access 2016 Runtime
         /// <br/> - Office 365
         /// </remarks>
         Ace16
