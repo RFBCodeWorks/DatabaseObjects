@@ -57,18 +57,17 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
             if (string.IsNullOrWhiteSpace(DataSource)) throw new ArgumentException("Path has no value");
 
             StringBuilder connection = new StringBuilder();
+
+#pragma warning disable CS0618 // Type or member is obsolete
             connection.Append(Provider switch
             {
-#if _WIN32
-                MSOfficeConnectionProvider.Jet4 => "Provider=Microsoft.Jet.OLEDB.4.0;",
-#else
-                (MSOfficeConnectionProvider)1 => throw new InvalidOperationException("Jet4.0 is not compatible with 64-Bit assemblies."),
-#endif
+                MSOfficeConnectionProvider.Jet4 => IntPtr.Size == 4 ? "Provider=Microsoft.Jet.OLEDB.4.0;" : throw new InvalidOperationException("Jet4.0 is only compatible with 32-Bit assemblies."),
                 MSOfficeConnectionProvider.Default or
                 MSOfficeConnectionProvider.Ace12 => "Provider=Microsoft.ACE.OLEDB.12.0;",
                 MSOfficeConnectionProvider.Ace16 => "Provider=Microsoft.ACE.OLEDB.16.0;",
                 _ => throw new NotImplementedException($"Enum Value {Provider} has not been implemented yet")
             });
+#pragma warning restore CS0618 // Type or member is obsolete
 
             connection.Append("Data Source={0};".Format(DataSource));
 

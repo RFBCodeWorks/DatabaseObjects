@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- Ensure that for Framework projects the correct DLL is copied to the build directory -->
+	<Choose>
+		<!-- x64 -->
+		<When Condition=" '$(Platform)' == 'x64' ">
+			<Choose>
+				<!-- Most Specific -->
+				<When Condition=" '$(TargetFramework)' == 'net8.0-windows' Or '$(TargetFramework)' == 'net6.0-windows'">
+					<ItemGroup >
+						<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\$(TargetFramework)\RFBCodeWorks.DatabaseObjects.MsOffice.dll">
+							<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+							<Link>RFBCodeWorks.DatabaseObjects.MsOffice.dll</Link>
+						</Content>
+					</ItemGroup>
+				</When>
+				<!-- .NetStandard2.0 -->
+				<Otherwise>
+					<ItemGroup >
+						<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\netstandard2.0\RFBCodeWorks.DatabaseObjects.MsOffice.dll">
+							<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+							<Link>RFBCodeWorks.DatabaseObjects.MsOffice.dll</Link>
+						</Content>
+					</ItemGroup>
+				</Otherwise>
+			</Choose>
+		</When>
+		<!-- x86 -->
+		<When Condition=" '$(Platform)' == 'x86' ">
+			<Choose>
+				<!-- Most Specific -->
+				<When Condition=" '$(TargetFramework)' == 'net8.0-windows' Or '$(TargetFramework)' == 'net6.0-windows'">
+					<ItemGroup >
+						<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win-x86\native\$(TargetFramework)\RFBCodeWorks.DatabaseObjects.MsOffice.dll">
+							<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+							<Link>RFBCodeWorks.DatabaseObjects.MsOffice.dll</Link>
+						</Content>
+					</ItemGroup>
+				</When>
+				<!-- .NetStandard2.0 -->
+				<Otherwise>
+					<ItemGroup>
+						<Content Include="$(MSBuildThisFileDirectory)..\runtimes\win-x86\native\netstandard2.0\RFBCodeWorks.DatabaseObjects.MsOffice.dll">
+							<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+							<Link>RFBCodeWorks.DatabaseObjects.MsOffice.dll</Link>
+						</Content>
+					</ItemGroup>
+				</Otherwise>
+			</Choose>
+		</When>
+		<!-- AnyCPU -> Do nothing, let ms build handle extraction from the nuget package -->
+	</Choose>
+</Project>
