@@ -47,8 +47,8 @@
 		</Description>
 
 		<!-- Package Release Notes -->
-		<Version>1.0.0.8</Version>
-		<PackageReleaseNotes>Updated NuGet packages. Now properly includes the x86 and x64 runtime dlls.</PackageReleaseNotes>
+		<Version>1.0.1.0</Version>
+		<PackageReleaseNotes>Updated NuGet packages. Add .targets file to nuget package</PackageReleaseNotes>
 
 		<!-- Build Files -->
 		<DocumentationFile>bin\$(Configuration)\$(Platform)\$(AssemblyName).xml</DocumentationFile>
@@ -68,5 +68,7 @@
 		<None Include="bin\Release\x86\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x86\native\$(AssemblyName).dll" />
 		<!--x64-->
 		<None Include="bin\Release\x64\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x64\native\$(AssemblyName).dll" />
+		<!-- Targets -->
+		<None Include="$(AssemblyName).targets" Pack="true" PackagePath="build\" />
 	</ItemGroup>
 </Project>

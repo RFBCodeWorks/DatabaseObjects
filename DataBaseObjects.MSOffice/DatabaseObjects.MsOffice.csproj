@@ -62,8 +62,9 @@
 		</Description>
 		
 		<!-- Package Release Notes -->
-		<Version>1.0.0.9</Version>
+		<Version>1.0.1.0</Version>
 		<PackageReleaseNotes>
+			Updated NuGet packages. Add .targets file to nuget package
 			Fixes for Connection Strings and better 32-bit / 64-bit support.
 			JET now reports as obsolete when using 64-bit assemblies.
 		</PackageReleaseNotes>
@@ -85,5 +86,7 @@
 		<None Include="bin\Release\x86\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x86\native\" />
 		<!--x64-->
 		<None Include="bin\Release\x64\*\$(AssemblyName).dll" Pack="true" PackagePath="runtimes\win-x64\native\" />
+		<!-- Targets -->
+		<None Include="$(AssemblyName).targets" Pack="true" PackagePath="build\" />
 	</ItemGroup>
 </Project>
