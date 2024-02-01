@@ -39,19 +39,17 @@ namespace RFBCodeWorks.DatabaseObjects.DatabaseTypes
             // If set to Default and is 32-bit, evaluate the file extension
             Provider = Provider != MSOfficeConnectionProvider.Default ? Provider : ext == ".xls" ? MSOfficeConnectionProvider.Jet4 : MSOfficeConnectionProvider.Ace12;
 #endif
+
+#pragma warning disable CS0618 // Type or member is obsolete
             connectionBuilder.Append(Provider switch
             {
-#if _WIN32
-                MSOfficeConnectionProvider.Jet4 => "Provider=Microsoft.Jet.OLEDB.4.0;", // 32-bit only provider
-#else
-                (MSOfficeConnectionProvider)1 => throw new InvalidOperationException("Jet4.0 is not compatible with 64-Bit assemblies."),
-
-#endif
+                MSOfficeConnectionProvider.Jet4 => IntPtr.Size == 4 ? "Provider=Microsoft.Jet.OLEDB.4.0;" : throw new InvalidOperationException("Jet4.0 is only compatible with 32-Bit assemblies."),
                 MSOfficeConnectionProvider.Default or
                 MSOfficeConnectionProvider.Ace12 => "Provider=Microsoft.ACE.OLEDB.12.0;",
                 MSOfficeConnectionProvider.Ace16 => "Provider=Microsoft.ACE.OLEDB.16.0;",
                 _ => throw new NotImplementedException($"Provider {Provider} not implemented")
             });
+#pragma warning restore CS0618 // Type or member is obsolete
 
             connectionBuilder.Append($"Data Source={WorkbookPath};");
 
